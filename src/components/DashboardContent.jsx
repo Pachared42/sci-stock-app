@@ -6,6 +6,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Paper,
 } from "@mui/material";
 
 export default function DashboardContent() {
@@ -16,7 +17,7 @@ export default function DashboardContent() {
     async function fetchOrders() {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/orders/today`,
+          `${import.meta.env.VITE_API_URL}/api/orders`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -37,28 +38,50 @@ export default function DashboardContent() {
   }, []);
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: "bold",
+          mb: 2,
+          color: "primary.main",
+        }}
+      >
         ยอดขายวันนี้: {totalSales.toLocaleString()} บาท
       </Typography>
-      <Typography variant="h6" gutterBottom>
+
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontWeight: 500, color: "text.secondary" }}
+      >
         รายการคำสั่งซื้อ
       </Typography>
-      <List>
-        {orders.map((order) => (
-          <React.Fragment key={order.id}>
-            <ListItem>
-              <ListItemText
-                primary={`Order #${order.id}`}
-                secondary={`ลูกค้า: ${
-                  order.customerName
-                } - รวม: ${order.totalPrice.toLocaleString()} บาท`}
-              />
-            </ListItem>
-            <Divider />
-          </React.Fragment>
-        ))}
-      </List>
+
+      {orders.length === 0 ? (
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          ยังไม่มีคำสั่งซื้อในวันนี้
+        </Typography>
+      ) : (
+        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
+          <List disablePadding>
+            {orders.map((order, index) => (
+              <React.Fragment key={order.id}>
+                <ListItem sx={{ px: 3, py: 2 }}>
+                  <ListItemText
+                    primary={`Order #${order.id}`}
+                    secondary={`ลูกค้า: ${
+                      order.customerName
+                    } - รวม: ${order.totalPrice.toLocaleString()} บาท`}
+                  />
+                </ListItem>
+                {index !== orders.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
+      )}
     </Box>
   );
 }
