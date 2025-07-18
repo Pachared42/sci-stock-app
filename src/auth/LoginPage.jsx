@@ -11,6 +11,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { login as apiLogin } from "../api/authService";
+import "@fontsource/noto-sans-thai";
+import "@fontsource/noto-sans";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,6 +49,7 @@ export default function LoginPage() {
         className="w-full max-w-md rounded-3xl"
         sx={{
           backgroundColor: "transparent",
+          fontFamily: '"Noto Sans Thai", "Noto Sans", sans-serif',
           boxShadow: "none",
           padding: { xs: 3, sm: 4 },
           borderRadius: 6,
