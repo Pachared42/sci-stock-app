@@ -5,8 +5,12 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import PrivateRoute from "./components/PrivateRoute";
 import DashboardContent from "./components/DashboardContent";
 import ProductsFromSheet from './components/ProductsFromSheet';
+import useRouteProgress from "./hooks/useRouteProgress";
+import Dashboard from "./components/Dashboard";
+import CalendarPage from "./components/Calendar";
 
 function AppRoutes() {
+  useRouteProgress();
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
@@ -20,8 +24,10 @@ function AppRoutes() {
         }
       >
         {/* nested routes สำหรับ admin */}
-        <Route path="dashboard" element={<DashboardContent />} />
-        <Route path="orders" element={<ProductsFromSheet />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="sales-report" element={<ProductsFromSheet />} />
+        <Route path="sales-day" element={<DashboardContent />} />
         {/* เพิ่ม route ลูกอื่นๆ ได้ตามต้องการ */}
       </Route>
 
@@ -34,8 +40,10 @@ function AppRoutes() {
         }
       >
         {/* nested routes สำหรับ superadmin */}
-        <Route path="dashboard" element={<DashboardContent />} />
-        <Route path="orders" element={<ProductsFromSheet />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="sales-report" element={<ProductsFromSheet />} />
+        <Route path="sales-day" element={<DashboardContent />} />
         {/* เพิ่ม route ลูกอื่นๆ */}
       </Route>
 

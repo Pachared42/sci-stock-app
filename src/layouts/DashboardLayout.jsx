@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
-import ReactLogo from "../assets/react.svg";
 import "@fontsource/noto-sans-thai";
 import "@fontsource/noto-sans";
+import LogoBox from "../hooks/LogoBox";
+import ProfilePanel from "../components/ProfilePanel";
+import { getAppTheme } from "../theme/theme";
+
 import {
   Box,
   Typography,
@@ -19,6 +22,7 @@ import {
   Collapse,
   Divider,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -47,6 +51,10 @@ import {
   AdminPanelSettings as AdminPanelSettingsIcon,
   CookieRounded as CookieRoundedIcon,
   FoodBankRounded as FoodBankRoundedIcon,
+  LunchDining as LunchDiningIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
+  AssignmentTurnedInRounded as AssignmentTurnedInRoundedIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
@@ -77,6 +85,13 @@ const NAVIGATION = [
     group: "main",
   },
   {
+    segment: "sales-day",
+    title: "ออเดอร์รายวัน",
+    icon: <AssignmentTurnedInRoundedIcon />,
+    roles: ["admin", "superadmin"],
+    group: "main",
+  },
+  {
     segment: "user-management",
     title: "จัดการผู้ใช้งาน",
     icon: <PeopleIcon />,
@@ -101,42 +116,42 @@ const NAVIGATION = [
     segment: "upload-products",
     title: "อัพโหลดสินค้า",
     icon: <UploadFileIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "upload",
   },
   {
     segment: "dry-category",
     title: "ประเภทแห้ง",
     icon: <FoodBankRoundedIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "drink-category",
     title: "ประเภทเครื่องดื่ม",
     icon: <LocalDrinkIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "frozen-category",
     title: "ประเภทแช่แข็ง",
     icon: <AcUnitIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "snack-category",
     title: "ประเภทขนม",
     icon: <CookieRoundedIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "stationery-category",
     title: "ประเภทเครื่องเขียน",
     icon: <CreateIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "product",
   },
   {
@@ -150,22 +165,17 @@ const NAVIGATION = [
     segment: "staff-management",
     title: "จัดการพนักงาน",
     icon: <PeopleIcon />,
-    roles: ["superadmin"],
+    roles: ["admin", "superadmin"],
     group: "management",
   },
 ];
 
 const drawerWidth = 300;
-const collapsedWidth = 150;
+const collapsedWidth = 110;
 const appBarHeight = 64;
-
 const spin = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 `;
 
 export default function DashboardLayout() {
@@ -190,71 +200,7 @@ export default function DashboardLayout() {
     setDrawerPanel(null);
   };
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: darkMode ? "dark" : "light",
-          primary: {
-            main: darkMode ? "#90caf9" : "#333333",
-          },
-          background: {
-            default: darkMode ? "#141A21" : "#f0f2f5",
-            paper: darkMode ? "#1E252C" : "#ffffff",
-          },
-          text: {
-            primary: darkMode ? "#E0E0E0" : "#2d2d2d",
-            secondary: darkMode ? "#AAAAAA" : "#666666",
-          },
-        },
-        typography: {
-          fontFamily: '"Noto Sans Thai", "Noto Sans", sans-serif',
-        },
-        components: {
-          MuiDrawer: {
-            styleOverrides: {
-              paper: {
-                backgroundColor: darkMode ? "#1A1F27" : "#ffffff",
-                backdropFilter: "blur(12px)",
-              },
-            },
-          },
-          MuiPaper: {
-            styleOverrides: {
-              root: {
-                backgroundImage: "none",
-                backgroundColor: darkMode ? "#1E252C" : "#ffffff",
-              },
-            },
-          },
-          MuiButton: {
-            styleOverrides: {
-              root: {
-                borderRadius: 8,
-                textTransform: "none",
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.03)",
-                  boxShadow: darkMode
-                    ? "0 4px 20px rgba(0, 0, 0, 0.2)"
-                    : "0 4px 12px rgba(0, 0, 0, 0.06)",
-                },
-              },
-            },
-          },
-          MuiToolbar: {
-            styleOverrides: {
-              root: {
-                backgroundColor: "transparent",
-                backdropFilter: "blur(1px)",
-                color: darkMode ? "#E0E0E0" : "#2d2d2d",
-              },
-            },
-          },
-        },
-      }),
-    [darkMode]
-  );
+  const theme = useMemo(() => getAppTheme(darkMode), [darkMode]);
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
@@ -273,179 +219,178 @@ export default function DashboardLayout() {
   const toggleExpand = (segment) =>
     setExpanded((prev) => ({ ...prev, [segment]: !prev[segment] }));
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
   const drawerContent = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* โลโก้ด้านบน */}
-      <Box
-        sx={{
-          p: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderBottom: "none",
-        }}
-      >
-        <img
-          src={ReactLogo}
-          alt="Logo"
-          style={{ maxHeight: 50, width: "auto" }}
-        />
-      </Box>
+    <>
+      <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        {/* LogoBox */}
+        <LogoBox />
 
-      <List
-        sx={{
-          flexGrow: 1,
-          px: open ? 1.5 : 1.5,
-          pt: 0,
-          pb: 0,
-          overflowY: "auto",
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(0,0,0,0.1) transparent",
-          "&::-webkit-scrollbar": {
-            width: "6px",
-            backgroundColor: "transparent",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0,0,0,0.0)",
-            borderRadius: "3px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: "rgba(0,0,0,0.4)",
-          },
-          // ซ่อนปุ่มลูกศร scrollbar (บน/ล่าง)
-          "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment": {
-            display: "none",
-            width: 0,
-            height: 0,
-          },
-        }}
-      >
-        {groups.map(({ id, label }, index) => {
-          const itemsInGroup = NAVIGATION.filter(
-            (item) => item.group === id && item.roles.includes(user?.role)
-          );
+        <List
+          sx={{
+            flexGrow: 1,
+            px: 1.5,
+            pt: 0,
+            pb: 0,
+            overflowY: "auto",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(0,0,0,0.1) transparent",
+            "&::-webkit-scrollbar": {
+              width: "6px",
+              backgroundColor: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "rgba(0,0,0,0.0)",
+              borderRadius: "3px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "rgba(0,0,0,0.4)",
+            },
+            "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment": {
+              display: "none",
+              width: 0,
+              height: 0,
+            },
+          }}
+        >
+          {groups.map(({ id, label }, index) => {
+            const itemsInGroup = NAVIGATION.filter(
+              (item) => item.group === id && item.roles.includes(user?.role)
+            );
 
-          if (itemsInGroup.length === 0) return null;
+            if (itemsInGroup.length === 0) return null;
 
-          return (
-            <Box key={id}>
-              {/* หัวข้อกลุ่ม */}
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  px: open ? 1 : 1,
-                  pt: 1,
-                  pb: 1,
-                  color: theme.palette.text.secondary,
-                  userSelect: "none",
-                  fontWeight: "bold",
-                }}
-              >
-                {label}
-              </Typography>
+            return (
+              <Box key={id}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    px: 1,
+                    pt: 1,
+                    pb: 1,
+                    color: theme.palette.text.secondary,
+                    userSelect: "none",
+                    fontWeight: "500",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  {label}
+                </Typography>
 
-              {/* รายการเมนูในกลุ่ม */}
-              {itemsInGroup.map((item) => {
-                const selected = location.pathname.includes(item.segment);
-                const isExpandable = !!item.children;
-                const isOpen = expanded[item.segment];
+                {itemsInGroup.map((item) => {
+                  const isExpandable = !!item.children;
+                  const isOpen = expanded[item.segment];
 
-                const renderListItem = (menuItem, isChild = false) => {
-                  const isSelected = location.pathname.includes(
-                    menuItem.segment
-                  );
+                  const renderListItem = (menuItem, isChild = false) => {
+                    const isSelected = location.pathname.includes(menuItem.segment);
 
-                  return (
-                    <ListItem disablePadding key={menuItem.segment}>
-                      <ListItemButton
-                        selected={isSelected}
-                        onClick={() =>
-                          isExpandable && !isChild
-                            ? toggleExpand(menuItem.segment)
-                            : handleNavigate(menuItem.segment)
-                        }
-                        sx={{
-                          flexDirection: open ? "row" : "column",
-                          alignItems: "center",
-                          justifyContent: open ? "flex-start" : "center",
-                          gap: open ? 1 : 0,
-                          px: 2,
-                          py: open ? 1 : 1.5,
-                          mb: 0.5,
-                          ml: isChild && open ? 3 : 0,
-                          borderRadius: 4,
-                          backgroundColor: isSelected
-                            ? theme.palette.action.selected
-                            : "transparent",
-                          transition: "all 0.25s ease",
-                          minHeight: 50,
-                        }}
-                      >
-                        <ListItemIcon
+                    return (
+                      <ListItem disablePadding key={menuItem.segment}>
+                        <ListItemButton
+                          selected={isSelected}
+                          onClick={() =>
+                            isExpandable && !isChild
+                              ? toggleExpand(menuItem.segment)
+                              : handleNavigate(menuItem.segment)
+                          }
                           sx={{
-                            minWidth: 36,
-                            mb: open ? 0 : 0.5,
-                            justifyContent: "center",
-                            color: isSelected
-                              ? theme.palette.primary.main
-                              : "inherit",
+                            position: "relative",
+                            flexDirection: open ? "row" : "column",
+                            alignItems: "center",
+                            justifyContent: open ? "flex-start" : "center",
+                            gap: open ? 1 : 0,
+                            px: 2,
+                            py: open ? 1 : 2.5,
+                            mb: 0.5,
+                            ml: isChild && open ? 3 : 0,
+                            borderRadius: 4,
+                            backgroundColor: isSelected
+                              ? theme.palette.action.selected
+                              : "transparent",
+                            transition: "all 0.25s ease",
+                            minHeight: 50,
                           }}
                         >
-                          {menuItem.icon}
-                        </ListItemIcon>
-
-                        {open && (
-                          <ListItemText
-                            primary={menuItem.title}
-                            primaryTypographyProps={{
-                              fontSize: "1rem",
-                            }}
+                          <ListItemIcon
                             sx={{
-                              opacity: 1,
+                              minWidth: 36,
+                              mb: open ? 0 : 0.5,
+                              justifyContent: "center",
                               color: isSelected
                                 ? theme.palette.primary.main
-                                : "text.secondary",
-                              whiteSpace: "nowrap",
+                                : "inherit",
                             }}
-                          />
-                        )}
+                          >
+                            {menuItem.icon}
+                          </ListItemIcon>
 
-                        {isExpandable &&
-                          !isChild &&
-                          open &&
-                          (isOpen ? <ExpandLess /> : <ExpandMore />)}
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                };
+                          {open && (
+                            <ListItemText
+                              primary={menuItem.title}
+                              primaryTypographyProps={{ fontSize: "1rem" }}
+                              sx={{
+                                opacity: 1,
+                                color: isSelected
+                                  ? theme.palette.primary.main
+                                  : "text.secondary",
+                                whiteSpace: "nowrap",
+                              }}
+                            />
+                          )}
 
-                if (isExpandable) {
-                  return (
-                    <React.Fragment key={item.segment}>
-                      {renderListItem(item)}
+                          {!open && isExpandable && !isChild && (
+                            <ExpandMore
+                              fontSize="small"
+                              sx={{
+                                position: "absolute",
+                                right: 8,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                pointerEvents: "none",
+                                color: theme.palette.text.secondary,
+                              }}
+                            />
+                          )}
 
-                      <Collapse in={isOpen} timeout={300}>
-                        <List disablePadding>
-                          {item.children
-                            .filter((child) => child.roles.includes(user?.role))
-                            .map((child) => renderListItem(child, true))}
-                        </List>
-                      </Collapse>
-                    </React.Fragment>
-                  );
-                }
-                return renderListItem(item);
-              })}
+                          {isExpandable && !isChild && open &&
+                            (isOpen ? <ExpandLess /> : <ExpandMore />)}
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  };
 
-              {/* Divider ระหว่างกลุ่ม ยกเว้นกลุ่มสุดท้าย */}
-              {index !== groups.length - 1 && (
-                <Divider sx={{ mt: open ? 1 : 1, mx: open ? 0 : 1 }} />
-              )}
-            </Box>
-          );
-        })}
-      </List>
-    </Box>
+                  if (isExpandable) {
+                    return (
+                      <React.Fragment key={item.segment}>
+                        {renderListItem(item)}
+
+                        <Collapse in={isOpen} timeout={300}>
+                          <List disablePadding>
+                            {item.children
+                              .filter((child) => child.roles.includes(user?.role))
+                              .map((child) => renderListItem(child, true))}
+                          </List>
+                        </Collapse>
+                      </React.Fragment>
+                    );
+                  }
+
+                  return renderListItem(item);
+                })}
+
+                {index !== groups.length - 1 && (
+                  <Divider sx={{ mt: 1, mx: open ? 0 : 1 }} />
+                )}
+              </Box>
+            );
+          })}
+        </List>
+      </Box>
+    </>
   );
 
   const breadcrumbPaths = location.pathname.split("/").filter(Boolean);
@@ -461,10 +406,12 @@ export default function DashboardLayout() {
           sx={{
             zIndex: theme.zIndex.drawer + 1,
             height: appBarHeight,
-            left: open ? drawerWidth : collapsedWidth,
-            width: open
-              ? `calc(100% - ${drawerWidth}px)`
-              : `calc(100% - ${collapsedWidth}px)`,
+            left: isMobile ? 0 : open ? drawerWidth : collapsedWidth,
+            width: isMobile
+              ? "100%"
+              : open
+                ? `calc(100% - ${drawerWidth}px)`
+                : `calc(100% - ${collapsedWidth}px)`,
             backgroundColor: darkMode
               ? "rgba(20, 26, 33, 0.08)"
               : "rgba(255, 255, 255, 0.08)",
@@ -480,7 +427,20 @@ export default function DashboardLayout() {
         >
           <Toolbar sx={{ justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              {!isMobile && (
+              {isMobile ? (
+                <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={() => setOpen(true)}
+                  size="large"
+                  sx={{
+                    ml: 0.5,
+                  }}
+                >
+                  <LunchDiningIcon />
+                </IconButton>
+              ) : (
                 <IconButton
                   edge="start"
                   aria-label={open ? "Collapse drawer" : "Expand drawer"}
@@ -522,26 +482,13 @@ export default function DashboardLayout() {
                   transform: darkMode ? "rotate(180deg)" : "rotate(0deg)",
                 }}
               >
-                {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                {darkMode ? <LightModeIcon sx={{
+                  animation: `${spin} 6s linear infinite`,
+                }} /> : <DarkModeIcon />}
               </IconButton>
 
-              <IconButton
-                color="inherit"
-                aria-label="profile"
-                onClick={() => openDrawer("profile")}
-              >
+              <IconButton color="inherit" aria-label="profile" onClick={() => openDrawer("profile")}>
                 <AccountCircleIcon />
-              </IconButton>
-
-              <IconButton
-                color="inherit"
-                aria-label="settings"
-                onClick={() => openDrawer("settings")}
-                sx={{
-                  animation: `${spin} 5s linear infinite`,
-                }}
-              >
-                <SettingsIcon />
               </IconButton>
             </Box>
           </Toolbar>
@@ -561,17 +508,20 @@ export default function DashboardLayout() {
             },
           }}
           sx={{
+            zIndex: isMobile ? (theme) => theme.zIndex.modal + 2 : (theme) => theme.zIndex.drawer,
             width: open ? drawerWidth : collapsedWidth,
             flexShrink: 0,
-            willChange: "width", // เพิ่มตรงนี้ช่วย browser optimize
+            willChange: "width",
             "& .MuiDrawer-paper": {
+              zIndex: isMobile ? (theme) => theme.zIndex.modal + 2 : (theme) => theme.zIndex.drawer,
               width: open ? drawerWidth : collapsedWidth,
               overflowX: "hidden",
-              willChange: "width", // เพิ่มตรงนี้เหมือนกัน
-              transition: theme.transitions.create("width", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
+              willChange: "width",
+              transition: (theme) =>
+                theme.transitions.create("width", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
               boxSizing: "border-box",
             },
           }}
@@ -583,34 +533,73 @@ export default function DashboardLayout() {
           anchor="right"
           open={drawerOpen}
           onClose={closeDrawer}
+          variant="temporary"
+          ModalProps={{
+            keepMounted: true,
+            BackdropProps: {
+              sx: {
+                backdropFilter: "blur(6px)",
+                backgroundColor: "rgba(0,0,0,0.2)",
+                zIndex: theme.zIndex.modal + 1000,
+              },
+            },
+          }}
+          sx={{
+            position: "fixed",
+            zIndex: theme.zIndex.modal + 1001,
+          }}
           PaperProps={{
             sx: {
-              width: 320,
-              p: 3,
+              width: 300,
+              paddingTop: "64px",
               backdropFilter: "blur(6px)",
               backgroundColor: theme.palette.background.paper,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              zIndex: theme.zIndex.modal + 1002,
             },
           }}
         >
-          {drawerPanel === "profile" && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                My Profile
-              </Typography>
-              <Typography>Email: {user?.email}</Typography>
-              <Typography>Role: {user?.role}</Typography>
-            </Box>
-          )}
-          {drawerPanel === "settings" && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Settings
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Coming soon... (ใส่ toggle ภาษา, theme, อื่น ๆ ได้ที่นี่)
-              </Typography>
-            </Box>
-          )}
+          {true && <ProfilePanel />}
+
+          <Box
+            sx={{
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: theme.palette.background.paper,
+              p: 2.5,
+            }}
+          >
+            <Button
+              sx={{
+                p: 1.5,
+                borderRadius: 5,
+                backgroundColor: "#d32f2f",
+                color: "#ffffff",
+                transition: "background-color 0.3s ease",
+                "&:hover": {
+                  backgroundColor: "#9a0007",
+                  boxShadow: "none",
+                  transform: "none",
+                },
+                "&:active": {
+                  backgroundColor: "#7b0000",
+                },
+                fontSize: "1rem",
+                fontWeight: "500",
+              }}
+              variant="contained"
+              fullWidth
+              onClick={() => {
+                logout();
+                setTimeout(() => closeDrawer(), 200);
+              }}
+            >
+              ออกจากระบบ
+            </Button>
+          </Box>
+
         </Drawer>
 
         <Box
@@ -623,9 +612,8 @@ export default function DashboardLayout() {
             willChange: "margin-left",
             transition: theme.transitions.create("margin-left", {
               easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
+              duration: theme.transitions.duration.standard
             }),
-            marginLeft: open ? `${drawerWidth}px` : `${collapsedWidth}px`,
           }}
         >
           <Outlet />

@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthProvider";
 import { login as apiLogin } from "../api/authService";
 import "@fontsource/noto-sans-thai";
 import "@fontsource/noto-sans";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,10 +21,12 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
     try {
       const data = await apiLogin(email, password);
       login(data);
@@ -37,6 +40,7 @@ export default function LoginPage() {
       }
     } catch {
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      setIsLoading(false);
     }
   };
 
@@ -114,6 +118,7 @@ export default function LoginPage() {
               variant="contained"
               size="large"
               fullWidth
+              disabled={isLoading}
               sx={{
                 py: 2,
                 fontSize: "1rem",
@@ -128,7 +133,7 @@ export default function LoginPage() {
                 },
               }}
             >
-              เข้าสู่ระบบ
+              {isLoading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "เข้าสู่ระบบ"}
             </Button>
           </Stack>
         </form>
