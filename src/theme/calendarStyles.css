@@ -1,0 +1,200 @@
+.fc-theme-standard table,
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.fc-theme-standard .fc-scrollgrid-section > td {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.fc-theme-standard thead th {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.fc-theme-standard .fc-day-sat {
+  background-color: rgba(255, 0, 0, 0.025) !important;
+}
+
+.fc-theme-standard .fc-day-sun {
+  background-color: rgba(255, 0, 0, 0.035) !important;
+}
+
+.fc-theme-standard .fc-col-header-cell.fc-day-sat,
+.fc-theme-standard .fc-col-header-cell.fc-day-sun {
+  background-color: rgba(255, 0, 0, 0.06) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.fc-theme-standard .fc-col-header-cell > div {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.fc-theme-standard .fc-day-today .fc-daygrid-day-number {
+  background-color: #ff5630 !important;
+  border-radius: 50%;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 4px;
+}
+
+.fc-theme-standard .fc-col-header-cell.fc-day-today,
+.fc-theme-standard .fc-col-header-cell.fc-day-today > div {
+  background-color: rgba(255, 0, 0, 0.15) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.fc-theme-standard .fc-daygrid-day-number {
+  margin: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.fc-theme-standard .fc-col-header-cell-cushion {
+  margin: 4px;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.fc-daygrid-event {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  padding: 4px 8px !important;
+  margin: 2px 0 !important;
+  font-weight: 500;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.fc-theme-standard .fc-popover,
+.fc-theme-standard.fc-theme-standard-light .fc-popover {
+  color: #000 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.fc-theme-standard .fc-popover-header,
+.fc-theme-standard.fc-theme-standard-light .fc-popover-header {
+  color: #000 !important;
+  font-weight: 600;
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+.fc-theme-standard .fc-popover-close,
+.fc-theme-standard.fc-theme-standard-light .fc-popover-close {
+  color: #000 !important;
+  opacity: 0.8 !important;
+  cursor: pointer;
+}
+
+.fc-theme-standard .fc-popover-close:hover,
+.fc-theme-standard.fc-theme-standard-light .fc-popover-close:hover {
+  opacity: 1 !important;
+}
+
+.fc-theme-standard .fc-popover-body .fc-event,
+.fc-theme-standard.fc-theme-standard-light .fc-popover-body .fc-event {
+  color: #000 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  margin: 4px 0 !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.fc-theme-standard .fc-popover,
+.fc-theme-standard.fc-theme-standard-light .fc-popover {
+  background-image: none !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .fc-theme-standard .fc-popover {
+    background-color: #141a21 !important;
+    color: #fff !important;
+  }
+
+  .fc-theme-standard .fc-popover-header {
+    color: #fff !important;
+  }
+
+  .fc-theme-standard .fc-popover-close {
+    color: #fff !important;
+  }
+
+  .fc-theme-standard .fc-popover-close:hover {
+    opacity: 1;
+  }
+
+  .fc-theme-standard .fc-popover-body .fc-event {
+    color: #fff !important;
+  }
+}
+
+.fc .fc-scrollgrid {
+  overflow: hidden !important;
+}
+
+@media (max-width: 600px) {
+  .fc-toolbar-title {
+    font-size: 0.85rem !important;
+  }
+
+  .fc .fc-button {
+    font-size: 0.65rem !important;
+    padding: 0.2rem 0.4rem !important;
+  }
+
+  .fc-col-header-cell-cushion {
+    font-size: 0.6rem !important;
+  }
+
+  .fc-daygrid-day-number {
+    font-size: 0.6rem !important;
+  }
+
+  .fc-event {
+    font-size: 0.6rem !important;
+    padding: 2px 4px !important;
+  }
+
+  .fc-theme-standard .fc-day-today .fc-daygrid-day-number {
+    font-size: 0.65rem !important;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    margin: 2px;
+  }
+
+  .fc-theme-standard .fc-popover-header {
+    font-size: 0.75rem !important;
+    padding: 6px 10px;
+  }
+
+  .fc-theme-standard .fc-popover-body .fc-event {
+    font-size: 0.7rem !important;
+    padding: 2px 6px;
+  }
+}

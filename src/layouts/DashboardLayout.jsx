@@ -55,6 +55,9 @@ import {
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
   AssignmentTurnedInRounded as AssignmentTurnedInRoundedIcon,
+  ManageAccounts as ManageAccountsIcon,
+  AssignmentInd as AssignmentIndIcon,
+  UploadFileRounded as UploadFileRoundedIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
@@ -93,34 +96,36 @@ const NAVIGATION = [
   },
   {
     segment: "user-management",
-    title: "จัดการผู้ใช้งาน",
-    icon: <PeopleIcon />,
+    title: "จัดการพนักงาน",
+    icon: <ManageAccountsIcon />,
     roles: ["admin", "superadmin"],
     group: "upload",
     children: [
       {
-        segment: "reports/sales",
-        title: "สมัครแอดมิน",
-        icon: <PersonAddIcon />,
-        roles: ["superadmin"],
-      },
-      {
-        segment: "reports/traffic",
+        segment: "staff-management",
         title: "อนุมัติพนักงาน",
-        icon: <VerifiedUserIcon />,
+        icon: <AssignmentIndIcon />,
         roles: ["admin", "superadmin"],
+        group: "management",
       },
+      // {
+      //   segment: "register-admin",
+      //   title: "เพิ่มแอดมิน",
+      //   icon: <PeopleIcon />,
+      //   roles: ["admin", "superadmin"],
+      //   group: "management",
+      // },
     ],
   },
   {
     segment: "upload-products",
     title: "อัพโหลดสินค้า",
-    icon: <UploadFileIcon />,
+    icon: <UploadFileRoundedIcon />,
     roles: ["admin", "superadmin"],
     group: "upload",
   },
   {
-    segment: "dry-category",
+    segment: "dried-category",
     title: "ประเภทแห้ง",
     icon: <FoodBankRoundedIcon />,
     roles: ["admin", "superadmin"],
@@ -133,40 +138,26 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "product",
   },
-  {
-    segment: "frozen-category",
-    title: "ประเภทแช่แข็ง",
-    icon: <AcUnitIcon />,
-    roles: ["admin", "superadmin"],
-    group: "product",
-  },
-  {
-    segment: "snack-category",
-    title: "ประเภทขนม",
-    icon: <CookieRoundedIcon />,
-    roles: ["admin", "superadmin"],
-    group: "product",
-  },
+  // {
+  //   segment: "fresh-category",
+  //   title: "ประเภทแช่แข็ง",
+  //   icon: <AcUnitIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "product",
+  // },
+  // {
+  //   segment: "snack-category",
+  //   title: "ประเภทขนม",
+  //   icon: <CookieRoundedIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "product",
+  // },
   {
     segment: "stationery-category",
     title: "ประเภทเครื่องเขียน",
     icon: <CreateIcon />,
     roles: ["admin", "superadmin"],
     group: "product",
-  },
-  {
-    segment: "admin-management",
-    title: "จัดการแอดมิน",
-    icon: <AdminPanelSettingsIcon />,
-    roles: ["superadmin"],
-    group: "management",
-  },
-  {
-    segment: "staff-management",
-    title: "จัดการพนักงาน",
-    icon: <PeopleIcon />,
-    roles: ["admin", "superadmin"],
-    group: "management",
   },
 ];
 
@@ -206,7 +197,7 @@ export default function DashboardLayout() {
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   const [open, setOpen] = useState(!isMobile);
   useEffect(() => setOpen(!isMobile), [isMobile]);
   const [expanded, setExpanded] = useState({});
@@ -220,8 +211,8 @@ export default function DashboardLayout() {
     setExpanded((prev) => ({ ...prev, [segment]: !prev[segment] }));
 
   const logout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   const drawerContent = (
@@ -250,11 +241,12 @@ export default function DashboardLayout() {
             "&::-webkit-scrollbar-thumb:hover": {
               backgroundColor: "rgba(0,0,0,0.4)",
             },
-            "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment": {
-              display: "none",
-              width: 0,
-              height: 0,
-            },
+            "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment":
+              {
+                display: "none",
+                width: 0,
+                height: 0,
+              },
           }}
         >
           {groups.map(({ id, label }, index) => {
@@ -286,7 +278,9 @@ export default function DashboardLayout() {
                   const isOpen = expanded[item.segment];
 
                   const renderListItem = (menuItem, isChild = false) => {
-                    const isSelected = location.pathname.includes(menuItem.segment);
+                    const isSelected = location.pathname.includes(
+                      menuItem.segment
+                    );
 
                     return (
                       <ListItem disablePadding key={menuItem.segment}>
@@ -356,7 +350,9 @@ export default function DashboardLayout() {
                             />
                           )}
 
-                          {isExpandable && !isChild && open &&
+                          {isExpandable &&
+                            !isChild &&
+                            open &&
                             (isOpen ? <ExpandLess /> : <ExpandMore />)}
                         </ListItemButton>
                       </ListItem>
@@ -371,7 +367,9 @@ export default function DashboardLayout() {
                         <Collapse in={isOpen} timeout={300}>
                           <List disablePadding>
                             {item.children
-                              .filter((child) => child.roles.includes(user?.role))
+                              .filter((child) =>
+                                child.roles.includes(user?.role)
+                              )
                               .map((child) => renderListItem(child, true))}
                           </List>
                         </Collapse>
@@ -410,14 +408,14 @@ export default function DashboardLayout() {
             width: isMobile
               ? "100%"
               : open
-                ? `calc(100% - ${drawerWidth}px)`
-                : `calc(100% - ${collapsedWidth}px)`,
+              ? `calc(100% - ${drawerWidth}px)`
+              : `calc(100% - ${collapsedWidth}px)`,
             backgroundColor: darkMode
               ? "rgba(20, 26, 33, 0.08)"
               : "rgba(255, 255, 255, 0.08)",
             color: theme.palette.text.primary,
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             boxShadow: "none",
             transition: theme.transitions.create(["width", "left"], {
               easing: theme.transitions.easing.sharp,
@@ -435,7 +433,7 @@ export default function DashboardLayout() {
                   onClick={() => setOpen(true)}
                   size="large"
                   sx={{
-                    ml: 0.5,
+                    ml: 0,
                   }}
                 >
                   <LunchDiningIcon />
@@ -482,12 +480,23 @@ export default function DashboardLayout() {
                   transform: darkMode ? "rotate(180deg)" : "rotate(0deg)",
                 }}
               >
-                {darkMode ? <LightModeIcon sx={{
-                  animation: `${spin} 6s linear infinite`,
-                }} /> : <DarkModeIcon />}
+                {darkMode ? (
+                  <LightModeIcon
+                    sx={{
+                      animation: `${spin} 6s linear infinite`,
+                      color: theme.palette.warning.main,
+                    }}
+                  />
+                ) : (
+                  <DarkModeIcon />
+                )}
               </IconButton>
 
-              <IconButton color="inherit" aria-label="profile" onClick={() => openDrawer("profile")}>
+              <IconButton
+                color="inherit"
+                aria-label="profile"
+                onClick={() => openDrawer("profile")}
+              >
                 <AccountCircleIcon />
               </IconButton>
             </Box>
@@ -508,25 +517,52 @@ export default function DashboardLayout() {
             },
           }}
           sx={{
-            zIndex: isMobile ? (theme) => theme.zIndex.modal + 2 : (theme) => theme.zIndex.drawer,
+            zIndex: isMobile
+              ? (theme) => theme.zIndex.modal + 2
+              : (theme) => theme.zIndex.drawer,
             width: open ? drawerWidth : collapsedWidth,
             flexShrink: 0,
-            willChange: "width",
+            whiteSpace: "nowrap",
+            transition: (theme) =>
+              theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.standard,
+              }),
+            overflowX: "hidden",
             "& .MuiDrawer-paper": {
-              zIndex: isMobile ? (theme) => theme.zIndex.modal + 2 : (theme) => theme.zIndex.drawer,
               width: open ? drawerWidth : collapsedWidth,
-              overflowX: "hidden",
-              willChange: "width",
               transition: (theme) =>
                 theme.transitions.create("width", {
                   easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
+                  duration: theme.transitions.duration.standard,
                 }),
+              backgroundColor: darkMode
+                ? "rgba(20, 26, 33, 0.8)"
+                : "rgba(255, 255, 255, 0.8)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRight: darkMode
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.05)",
               boxSizing: "border-box",
+              overflowX: "hidden",
             },
           }}
         >
-          {drawerContent}
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              overflow: "hidden",
+              px: open ? 2 : 0,
+              transition: (theme) =>
+                theme.transitions.create(["padding"], {
+                  duration: theme.transitions.duration.standard,
+                }),
+            }}
+          >
+            {drawerContent}
+          </Box>
         </Drawer>
 
         <Drawer
@@ -539,8 +575,8 @@ export default function DashboardLayout() {
             BackdropProps: {
               sx: {
                 backdropFilter: "blur(6px)",
-                backgroundColor: "rgba(0,0,0,0.2)",
                 zIndex: theme.zIndex.modal + 1000,
+                backgroundColor: "rgba(0,0,0,0.3)",
               },
             },
           }}
@@ -552,12 +588,19 @@ export default function DashboardLayout() {
             sx: {
               width: 300,
               paddingTop: "64px",
-              backdropFilter: "blur(6px)",
-              backgroundColor: theme.palette.background.paper,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(20, 26, 33, 0.8)"
+                  : "rgba(255, 255, 255, 0.8)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               height: "100%",
               display: "flex",
               flexDirection: "column",
               zIndex: theme.zIndex.modal + 1002,
+              borderLeft: darkMode
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.05)",
             },
           }}
         >
@@ -567,14 +610,20 @@ export default function DashboardLayout() {
             sx={{
               position: "sticky",
               bottom: 0,
-              backgroundColor: theme.palette.background.paper,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(20, 26, 33, 0.8)"
+                  : "rgba(255, 255, 255, 0.8)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               p: 2.5,
+              zIndex: theme.zIndex.modal + 1003,
             }}
           >
             <Button
               sx={{
                 p: 1.5,
-                borderRadius: 5,
+                borderRadius: 3,
                 backgroundColor: "#d32f2f",
                 color: "#ffffff",
                 transition: "background-color 0.3s ease",
@@ -599,7 +648,6 @@ export default function DashboardLayout() {
               ออกจากระบบ
             </Button>
           </Box>
-
         </Drawer>
 
         <Box
@@ -612,7 +660,7 @@ export default function DashboardLayout() {
             willChange: "margin-left",
             transition: theme.transitions.create("margin-left", {
               easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.standard
+              duration: theme.transitions.duration.standard,
             }),
           }}
         >

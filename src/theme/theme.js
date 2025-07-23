@@ -26,6 +26,7 @@ export const getAppTheme = (darkMode) =>
                 primary: darkMode ? "#E0E0E0" : "#2d2d2d",
                 secondary: darkMode ? "#AAAAAA" : "#666666",
                 disabled: darkMode ? "#ffffff" : "#f0f0f0",
+                hint: darkMode ? "#1C252E" : "#F5F5F5",
             },
         },
         typography: {

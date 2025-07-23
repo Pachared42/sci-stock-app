@@ -93,7 +93,7 @@ export default function LoginPage() {
               autoComplete="email"
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 5,
+                  borderRadius: 4,
                 },
               }}
             />
@@ -108,7 +108,7 @@ export default function LoginPage() {
               autoComplete="current-password"
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 5,
+                  borderRadius: 4,
                 },
               }}
             />
@@ -123,7 +123,7 @@ export default function LoginPage() {
                 py: 2,
                 fontSize: "1rem",
                 fontWeight: "bold",
-                borderRadius: 5,
+                borderRadius: 4,
                 backgroundColor: "#000000",
                 letterSpacing: 1,
                 textTransform: "uppercase",

@@ -2,28 +2,27 @@ import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
 } from "@mui/material";
 
-export default function DashboardContent() {
+export default function OrderDay() {
   const [orders, setOrders] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
 
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/orders`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
 
@@ -38,7 +37,7 @@ export default function DashboardContent() {
   }, []);
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: 1 }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -64,23 +63,28 @@ export default function DashboardContent() {
           ยังไม่มีคำสั่งซื้อในวันนี้
         </Typography>
       ) : (
-        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
-          <List disablePadding>
-            {orders.map((order, index) => (
-              <React.Fragment key={order.id}>
-                <ListItem sx={{ px: 3, py: 2 }}>
-                  <ListItemText
-                    primary={`Order #${order.id}`}
-                    secondary={`ลูกค้า: ${
-                      order.customerName
-                    } - รวม: ${order.totalPrice.toLocaleString()} บาท`}
-                  />
-                </ListItem>
-                {index !== orders.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        </Paper>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, mt: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order ID</TableCell>
+                <TableCell>ชื่อลูกค้า</TableCell>
+                <TableCell align="right">ราคารวม (บาท)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>{order.id}</TableCell>
+                  <TableCell>{order.customerName}</TableCell>
+                  <TableCell align="right">
+                    {order.totalPrice.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Box>
   );

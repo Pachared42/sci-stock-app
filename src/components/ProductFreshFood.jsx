@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -14,42 +14,33 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
+import { visuallyHidden } from "@mui/utils";
 
-function createData(id, name, img, barcode, price, manage) {
+import { fetchProductsByCategory } from "../api/productApi";
+
+function createData(
+  id,
+  name,
+  imgUrl,
+  barcode,
+  priceSell,
+  priceCost,
+  stockQty,
+  stockMin
+) {
   return {
     id,
     name,
+    imgUrl,
     barcode,
-    price,
-    manage,
-    img,
+    priceSell,
+    priceCost,
+    stockQty,
+    stockMin,
   };
 }
-
-const rows = [
-  createData(1, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 3.7, 4.3),
-  createData(2, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 25.0, 4.9),
-  createData(3, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 16.0, 6.0),
-  createData(4, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 20.0, 4.0),
-  createData(5, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 16.0, 3.9),
-  createData(6, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 3.2, 6.5),
-  createData(7, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 9.0, 4.3),
-  createData(8, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0.0, 0.0),
-  createData(9, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 26.0, 7.0),
-  createData(10, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0.2, 0.0),
-  createData(11, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0, 2.0),
-  createData(12, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 19.0, 37.0),
-  createData(13, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 18.0, 4.0),
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -68,11 +59,14 @@ function getComparator(order, orderBy) {
 }
 
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "30%" },
-  { id: "img", label: "รูปภาพ", width: "25%" },
-  { id: "barcode", label: "BARCODE", width: "30%" },
-  { id: "price", label: "ราคา", width: "10%" },
-  { id: "manage", label: "จัดการ", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "img", label: "รูปภาพ", width: "15%" },
+  { id: "barcode", label: "BARCODE", width: "15%" },
+  { id: "priceSell", label: "ราคาขาย", width: "10%" },
+  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+  { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+  { id: "manage", label: "จัดการสินค้า", width: "15%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -181,13 +175,39 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function EnhancedTable() {
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("calories");
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rows, setRows] = useState([]);
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("name");
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [dense, setDense] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const theme = useTheme();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchProductsByCategory("fresh_food");
+  
+        const formatted = data.map((item, index) =>
+          createData(
+            index + 1,
+            item.product_name,
+            item.image_url,
+            item.barcode,
+            item.price,
+            item.cost,
+            item.stock,
+            item.reorder_level
+          )
+        );
+        setRows(formatted);
+      } catch (err) {
+        console.error("โหลดสินค้าล้มเหลว:", err);
+      }
+    };
+    loadData();
+  }, []);  
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -232,10 +252,6 @@ export default function EnhancedTable() {
     setPage(0);
   };
 
-  const handleChangeDense = (event) => {
-    setDense(event.target.checked);
-  };
-
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -244,7 +260,7 @@ export default function EnhancedTable() {
       [...rows]
         .sort(getComparator(order, orderBy))
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   );
 
   return (
@@ -269,7 +285,7 @@ export default function EnhancedTable() {
         >
           <Table
             sx={{
-              minWidth: { xs: "250%", sm: 850 },
+              minWidth: { xs: "300%", sm: 850 },
               tableLayout: "fixed",
             }}
             aria-labelledby="tableTitle"
@@ -284,87 +300,125 @@ export default function EnhancedTable() {
               rowCount={rows.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+              {rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    ยังไม่มีรายการสินค้า
+                  </TableCell>
+                </TableRow>
+              ) : (
+                visibleRows.map((row, index) => {
+                  const isItemSelected = selected.includes(row.id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell padding="checkbox" sx={{ width: 48 }}>
-                      {" "}
-                      {/* width checkbox 48px ตาม MUI default */}
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{ "aria-labelledby": labelId }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                      sx={{
-                        width: "30%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        px: 1,
-                      }}
-                      title={row.name}
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.id}
+                      selected={isItemSelected}
+                      sx={{ cursor: "pointer" }}
                     >
-                      {row.name}
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "25%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.img}
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "30%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.barcode}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.price}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                      <TableCell padding="checkbox" sx={{ width: 48 }}>
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        padding="none"
+                        sx={{
+                          width: "20%",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          px: 1,
                         }}
+                        title={row.name}
                       >
-                        ตัดสต๊อก
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
+                        {row.name}
+                      </TableCell>
+                      <TableCell
+                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        <img
+                          src={row.imgUrl}
+                          alt={row.name}
+                          style={{ width: 75 }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.barcode}
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.priceSell} บาท
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.priceCost} บาท
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.stockQty} ชิ้น
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.stockMin} ชิ้น
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          sx={{ mr: 1 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert(`แก้ไขสินค้า: ${row.name}`);
+                          }}
+                        >
+                          แก้ไข
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert(`ลบสินค้า: ${row.name}`);
+                          }}
+                        >
+                          ลบ
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+
+              {emptyRows > 0 && rows.length > 0 && (
+                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                  <TableCell colSpan={9} />
                 </TableRow>
               )}
             </TableBody>
