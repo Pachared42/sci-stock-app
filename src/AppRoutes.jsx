@@ -15,6 +15,7 @@ import SoftDrink from "./components/ProductSoftDrink";
 import Snack from "./components/ProductSnack";
 import Stationery from "./components/ProductStationery";
 import ApproveStaff from "./components/ApproveStaff";
+import UploadProducts from "./components/UploadProducts";
 
 function AppRoutes() {
   useRouteProgress();
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="drink-category" element={<SoftDrink />} />
         <Route path="snack-category" element={<Snack />} />
         <Route path="stationery-category" element={<Stationery />} />
+        <Route path="upload-products" element={<UploadProducts />} />
         {/* เพิ่ม route ลูกอื่นๆ ได้ตามต้องการ */}
       </Route>
 

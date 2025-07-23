@@ -264,7 +264,7 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden" }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer
@@ -299,7 +299,11 @@ export default function EnhancedTable() {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
-            <TableBody>
+            <TableBody sx={{
+              "& .MuiTableCell-root": {
+                borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+              },
+            }}>
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">

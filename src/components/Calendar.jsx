@@ -160,7 +160,7 @@ export default function CalendarPage() {
   }), [events, isMobile]);
 
   return (
-    <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: 1 }}>
+    <Box sx={{ px: { xs: 1.5, sm: 2, md: 20 }, py: 1 }}>
       <Box
         sx={{
           mb: 3,

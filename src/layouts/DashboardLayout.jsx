@@ -58,6 +58,7 @@ import {
   ManageAccounts as ManageAccountsIcon,
   AssignmentInd as AssignmentIndIcon,
   UploadFileRounded as UploadFileRoundedIcon,
+  ShoppingBag as ShoppingBagIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
@@ -83,7 +84,7 @@ const NAVIGATION = [
   {
     segment: "sales-report",
     title: "รายงานขาย",
-    icon: <ShoppingBasketIcon />,
+    icon: <ShoppingBagIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
@@ -119,7 +120,7 @@ const NAVIGATION = [
   },
   {
     segment: "upload-products",
-    title: "อัพโหลดสินค้า",
+    title: "อัพโหลดสินค้า .xlsx",
     icon: <UploadFileRoundedIcon />,
     roles: ["admin", "superadmin"],
     group: "upload",

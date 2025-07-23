@@ -15,8 +15,8 @@ export default function LoadingScreen() {
       <img
         src="/logo-sci-dark.svg"
         alt="logo"
-        width={100}
-        height={100}
+        width={150}
+        height={150}
         style={{ animation: "popFade 1.5s ease forwards infinite" }}
       />
 

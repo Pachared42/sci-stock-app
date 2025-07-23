@@ -38,9 +38,9 @@ const headCells = [
   { id: "firstName", label: "ชื่อ", width: "15%" },
   { id: "lastName", label: "นามสกุล", width: "15%" },
   { id: "studentId", label: "เลขประจำตัวนักศึกษา", width: "20%" },
-  { id: "schedule", label: "ตารางสอน", width: "20%" },
+  { id: "schedule", label: "ตารางสอน", width: "15%" },
   { id: "contact", label: "ช่องทางติดต่อ (Line ID)", width: "15%" },
-  { id: "manage", label: "จัดการ", width: "15%" },
+  { id: "manage", label: "จัดการ", width: "20%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -155,8 +155,7 @@ export default function EnhancedTable() {
       firstName: "สมชาย",
       lastName: "ใจดี",
       studentId: "367409222001",
-      scheduleImg:
-        "/image.png",
+      scheduleImg: "/image.png",
       lineId: "somchai_line",
     },
     {
@@ -164,8 +163,7 @@ export default function EnhancedTable() {
       firstName: "สมหญิง",
       lastName: "แสนสุข",
       studentId: "367409222002",
-      scheduleImg:
-        "/image.png",
+      scheduleImg: "/image.png",
       lineId: "somying_line",
     },
     {
@@ -173,8 +171,7 @@ export default function EnhancedTable() {
       firstName: "วิทยา",
       lastName: "เก่งดี",
       studentId: "367409222003",
-      scheduleImg:
-        "/image.png",
+      scheduleImg: "/image.png",
       lineId: "witaya_line",
     },
     {
@@ -182,8 +179,7 @@ export default function EnhancedTable() {
       firstName: "พิมพ์ใจ",
       lastName: "สดใส",
       studentId: "367409222004",
-      scheduleImg:
-        "/image.png",
+      scheduleImg: "/image.png",
       lineId: "pimjai_line",
     },
     {
@@ -191,11 +187,10 @@ export default function EnhancedTable() {
       firstName: "ธนา",
       lastName: "มั่นคง",
       studentId: "367409222005",
-      scheduleImg:
-        "/image.png",
+      scheduleImg: "/image.png",
       lineId: "thana_line",
     },
-  ]);  
+  ]);
 
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("firstName");
@@ -274,7 +269,7 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden" }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer
@@ -309,7 +304,13 @@ export default function EnhancedTable() {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
-            <TableBody>
+            <TableBody
+              sx={{
+                "& .MuiTableCell-root": {
+                  borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+                },
+              }}
+            >
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
@@ -371,7 +372,7 @@ export default function EnhancedTable() {
 
                       <TableCell
                         sx={{
-                          width: "20%",
+                          width: "15%",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -407,7 +408,7 @@ export default function EnhancedTable() {
                       </TableCell>
 
                       <TableCell
-                        sx={{ width: "15%", px: 1, whiteSpace: "nowrap" }}
+                        sx={{ width: "20%", px: 1, whiteSpace: "nowrap" }}
                       >
                         <Button
                           color="success"
@@ -506,7 +507,14 @@ export default function EnhancedTable() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>ปิด</Button>
+          <Button
+            color="error"
+            variant="outlined"
+            onClick={handleCloseDialog}
+            autoFocus // <-- เพิ่มตรงนี้
+          >
+            ปิด
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
