@@ -18,24 +18,28 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // ป้องกัน retry loop
+      originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) throw new Error("No refresh token");
 
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh`, null, {
-          headers: { Authorization: `Bearer ${refreshToken}` },
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
+          refresh_token: refreshToken
         });
 
         localStorage.setItem("token", res.data.access_token);
-        localStorage.setItem("refresh_token", res.data.refresh_token);
+        if (res.data.refresh_token) {
+          localStorage.setItem("refresh_token", res.data.refresh_token);
+        }
 
         originalRequest.headers['Authorization'] = `Bearer ${res.data.access_token}`;
         return api.request(originalRequest);
       } catch (err) {
         localStorage.clear();
-        window.location.href = '/';
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
         return Promise.reject(err);
       }
     }

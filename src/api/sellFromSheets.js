@@ -1,69 +1,48 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function fetchProductsFromSheet(token) {
-  const res = await fetch(`${API_URL}/api/fromsheet`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("❌ Failed to fetch products");
-  }
-
-  const data = await res.json();
-  return data; // ควรได้ { products: [...] }
-}
-
-// 🔹 ใช้ใน React เพื่อโหลดข้อมูลและเซตเข้า state
 export async function loadProductsFromSheet(token, setProducts) {
+  if (!token) throw new Error("No token provided");
   try {
-    const data = await fetchProductsFromSheet(token);
-    console.log("✅ ข้อมูลจาก /api/fromsheet:", data);
-
-    if (Array.isArray(data.products)) {
-      setProducts(data.products);
-    } else {
-      console.warn("⚠️ products ไม่เป็น array:", data);
-      setProducts([]);
-    }
-  } catch (error) {
-    console.error("❌ Error loading products:", error);
+    const res = await fetch(`${API_URL}/api/fromsheet`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to fetch products");
+    const data = await res.json();
+    setProducts(data.products || []);
+  } catch (err) {
+    console.error("loadProductsFromSheet error:", err);
     setProducts([]);
+    throw err;
   }
 }
 
-// 🔹 ฟังก์ชันรีเฟรชแคช
-export async function refreshCache(token) {
-  const res = await fetch(`${API_URL}/api/refresh-cache`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("❌ Failed to refresh cache");
-  }
-
-  return res.json();
-}
-
-// 🔹 ฟังก์ชันตัดสต๊อก/ขายสินค้า
 export async function sellProduct(token, barcode, quantity = 1) {
+  if (!token) throw new Error("No token provided");
   const res = await fetch(`${API_URL}/api/orders`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ barcode, quantity }),
   });
 
-  const data = await res.json();
-
   if (!res.ok) {
-    throw new Error(data.error || "❌ ตัดสต๊อกไม่สำเร็จ");
+    const err = await res.text();
+    throw new Error(err || "Failed to sell product");
   }
+  return true;
+}
 
-  return data;
+export async function refreshCache(token) {
+  if (!token) throw new Error("No token provided");
+  const res = await fetch(`${API_URL}/api/refresh-cache`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || "Failed to refresh cache");
+  }
+  return true;
 }

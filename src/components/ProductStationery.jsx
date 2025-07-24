@@ -163,7 +163,7 @@ function EnhancedTableToolbar(props) {
           id="tableTitle"
           component="div"
         >
-          สินค้าจาก Google Sheets
+          สินค้า
         </Typography>
       )}
     </Toolbar>

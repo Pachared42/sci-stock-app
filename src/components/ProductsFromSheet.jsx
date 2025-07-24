@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { createContext, useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -14,50 +14,18 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
-
-function createData(id, name, img, barcode, price, manage) {
-  return {
-    id,
-    name,
-    barcode,
-    price,
-    manage,
-    img,
-  };
-}
-
-const rows = [
-  createData(1, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 3.7, 4.3),
-  createData(2, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 25.0, 4.9),
-  createData(3, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 16.0, 6.0),
-  createData(4, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 20.0, 4.0),
-  createData(5, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 16.0, 3.9),
-  createData(6, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 3.2, 6.5),
-  createData(7, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 9.0, 4.3),
-  createData(8, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0.0, 0.0),
-  createData(9, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 26.0, 7.0),
-  createData(10, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0.2, 0.0),
-  createData(11, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 0, 2.0),
-  createData(12, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 19.0, 37.0),
-  createData(13, "แฟนต้า-กระป๋อง กลิ่นฟรุตพันช์", 8554678591045, 18.0, 4.0),
-];
+import { useAuth } from "../context/AuthProvider";
+import {
+  loadProductsFromSheet,
+  sellProduct,
+  refreshCache,
+} from "../api/sellFromSheets";
 
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 }
 
@@ -84,6 +52,7 @@ function EnhancedTableHead(props) {
     rowCount,
     onRequestSort,
   } = props;
+
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -97,9 +66,7 @@ function EnhancedTableHead(props) {
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all desserts",
-            }}
+            inputProps={{ "aria-label": "select all items" }}
           />
         </TableCell>
         {headCells.map((headCell) => (
@@ -116,11 +83,6 @@ function EnhancedTableHead(props) {
               onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
             </TableSortLabel>
           </TableCell>
         ))}
@@ -138,8 +100,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+function EnhancedTableToolbar({ numSelected, onRefresh, loading }) {
   return (
     <Toolbar
       sx={{
@@ -163,31 +124,107 @@ function EnhancedTableToolbar(props) {
           {numSelected} เลือกแล้ว
         </Typography>
       ) : (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          variant="h5"
-          id="tableTitle"
-          component="div"
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flex: "1 1 100%",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
         >
-          สินค้าจาก Google Sheets
-        </Typography>
+          <Typography variant="h5" component="div">
+            สินค้าจาก Google Sheets
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={onRefresh}
+            disabled={loading}
+          >
+            {loading ? (
+              <Box
+                component="span"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    border: "2px solid",
+                    borderColor: "primary.main",
+                    borderTopColor: "transparent",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+                กำลังโหลด...
+              </Box>
+            ) : (
+              "รีเฟรชข้อมูล"
+            )}
+          </Button>
+        </Box>
       )}
+
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </Toolbar>
   );
 }
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
 };
 
 export default function EnhancedTable() {
+  const theme = useTheme();
+  const { user } = useAuth();
+  const token = user?.token;
+  const [products, setProducts] = React.useState([]);
   const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("calories");
+  const [orderBy, setOrderBy] = React.useState("name");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const theme = useTheme();
+  const [dense] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  // React.useEffect(() => {
+  //   if (!token) {
+  //     console.warn("No token, skipping loadProductsFromSheet");
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   loadProductsFromSheet(token, setProducts)
+  //     .catch((err) => alert("โหลดข้อมูลล้มเหลว: " + err.message))
+  //     .finally(() => setLoading(false));
+  // }, [token]);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [products]);
+
+  const handleRefresh = () => {
+    if (!token) {
+      alert("ไม่พบ token สำหรับรีเฟรชข้อมูล");
+      return;
+    }
+    setLoading(true);
+    refreshCache(token)
+      .then(() => loadProductsFromSheet(token, setProducts))
+      .catch((err) => alert("รีเฟรชข้อมูลล้มเหลว: " + err.message))
+      .finally(() => setLoading(false));
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -197,7 +234,7 @@ export default function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
+      const newSelected = products.map((n, index) => n.id ?? `idx-${index}`);
       setSelected(newSelected);
       return;
     }
@@ -232,25 +269,47 @@ export default function EnhancedTable() {
     setPage(0);
   };
 
-  const handleChangeDense = (event) => {
-    setDense(event.target.checked);
-  };
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+
+  const visibleRows = React.useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    const productsWithId = products.map((p, index) => ({
+      id: p.id != null ? p.id : `idx-${index}`,
+      product_name: p.product_name ?? "",
+      barcode: p.barcode ?? "",
+      price: p.price ?? 0,
+      image_url: p.image_url ? (
+        <img
+          src={p.image_url}
+          alt={p.product_name ?? ""}
+          style={{ maxWidth: "100%", maxHeight: 80, objectFit: "contain" }}
+          loading="lazy"
+        />
+      ) : (
+        "-"
+      ),
+      original: p,
+    }));
+
+    return productsWithId
+      .sort(getComparator(order, orderBy))
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [products, order, orderBy, page, rowsPerPage]);
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const visibleRows = React.useMemo(
-    () =>
-      [...rows]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage]
-  );
+    page > 0
+      ? Math.max(0, (1 + page) * rowsPerPage - (products?.length || 0))
+      : 0;
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          onRefresh={handleRefresh}
+          loading={loading}
+        />
         <TableContainer
           sx={{
             borderTopLeftRadius: 20,
@@ -281,99 +340,122 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={products.length}
             />
-            <TableBody sx={{
-              "& .MuiTableCell-root": {
-                borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)"
-              },
-            }}>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+            <TableBody
+              sx={{
+                "& .MuiTableCell-root": {
+                  borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+                },
+              }}
+            >
+              {visibleRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 2 }}>
+                    ยังไม่มีรายการขาย
+                  </TableCell>
+                </TableRow>
+              ) : (
+                visibleRows.map((row, index) => {
+                  const isItemSelected = isSelected(row.id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell padding="checkbox" sx={{ width: 48 }}>
-                      {" "}
-                      {/* width checkbox 48px ตาม MUI default */}
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{ "aria-labelledby": labelId }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                      sx={{
-                        width: "30%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        px: 1,
-                      }}
-                      title={row.name}
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={`${row.id}-${index}`}
+                      selected={isItemSelected}
+                      sx={{ cursor: "pointer" }}
                     >
-                      {row.name}
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "25%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.img}
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "30%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.barcode}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      {row.price}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                      <TableCell padding="checkbox" sx={{ width: 48 }}>
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{ "aria-labelledby": labelId }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        padding="none"
+                        sx={{
+                          width: "30%",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          px: 1,
                         }}
+                        title={row.product_name}
                       >
-                        ตัดสต๊อก
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
+                        {row.product_name}
+                      </TableCell>
+                      <TableCell
+                        sx={{ width: "25%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.image_url}
+                      </TableCell>
+                      <TableCell
+                        sx={{ width: "30%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.barcode}
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        {row.price} ราคา
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                      >
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!token) {
+                              alert("ไม่พบ token สำหรับตัดสต๊อก");
+                              return;
+                            }
+                            sellProduct(token, row.barcode, 1)
+                              .then(() => {
+                                alert("ตัดสต๊อกสำเร็จ");
+                                loadProductsFromSheet(token, setProducts).catch(
+                                  (err) =>
+                                    alert("โหลดข้อมูลล้มเหลว: " + err.message)
+                                );
+                                // ล้างการเลือก
+                                setSelected([]);
+                              })
+                              .catch((err) =>
+                                alert("เกิดข้อผิดพลาด: " + err.message)
+                              );
+                          }}
+                        >
+                          ตัดสต๊อก
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+
+              {emptyRows > 0 && visibleRows.length > 0 && (
+                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={6} />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
+
         <Box
           sx={{
             display: "flex",
@@ -390,7 +472,7 @@ export default function EnhancedTable() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={rows.length}
+            count={products.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

@@ -9,3 +9,16 @@ export async function fetchProductsByCategory(category) {
   }
 }
 
+export async function uploadProducts(category, products) {
+  try {
+    const response = await api.post(`/api/products/${category}/bulk`, products);
+    return response.data;
+  } catch (error) {
+    console.error("Upload failed:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+
+
+

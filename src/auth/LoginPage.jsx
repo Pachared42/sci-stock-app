@@ -6,6 +6,7 @@ import {
   Alert,
   Paper,
   Stack,
+  Box,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate } from "react-router-dom";
@@ -45,9 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 overflow-x-hidden bg-gradient-to-tr from-orange-300 via-orange-200 to-orange-100"
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 overflow-x-hidden bg-gradient-to-tr from-orange-300 via-orange-200 to-orange-100">
       <Paper
         elevation={18}
         className="w-full max-w-md rounded-3xl"
@@ -61,15 +60,22 @@ export default function LoginPage() {
           maxWidth: 450,
         }}
       >
-        <Stack spacing={3} alignItems="center" mb={4}>
-          <LockOutlinedIcon sx={{ fontSize: 60, color: "#000000" }} />
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            className="text-gray-800 text-center"
-          >
-            เข้าสู่ระบบ
-          </Typography>
+        <Stack spacing={3} alignItems="center" mb={6}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography
+              variant="h4"
+              fontWeight={600}
+              className="text-gray-800 text-center"
+            >
+              ระบบบริหารจัดการ
+            </Typography>
+            <Box
+              component="img"
+              src="/logo-sci-dark.svg"
+              alt="SCI Logo"
+              sx={{ width: 35, height: 35 }}
+            />
+          </Box>
         </Stack>
 
         {error && (
@@ -94,6 +100,15 @@ export default function LoginPage() {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 4,
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#000000",
+                  },
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#000000",
+                },
+                "& input": {
+                  caretColor: "#000000",
                 },
               }}
             />
@@ -109,6 +124,15 @@ export default function LoginPage() {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 4,
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#000000",
+                  },
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#000000",
+                },
+                "& input": {
+                  caretColor: "#000000",
                 },
               }}
             />
@@ -133,7 +157,11 @@ export default function LoginPage() {
                 },
               }}
             >
-              {isLoading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "เข้าสู่ระบบ"}
+              {isLoading ? (
+                <CircularProgress size={24} sx={{ color: "#fff" }} />
+              ) : (
+                "เข้าสู่ระบบ"
+              )}
             </Button>
           </Stack>
         </form>
