@@ -15,6 +15,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { registerAdmin } from "../api/registerAdmin";
 
 export default function RegisterAdmin() {
@@ -104,7 +105,7 @@ export default function RegisterAdmin() {
   };
 
   return (
-    <Box sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: 1 }}>
+    <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
       {/* หัวข้อหลัก */}
       <Typography
         variant="h5"
@@ -113,7 +114,7 @@ export default function RegisterAdmin() {
         textAlign="left"
         mb={3}
       >
-        ลงทะเบียนผู้ดูแลระบบ
+        ลงทะเบียนพนักงาน
       </Typography>
 
       {/* กล่องหลักที่มี Upload กับ Form */}

@@ -39,7 +39,7 @@ const headCells = [
   { id: "lastName", label: "นามสกุล", width: "15%" },
   { id: "studentId", label: "เลขประจำตัวนักศึกษา", width: "20%" },
   { id: "schedule", label: "ตารางสอน", width: "15%" },
-  { id: "contact", label: "ช่องทางติดต่อ (Line ID)", width: "15%" },
+  { id: "contact", label: "ช่องทางติดต่อ", width: "15%" },
   { id: "manage", label: "จัดการ", width: "20%" },
 ];
 
@@ -269,7 +269,7 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer

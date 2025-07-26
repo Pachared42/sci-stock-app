@@ -59,14 +59,14 @@ function getComparator(order, orderBy) {
 }
 
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "name", label: "ชื่อสินค้า", width: "15%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
   { id: "priceSell", label: "ราคาขาย", width: "10%" },
   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
-  { id: "manage", label: "จัดการสินค้า", width: "15%" },
+  { id: "manage", label: "จัดการสินค้า", width: "20%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -264,7 +264,7 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer

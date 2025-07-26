@@ -77,7 +77,7 @@ const Dashboard = () => {
       color: theme.palette.primary.contrastText,
       background: theme.palette.background.deepPinkDark,
     },
-  ], [theme.palette, theme.palette.background]);  // <-- ต้องอยู่ข้างนอก array
+  ], [theme.palette, theme.palette.background]);
   
   const salesData = useMemo(() => [
     { month: "ม.ค.", sales: 0 },
@@ -92,7 +92,7 @@ const Dashboard = () => {
     { month: "ต.ค.", sales: 290 },
     { month: "พ.ย.", sales: 310 },
     { month: "ธ.ค.", sales: 370 },
-  ], []);  // <-- ปิด array dependencies ที่ถูกต้อง
+  ], []);
   
   const sales = useMemo(() => [
     { month: "ม.ค.", inbound: 50, outbound: 30 },
@@ -110,7 +110,7 @@ const Dashboard = () => {
   ], []);  
 
   return (
-    <Box sx={{ px: { xs: 1.5, sm: 2, md: 20 }, py: 1 }}>
+    <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
       <Grid
         container
         spacing={2}

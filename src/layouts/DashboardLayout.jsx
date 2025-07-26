@@ -59,6 +59,7 @@ import {
   AssignmentInd as AssignmentIndIcon,
   UploadFileRounded as UploadFileRoundedIcon,
   ShoppingBag as ShoppingBagIcon,
+  Inventory2Rounded as Inventory2RoundedIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
@@ -89,6 +90,13 @@ const NAVIGATION = [
     group: "main",
   },
   {
+    segment: "stock-out",
+    title: "ตัดสต๊อก",
+    icon: <Inventory2RoundedIcon />,
+    roles: ["admin", "superadmin"],
+    group: "main",
+  },
+  {
     segment: "sales-day",
     title: "ออเดอร์รายวัน",
     icon: <AssignmentTurnedInRoundedIcon />,
@@ -109,13 +117,13 @@ const NAVIGATION = [
         roles: ["admin", "superadmin"],
         group: "management",
       },
-      // {
-      //   segment: "register-admin",
-      //   title: "เพิ่มแอดมิน",
-      //   icon: <PeopleIcon />,
-      //   roles: ["admin", "superadmin"],
-      //   group: "management",
-      // },
+      {
+        segment: "register-empolyee",
+        title: "เพิ่มพนักงาน",
+        icon: <PeopleIcon />,
+        roles: ["admin"],
+        group: "management",
+      },
     ],
   },
   {
@@ -243,11 +251,11 @@ export default function DashboardLayout() {
               backgroundColor: "rgba(0,0,0,0.4)",
             },
             "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment":
-              {
-                display: "none",
-                width: 0,
-                height: 0,
-              },
+            {
+              display: "none",
+              width: 0,
+              height: 0,
+            },
           }}
         >
           {groups.map(({ id, label }, index) => {
@@ -409,8 +417,8 @@ export default function DashboardLayout() {
             width: isMobile
               ? "100%"
               : open
-              ? `calc(100% - ${drawerWidth}px)`
-              : `calc(100% - ${collapsedWidth}px)`,
+                ? `calc(100% - ${drawerWidth}px)`
+                : `calc(100% - ${collapsedWidth}px)`,
             backgroundColor: darkMode
               ? "rgba(20, 26, 33, 0.08)"
               : "rgba(255, 255, 255, 0.08)",

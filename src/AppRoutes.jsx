@@ -8,14 +8,15 @@ import ProductsFromSheet from './components/ProductsFromSheet';
 import useRouteProgress from "./hooks/useRouteProgress";
 import Dashboard from "./components/Dashboard";
 import CalendarPage from "./components/Calendar";
-import RegisterAdmin from "./components/RegisterAdmin";
+import RegisterEmpolyee from "./components/RegisterEmpolyee";
 import DriedFood from "./components/ProductDriedFood";
 import FreshFood from "./components/ProductFreshFood";
 import SoftDrink from "./components/ProductSoftDrink";
 import Snack from "./components/ProductSnack";
 import Stationery from "./components/ProductStationery";
 import ApproveStaff from "./components/ApproveStaff";
-import UploadProducts from "./components/UploadProducts";
+import UploadProductsXlsx from "./components/UploadProductsXlsx";
+import StockOutPage from "./components/StockOutPage";
 
 function AppRoutes() {
   useRouteProgress();
@@ -37,13 +38,14 @@ function AppRoutes() {
         <Route path="sales-report" element={<ProductsFromSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
-        <Route path="register-admin" element={<RegisterAdmin />} />
+        <Route path="register-empolyee" element={<RegisterEmpolyee />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />
         <Route path="drink-category" element={<SoftDrink />} />
         <Route path="snack-category" element={<Snack />} />
         <Route path="stationery-category" element={<Stationery />} />
-        <Route path="upload-products" element={<UploadProducts />} />
+        <Route path="upload-products" element={<UploadProductsXlsx />} />
+        <Route path="stock-out" element={<StockOutPage />} />
         {/* เพิ่ม route ลูกอื่นๆ ได้ตามต้องการ */}
       </Route>
 
@@ -60,7 +62,7 @@ function AppRoutes() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sales-report" element={<ProductsFromSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
-        <Route path="register-admin" element={<RegisterAdmin />} />
+        <Route path="register-empolyee" element={<RegisterEmpolyee />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />
         <Route path="drink-category" element={<SoftDrink />} />

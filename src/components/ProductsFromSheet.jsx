@@ -303,7 +303,7 @@ export default function EnhancedTable() {
       : 0;
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 20 } }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar
           numSelected={selected.length}

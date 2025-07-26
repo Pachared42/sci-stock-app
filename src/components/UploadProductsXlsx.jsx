@@ -510,7 +510,7 @@ export default function UploadThreeTables() {
   }
 
   return (
-    <Box sx={{ px: { xs: 0, md: 25 } }}>
+    <Box sx={{ px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 } }}>
       <Typography variant="h5" gutterBottom>
         อัปโหลดไฟล์สินค้า .xlsx
       </Typography>
