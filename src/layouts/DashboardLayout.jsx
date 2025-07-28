@@ -563,7 +563,7 @@ export default function DashboardLayout() {
               width: "100%",
               height: "100%",
               overflow: "hidden",
-              px: open ? 2 : 0,
+              px: open ? 0 : 0,
               transition: (theme) =>
                 theme.transitions.create(["padding"], {
                   duration: theme.transitions.duration.standard,
