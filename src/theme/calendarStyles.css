@@ -1,3 +1,18 @@
+:root {
+  --chart-bg-light: #F5F5F5;
+  --chart-bg-dark: #1C252E;
+  --fc-list-event-hover-bg-color: transparent;
+}
+
+body.light-mode {
+  --chart-bg: var(--chart-bg-light);
+}
+
+body.dark-mode {
+  --chart-bg: var(--chart-bg-dark);
+  --fc-list-event-hover-bg-color: transparent;
+}
+
 .fc-theme-standard table,
 .fc-theme-standard td,
 .fc-theme-standard th {
@@ -18,18 +33,18 @@
   font-weight: 600;
 }
 
-.fc-theme-standard .fc-day-sat {
-  background-color: rgba(255, 0, 0, 0.025) !important;
+.fc-theme-standard td.fc-day-sat {
+  background-color: rgba(28, 37, 46, 0.08) !important;
 }
 
-.fc-theme-standard .fc-day-sun {
-  background-color: rgba(255, 0, 0, 0.035) !important;
+.fc-theme-standard td.fc-day-sun {
+  background-color: rgba(28, 37, 46, 0.10) !important;
 }
 
 .fc-theme-standard .fc-col-header-cell.fc-day-sat,
 .fc-theme-standard .fc-col-header-cell.fc-day-sun {
-  background-color: rgba(255, 0, 0, 0.06) !important;
-  color: #ffffff !important;
+  background-color: rgba(28, 37, 46, 0.15) !important;
+  color: #fff !important;
   font-weight: 600;
 }
 
@@ -198,3 +213,57 @@
     padding: 2px 6px;
   }
 }
+
+.fc-day-today {
+  background-color: transparent !important;
+}
+
+.fc-list-empty {
+  background-color: var(--chart-bg) !important;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.fc-theme-standard .fc-list {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+.fc-list-day-cushion.fc-cell-shaded {
+  background-color: #E1DFE9 !important;
+  color: #000;
+  font-weight: 500;
+}
+
+.fc-event.fc-event-start.fc-event-end.fc-event-past.fc-list-event:hover {
+  background-color: unset !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+.fc-list-event-graphic {
+  padding-left: 2px !important;
+}
+
+.fc-event-dragging {
+  max-width: 180px !important;
+  width: 180px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
+
+
+
+
