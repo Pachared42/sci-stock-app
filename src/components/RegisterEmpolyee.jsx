@@ -4,15 +4,9 @@ import {
   TextField,
   Button,
   Typography,
-  Switch,
-  FormControlLabel,
   useMediaQuery,
   useTheme,
   Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -25,54 +19,13 @@ export default function RegisterAdmin() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    username: "",
     password: "",
     role: "admin",
-    emailVerified: false,
     photo: null,
   });
 
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
-  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-
-  const handleDigitClick = (digit) => {
-    const next = [...otpDigits];
-    const idx = next.findIndex((d) => d === "");
-    if (idx !== -1) {
-      next[idx] = digit;
-      setOtpDigits(next);
-    }
-  };
-
-  const handleBackspace = () => {
-    const next = [...otpDigits];
-    const idx = next.findLastIndex((d) => d !== "");
-    if (idx !== -1) {
-      next[idx] = "";
-      setOtpDigits(next);
-    }
-  };
-
-  const handleCloseOtpDialog = () => {
-    setOtpDialogOpen(false);
-    setOtpDigits(["", "", "", "", "", ""]);
-  };
-
-  const handleSubmitOtp = async () => {
-    const fullCode = otpDigits.join("");
-    if (fullCode === "123456") {
-      try {
-        await registerAdmin(formData);
-        alert("ลงทะเบียนผู้ดูแลระบบสำเร็จ");
-        handleCloseOtpDialog();
-      } catch (err) {
-        alert(err.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
-      }
-    } else {
-      alert("OTP ไม่ถูกต้อง");
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,15 +40,7 @@ export default function RegisterAdmin() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!formData.emailVerified) {
-      setOtpDialogOpen(true);
-    } else {
-      submitWithoutOtp();
-    }
-  };
-
-  const submitWithoutOtp = async () => {
+  const handleSubmit = async () => {
     try {
       await registerAdmin(formData);
       alert("ลงทะเบียนผู้ดูแลระบบสำเร็จ");
@@ -106,7 +51,6 @@ export default function RegisterAdmin() {
 
   return (
     <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
-      {/* หัวข้อหลัก */}
       <Typography
         variant="h5"
         fontWeight="500"
@@ -117,7 +61,6 @@ export default function RegisterAdmin() {
         ลงทะเบียนพนักงาน
       </Typography>
 
-      {/* กล่องหลักที่มี Upload กับ Form */}
       <Box
         sx={{
           display: "flex",
@@ -270,11 +213,11 @@ export default function RegisterAdmin() {
             />
             <TextField
               fullWidth
-              label="อีเมล"
-              name="email"
-              type="email"
+              label="ชื่อผู้ใช้"
+              name="username"
+              type="text"
               onChange={handleChange}
-              value={formData.email}
+              value={formData.username}
               sx={{
                 gridColumn: "1 / -1",
                 "& .MuiOutlinedInput-root": { borderRadius: 3 },
@@ -319,92 +262,6 @@ export default function RegisterAdmin() {
           </Box>
         </Box>
       </Box>
-
-      {/* OTP Dialog */}
-      <Dialog
-        open={otpDialogOpen}
-        onClose={handleCloseOtpDialog}
-        sx={{
-          "& .MuiDialog-paper": {
-            borderRadius: 4,
-          },
-        }}
-      >
-        <DialogContent sx={{ textAlign: "center" }}>
-          <Typography mb={4} mt={2} fontSize={20}>
-            กรุณากรอกเลข OTP 6 หลัก
-          </Typography>
-          <Box display="flex" justifyContent="center" gap={1} mb={2}>
-            {otpDigits.map((digit, idx) => (
-              <Box
-                key={idx}
-                sx={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 3,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.5rem",
-                  fontWeight: "bold",
-                  bgcolor: "background.chartBackground",
-                }}
-              >
-                {digit}
-              </Box>
-            ))}
-          </Box>
-
-          <Box display="flex" justifyContent="center">
-            <Box
-              display="grid"
-              gridTemplateColumns="repeat(3, 1fr)"
-              gap={2}
-              mt={0.1}
-              mb={2}
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, "ลบ", 0].map((val, idx) => (
-                <Button
-                  key={idx}
-                  variant="outlined"
-                  onClick={() =>
-                    val === "ลบ"
-                      ? handleBackspace()
-                      : handleDigitClick(val.toString())
-                  }
-                  sx={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: "50%",
-                    fontSize: "1.2rem",
-                    fontWeight: "400",
-                    minWidth: "unset",
-                    padding: 0,
-                    textAlign: "center",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: "background.chartBackground",
-                    border: "none",
-                  }}
-                >
-                  {val}
-                </Button>
-              ))}
-            </Box>
-          </Box>
-          <DialogActions sx={{ p: 0 }}>
-            <Button onClick={handleCloseOtpDialog}>ยกเลิก</Button>
-            <Button
-              variant="contained"
-              onClick={handleSubmitOtp}
-              disabled={otpDigits.includes("")}
-            >
-              ยืนยัน
-            </Button>
-          </DialogActions>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

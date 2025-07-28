@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import thLocale from "@fullcalendar/core/locales/th";
 import listPlugin from "@fullcalendar/list";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import "../theme/calendarStyles.css";
 
@@ -63,6 +64,8 @@ export default function CalendarPage() {
     date: "",
     tag: "shipping",
   });
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const calendarApi = () => calendarRef.current?.getApi();
 
@@ -78,7 +81,6 @@ export default function CalendarPage() {
     async function loadEvents() {
       try {
         const data = await fetchWorkSchedules();
-        // backend date อาจมาในรูปแบบ timestamp หรือ ISO string - ตัดแค่ YYYY-MM-DD ให้ FullCalendar
         setEvents(data.map((e) => ({ ...e, date: e.date.slice(0, 10) })));
       } catch (err) {
         setAlert({ open: true, message: err.message, severity: "error" });
@@ -96,22 +98,22 @@ export default function CalendarPage() {
 
   const handleAddOrUpdate = async () => {
     if (!formState.title || !formState.date) return;
-
+  
     try {
       if (editingEvent) {
-        const updated = await updateWorkSchedule(editingEvent.id, formState);
-        setEvents((prev) =>
-          prev.map((e) => (e.id === updated.id ? updated : e))
-        );
+        await updateWorkSchedule(editingEvent.id, formState);
         setAlert({ open: true, message: "แก้ไขการทำงานแล้ว", severity: "info" });
       } else {
-        const created = await createWorkSchedule(formState);
-        setEvents((prev) => [...prev, created]);
+        await createWorkSchedule(formState);
         setAlert({ open: true, message: "เพิ่มการทำงานแล้ว", severity: "success" });
       }
+  
       setOpenDialog(false);
       setFormState({ title: "", date: "", tag: "shipping" });
       setEditingEvent(null);
+  
+      navigate(location.pathname, { replace: true });
+  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -131,12 +133,12 @@ export default function CalendarPage() {
       const id = parseInt(info.event.id, 10);
       const event = events.find((e) => e.id === id);
       if (!event) return;
-
-      const updatedEvent = await updateWorkSchedule(id, { ...event, date: updatedDate });
-      setEvents((prev) =>
-        prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e))
-      );
+  
+      await updateWorkSchedule(id, { ...event, date: updatedDate });
       setAlert({ open: true, message: "เลื่อนการทำงานแล้ว", severity: "info" });
+  
+      navigate(location.pathname, { replace: true });
+  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -146,10 +148,12 @@ export default function CalendarPage() {
     if (!editingEvent) return;
     try {
       await deleteWorkSchedule(editingEvent.id);
-      setEvents((prev) => prev.filter((e) => e.id !== editingEvent.id));
       setAlert({ open: true, message: "ลบการทำงานแล้ว", severity: "error" });
       setOpenDialog(false);
       setEditingEvent(null);
+  
+      navigate(location.pathname, { replace: true });
+  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
