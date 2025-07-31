@@ -66,6 +66,7 @@ export default function CalendarPage() {
   });
   const navigate = useNavigate();
   const location = useLocation();
+  const [reload, setReload] = useState(false);
 
   const calendarApi = () => calendarRef.current?.getApi();
 
@@ -86,8 +87,9 @@ export default function CalendarPage() {
         setAlert({ open: true, message: err.message, severity: "error" });
       }
     }
+  
     loadEvents();
-  }, []);
+  }, [reload]);
 
   const handleNavigate = (action) => {
     const api = calendarApi();
@@ -112,6 +114,7 @@ export default function CalendarPage() {
       setFormState({ title: "", date: "", tag: "shipping" });
       setEditingEvent(null);
   
+      setReload((r) => !r);
       navigate(location.pathname, { replace: true });
   
     } catch (err) {
@@ -137,6 +140,7 @@ export default function CalendarPage() {
       await updateWorkSchedule(id, { ...event, date: updatedDate });
       setAlert({ open: true, message: "เลื่อนการทำงานแล้ว", severity: "info" });
   
+      setReload((r) => !r);
       navigate(location.pathname, { replace: true });
   
     } catch (err) {
@@ -146,12 +150,14 @@ export default function CalendarPage() {
 
   const handleDeleteEvent = async () => {
     if (!editingEvent) return;
+  
     try {
       await deleteWorkSchedule(editingEvent.id);
       setAlert({ open: true, message: "ลบการทำงานแล้ว", severity: "error" });
       setOpenDialog(false);
       setEditingEvent(null);
   
+      setReload((r) => !r);
       navigate(location.pathname, { replace: true });
   
     } catch (err) {

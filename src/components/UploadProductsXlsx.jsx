@@ -574,7 +574,7 @@ export default function UploadThreeTables() {
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <UploadBox
-            label="ประเภทขนม"
+            label="ประเภทเครื่องเขียน"
             onFileChange={handleUpload(
               setData3,
               setErrors3,
@@ -586,7 +586,7 @@ export default function UploadThreeTables() {
             uploading={uploading3}
           />
           <TableComponent
-            title="ข้อมูลประเภทขนม"
+            title="ข้อมูลประเภทเครื่องเขียน"
             rows={data3}
             errors={errors3}
             order={order3}

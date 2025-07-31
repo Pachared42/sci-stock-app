@@ -60,6 +60,7 @@ import {
   UploadFileRounded as UploadFileRoundedIcon,
   ShoppingBag as ShoppingBagIcon,
   Inventory2Rounded as Inventory2RoundedIcon,
+  Inventory as InventoryIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
@@ -132,6 +133,13 @@ const NAVIGATION = [
     icon: <UploadFileRoundedIcon />,
     roles: ["admin", "superadmin"],
     group: "upload",
+  },
+  {
+    segment: "all-products",
+    title: "สินค้าทั้งหมด",
+    icon: <InventoryIcon />,
+    roles: ["admin", "superadmin"],
+    group: "product",
   },
   {
     segment: "dried-category",
@@ -420,8 +428,8 @@ export default function DashboardLayout() {
                 ? `calc(100% - ${drawerWidth}px)`
                 : `calc(100% - ${collapsedWidth}px)`,
             backgroundColor: darkMode
-              ? "rgba(20, 26, 33, 0.08)"
-              : "rgba(255, 255, 255, 0.08)",
+              ? "rgba(12, 16, 20, 0.6)"
+              : "rgba(255, 255, 255, 0.6)",
             color: theme.palette.text.primary,
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
@@ -460,12 +468,12 @@ export default function DashboardLayout() {
                     width: 30,
                     height: 30,
                     bgcolor: "background.paper",
-                    border: "1px solid",
+                    transition: "background-color 0.2s ease, all 0.3s ease",
+                    border: "0.5px solid",
                     borderColor: "divider",
                     borderRadius: "50%",
-                    boxShadow: 1,
+                    boxShadow: "none",
                     zIndex: 10,
-                    transition: "all 0.3s ease",
                     "& svg": {
                       fontSize: 18,
                     },
@@ -546,8 +554,8 @@ export default function DashboardLayout() {
                   duration: theme.transitions.duration.standard,
                 }),
               backgroundColor: darkMode
-                ? "rgba(20, 26, 33, 0.8)"
-                : "rgba(255, 255, 255, 0.8)",
+                ? "rgba(12, 16, 20, 0.98)"
+                : "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               borderRight: darkMode
@@ -599,8 +607,8 @@ export default function DashboardLayout() {
               paddingTop: "64px",
               backgroundColor:
                 theme.palette.mode === "dark"
-                  ? "rgba(20, 26, 33, 0.8)"
-                  : "rgba(255, 255, 255, 0.8)",
+                  ? "rgba(12, 16, 20, 0.98)"
+                  : "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               height: "100%",
@@ -621,8 +629,8 @@ export default function DashboardLayout() {
               bottom: 0,
               backgroundColor:
                 theme.palette.mode === "dark"
-                  ? "rgba(20, 26, 33, 0.8)"
-                  : "rgba(255, 255, 255, 0.8)",
+                  ? "rgba(12, 16, 20, 0.98)"
+                  : "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               p: 2.5,

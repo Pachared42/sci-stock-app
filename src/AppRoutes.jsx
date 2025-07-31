@@ -17,6 +17,7 @@ import Stationery from "./components/ProductStationery";
 import ApproveStaff from "./components/ApproveStaff";
 import UploadProductsXlsx from "./components/UploadProductsXlsx";
 import StockOutPage from "./components/StockOutPage";
+import ProductAll from "./components/ProductAll"
 
 function AppRoutes() {
   useRouteProgress();
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="register-empolyee" element={<RegisterEmpolyee />} />
+        <Route path="all-products" element={<ProductAll />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />
         <Route path="drink-category" element={<SoftDrink />} />
