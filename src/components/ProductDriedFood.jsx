@@ -1,33 +1,41 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Toolbar,
+  Typography,
+  Paper,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Alert,
+  InputAdornment,
+  Fade,
+} from "@mui/material";
+
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@mui/material/InputAdornment";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 
 import {
@@ -192,25 +200,52 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function EnhancedTable() {
+  // ตัวแปร state ต่าง ๆ
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
-  const [dense, setDense] = useState(false);
+  const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // สถานะ Dialog ต่าง ๆ
   const [editRow, setEditRow] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    barcode: "",
+    imgUrl: "",
+    priceSell: "",
+    priceCost: "",
+    stockQty: "",
+    stockMin: "",
+  });
+
+  // ตัวแปรสำหรับการกรองและค้นหา
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const filterOpen = Boolean(filterAnchorEl);
   const [filter, setFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
+
+  // Snackbar สำหรับแจ้งเตือนสถานะ
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // ตัวแปรสถานะอื่น ๆ
+  const [reload, setReload] = useState(false);
+
+  // Hooks ต่าง ๆ
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [reload, setReload] = useState(false);
 
+  // --- โหลดข้อมูลสินค้า ---
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -233,9 +268,9 @@ export default function EnhancedTable() {
       }
     };
     loadData();
-  }, []);
+  }, [reload]);
 
-  // ฟังก์ชันจัดการ Select All
+  // --- ฟังก์ชันจัดการการเลือกทั้งหมด ---
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelected = rows.map((n) => n.id);
@@ -245,7 +280,7 @@ export default function EnhancedTable() {
     setSelected([]);
   };
 
-  // ฟังก์ชันจัดการเลือกแถวเดียว
+  // --- ฟังก์ชันจัดการเลือกแถวเดียว ---
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -266,24 +301,25 @@ export default function EnhancedTable() {
     setSelected(newSelected);
   };
 
-  // ฟังก์ชันจัดการ sort
+  // --- ฟังก์ชันจัดการการเรียงลำดับ ---
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  // ฟังก์ชันจัดการเปลี่ยนหน้า
+  // --- ฟังก์ชันจัดการเปลี่ยนหน้า ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  // ฟังก์ชันจัดการเปลี่ยนจำนวนแถวต่อหน้า
+  // --- ฟังก์ชันจัดการเปลี่ยนจำนวนแถวต่อหน้า ---
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
+  // --- ฟังก์ชันจัดการ Dialog แก้ไข ---
   const handleEdit = (row) => {
     setEditRow(row);
     setEditValues(row);
@@ -295,8 +331,6 @@ export default function EnhancedTable() {
 
   const handleDialogSave = async () => {
     try {
-      console.log("Updating product with barcode:", editValues.barcode);
-
       const updatedPayload = {
         product_name: editValues.name,
         barcode: editValues.barcode,
@@ -307,32 +341,27 @@ export default function EnhancedTable() {
         image_url: editValues.imgUrl,
       };
 
-      console.log("Payload:", updatedPayload);
-
       await updateProduct("dried_food", editValues.barcode, updatedPayload);
 
-      setReload((r) => !r);
+      setSnackbar({
+        open: true,
+        message: "แก้ไขสินค้าสำเร็จ",
+        severity: "success",
+      });
+
       setEditRow(null);
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
     } catch (error) {
       console.error(
         "❌ Error updating product:",
         error.response?.data || error.message
       );
-      alert("ไม่สามารถแก้ไขสินค้าได้");
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteProduct("dried_food", deleteRow.barcode);
-      setReload((r) => !r);
-      setDeleteRow(null);
-    } catch (error) {
-      console.error(
-        "❌ Error deleting product:",
-        error.response?.data || error.message
-      );
-      alert("ไม่สามารถลบสินค้าได้");
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถแก้ไขสินค้าได้",
+        severity: "error",
+      });
     }
   };
 
@@ -340,30 +369,35 @@ export default function EnhancedTable() {
     setEditRow(null);
   };
 
-  // คำนวณแถวว่าง (ถ้าหน้าปัจจุบันแสดงไม่ครบ)
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  // --- ฟังก์ชันจัดการลบสินค้า ---
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteProduct("dried_food", deleteRow.barcode);
 
-  // แถวที่แสดงในแต่ละหน้า (คำนวณ sort + pagination)
-  const visibleRows = React.useMemo(
-    () =>
-      [...rows]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage, rows]
-  );
+      setDeleteRow(null);
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
 
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    barcode: "",
-    imgUrl: "",
-    priceSell: "",
-    priceCost: "",
-    stockQty: "",
-    stockMin: "",
-  });
+      setSnackbar({
+        open: true,
+        message: "ลบสินค้าสำเร็จ",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error(
+        "❌ Error deleting product:",
+        error.response?.data || error.message
+      );
 
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถลบสินค้าได้",
+        severity: "error",
+      });
+    }
+  };
+
+  // --- ฟังก์ชันเพิ่มสินค้าใหม่ ---
   const handleAddProduct = async () => {
     const productPayload = {
       product_name: newProduct.name.trim(),
@@ -382,7 +416,12 @@ export default function EnhancedTable() {
       isNaN(productPayload.price) ||
       isNaN(productPayload.cost)
     ) {
-      alert("กรุณากรอกชื่อสินค้า, barcode, ราคาขาย และราคาต้นทุนให้ถูกต้อง");
+      setSnackbar({
+        open: true,
+        message:
+          "กรุณากรอกชื่อสินค้า, barcode, ราคาขาย และราคาต้นทุนให้ถูกต้อง",
+        severity: "warning",
+      });
       return;
     }
 
@@ -405,27 +444,29 @@ export default function EnhancedTable() {
           stockMin: productPayload.reorder_level,
         },
       ]);
+
+      setSnackbar({
+        open: true,
+        message: "เพิ่มสินค้าสำเร็จ",
+        severity: "success",
+      });
+
+      setOpenAddDialog(false);
     } catch (error) {
       console.error(
-        "❌ Error adding product:",
+        "Error adding product:",
         error.response?.data || error.message
       );
+
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถเพิ่มสินค้าได้",
+        severity: "error",
+      });
     }
-
-    setNewProduct({
-      name: "",
-      barcode: "",
-      imgUrl: "",
-      priceSell: "",
-      priceCost: "",
-      stockQty: "",
-      stockMin: "",
-    });
-
-    setOpenAddDialog(false);
   };
 
-  // ฟิลเตอร์และค้นหาข้อมูล
+  // --- ฟังก์ชันกรองและค้นหาข้อมูล ---
   const filteredRows = useMemo(() => {
     const search = searchText.trim().toLowerCase();
 
@@ -451,8 +492,22 @@ export default function EnhancedTable() {
     });
   }, [rows, filter, searchText]);
 
+  // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
   const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 5;
+
+  // --- การคำนวณแถวว่างสำหรับ pagination ---
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+  // --- แถวที่แสดงตามหน้าปัจจุบัน (คำนวณ sort + pagination) ---
+  const visibleRows = useMemo(
+    () =>
+      [...rows]
+        .sort(getComparator(order, orderBy))
+        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [order, orderBy, page, rowsPerPage, rows]
+  );
 
   return (
     <Box
@@ -813,11 +868,21 @@ export default function EnhancedTable() {
         onClose={() => setOpenAddDialog(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 6,
-            p: { xs: 2, md: 3 },
-            bgcolor: "background.paper",
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
@@ -878,7 +943,7 @@ export default function EnhancedTable() {
                   color: "gray",
                   fontStyle: "italic",
                   userSelect: "none",
-                  gap: 1, // เพิ่มช่องว่างระหว่างไอคอนกับข้อความ
+                  gap: 1,
                 }}
               >
                 <ImageNotSupportedIcon fontSize="large" />
@@ -888,7 +953,14 @@ export default function EnhancedTable() {
           </Box>
 
           <Box
-            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "100%",
+              minWidth: 0,
+            }}
           >
             <TextField
               label="URL รูปภาพ"
@@ -900,6 +972,11 @@ export default function EnhancedTable() {
               placeholder="วาง URL รูปภาพที่นี่"
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ชื่อสินค้า"
@@ -910,6 +987,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="BARCODE"
@@ -920,6 +1002,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาขาย"
@@ -934,6 +1021,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาต้นทุน"
@@ -948,6 +1040,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="จำนวนสต็อก"
@@ -959,6 +1056,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="สต็อกต่ำสุด"
@@ -970,6 +1072,11 @@ export default function EnhancedTable() {
               }
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
           </Box>
         </DialogContent>
@@ -993,8 +1100,15 @@ export default function EnhancedTable() {
             onClick={handleAddProduct}
             variant="contained"
             color="primary"
+            sx={{
+              backgroundColor: theme.palette.background.ButtonDay,
+              color: theme.palette.text.hint,
+              "&:hover": {
+                backgroundColor: theme.palette.background.ButtonDay,
+              },
+            }}
           >
-            บันทึก
+            เพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1005,11 +1119,21 @@ export default function EnhancedTable() {
         onClose={handleDialogClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 6,
-            p: { xs: 2, md: 3 },
-            bgcolor: "background.paper",
+        TransitionComponent={Fade}
+        transitionDuration={300} // ทำให้ทั้ง backdrop และ dialog ใช้เวลาเท่ากัน
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
@@ -1058,7 +1182,14 @@ export default function EnhancedTable() {
           </Box>
 
           <Box
-            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "100%",
+              minWidth: 0,
+            }}
           >
             <TextField
               label="URL รูปภาพ"
@@ -1068,6 +1199,11 @@ export default function EnhancedTable() {
               placeholder="วาง URL รูปภาพที่นี่"
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ชื่อสินค้า"
@@ -1076,6 +1212,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("name", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="BARCODE"
@@ -1084,6 +1225,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("barcode", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาขาย"
@@ -1093,6 +1239,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("priceSell", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาต้นทุน"
@@ -1102,6 +1253,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("priceCost", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="จำนวนสต็อก"
@@ -1111,6 +1267,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("stockQty", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="สต็อกต่ำสุด"
@@ -1120,6 +1281,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("stockMin", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
           </Box>
         </DialogContent>
@@ -1151,7 +1317,7 @@ export default function EnhancedTable() {
               },
             }}
           >
-            บันทึก
+            บันทึกการแก้ไข
           </Button>
         </DialogActions>
       </Dialog>
@@ -1161,11 +1327,21 @@ export default function EnhancedTable() {
         onClose={() => setDeleteRow(null)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            p: 3,
-            bgcolor: "background.paper",
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
@@ -1224,6 +1400,26 @@ export default function EnhancedTable() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

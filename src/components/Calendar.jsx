@@ -87,7 +87,7 @@ export default function CalendarPage() {
         setAlert({ open: true, message: err.message, severity: "error" });
       }
     }
-  
+
     loadEvents();
   }, [reload]);
 
@@ -100,23 +100,30 @@ export default function CalendarPage() {
 
   const handleAddOrUpdate = async () => {
     if (!formState.title || !formState.date) return;
-  
+
     try {
       if (editingEvent) {
         await updateWorkSchedule(editingEvent.id, formState);
-        setAlert({ open: true, message: "แก้ไขการทำงานแล้ว", severity: "info" });
+        setAlert({
+          open: true,
+          message: "แก้ไขการทำงานแล้ว",
+          severity: "info",
+        });
       } else {
         await createWorkSchedule(formState);
-        setAlert({ open: true, message: "เพิ่มการทำงานแล้ว", severity: "success" });
+        setAlert({
+          open: true,
+          message: "เพิ่มการทำงานแล้ว",
+          severity: "success",
+        });
       }
-  
+
       setOpenDialog(false);
       setFormState({ title: "", date: "", tag: "shipping" });
       setEditingEvent(null);
-  
+
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
-  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -136,13 +143,12 @@ export default function CalendarPage() {
       const id = parseInt(info.event.id, 10);
       const event = events.find((e) => e.id === id);
       if (!event) return;
-  
+
       await updateWorkSchedule(id, { ...event, date: updatedDate });
       setAlert({ open: true, message: "เลื่อนการทำงานแล้ว", severity: "info" });
-  
+
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
-  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -150,16 +156,15 @@ export default function CalendarPage() {
 
   const handleDeleteEvent = async () => {
     if (!editingEvent) return;
-  
+
     try {
       await deleteWorkSchedule(editingEvent.id);
       setAlert({ open: true, message: "ลบการทำงานแล้ว", severity: "error" });
       setOpenDialog(false);
       setEditingEvent(null);
-  
+
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
-  
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -201,7 +206,7 @@ export default function CalendarPage() {
         const tag = arg.event.extendedProps.tag;
         const bgColor = tagColors[tag] || "#ccc";
         const isListWeek = arg.view.type === "listWeek";
-      
+
         return (
           <Box
             sx={{
@@ -485,9 +490,20 @@ export default function CalendarPage() {
         open={alert.open}
         autoHideDuration={3000}
         onClose={() => setAlert({ ...alert, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={alert.severity}>{alert.message}</Alert>
+        <Alert
+          severity={alert.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {alert.message}
+        </Alert>
       </Snackbar>
     </Box>
   );
