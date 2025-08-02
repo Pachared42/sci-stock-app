@@ -17,6 +17,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+import Fade from "@mui/material/Fade";
 
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -269,7 +270,13 @@ export default function EnhancedTable() {
   );
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
+    <Box
+      sx={{
+        width: "100%",
+        overflow: "hidden",
+        px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 },
+      }}
+    >
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer
@@ -492,9 +499,34 @@ export default function EnhancedTable() {
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
       >
         <DialogTitle>ตารางสอน</DialogTitle>
-        <DialogContent dividers>
+
+        <DialogContent
+          sx={{
+            borderTop: "none",
+            borderBottom: "none",
+            px: { xs: 2, md: 3 },
+            pb: 2,
+          }}
+        >
           {currentSchedule ? (
             <Box
               component="img"
@@ -506,12 +538,13 @@ export default function EnhancedTable() {
             <Typography>ไม่พบรูปภาพ</Typography>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button
             color="error"
             variant="outlined"
             onClick={handleCloseDialog}
-            autoFocus // <-- เพิ่มตรงนี้
+            autoFocus
           >
             ปิด
           </Button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, } from "react";
 import PropTypes from "prop-types";
 import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -22,8 +22,21 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { visuallyHidden } from "@mui/utils";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import { forwardRef } from "react";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import Fade from '@mui/material/Fade';
 
-import { fetchProductsByCategory } from "../api/productApi";
+import {
+  fetchProductsByCategory,
+  updateProduct,
+  deleteProduct,
+} from "../api/productApi";
 
 function createData(
   id,
@@ -33,7 +46,8 @@ function createData(
   priceSell,
   priceCost,
   stockQty,
-  stockMin
+  stockMin,
+  category
 ) {
   return {
     id,
@@ -44,6 +58,7 @@ function createData(
     priceCost,
     stockQty,
     stockMin,
+    category,
   };
 }
 
@@ -191,6 +206,19 @@ export default function EnhancedTable() {
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
   const theme = useTheme();
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const filterOpen = Boolean(filterAnchorEl);
+  const [filter, setFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
+
+  const Alert = forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
   useEffect(() => {
     const categories = ["dried_food", "soft_drink", "stationery"];
@@ -211,7 +239,8 @@ export default function EnhancedTable() {
             item.price,
             item.cost,
             item.stock,
-            item.reorder_level
+            item.reorder_level,
+            item.category
           )
         );
         setRows(formatted);
@@ -281,28 +310,112 @@ export default function EnhancedTable() {
     setEditValues((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDialogSave = () => {
-    setRows((prevRows) =>
-      prevRows.map((r) => (r.id === editRow.id ? { ...editValues } : r))
-    );
-    setEditRow(null);
+  const handleDialogSave = async () => {
+    try {
+      const updatedPayload = {
+        product_name: editValues.name,
+        barcode: editValues.barcode,
+        price: parseFloat(editValues.priceSell),
+        cost: parseFloat(editValues.priceCost),
+        stock: parseInt(editValues.stockQty, 10),
+        reorder_level: parseInt(editValues.stockMin, 10),
+        image_url: editValues.imgUrl,
+      };
+
+      await updateProduct(
+        editValues.category,
+        editValues.barcode,
+        updatedPayload
+      );
+
+      setSnackbar({
+        open: true,
+        message: "แก้ไขสินค้าสำเร็จ",
+        severity: "success",
+      });
+
+      setEditRow(null);
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
+    } catch (error) {
+      console.error(
+        "❌ Error updating product:",
+        error.response?.data || error.message
+      );
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถแก้ไขสินค้าได้",
+        severity: "error",
+      });
+    }
   };
 
   const handleDialogClose = () => {
     setEditRow(null);
   };
 
-  // Delete dialog
-  const handleDeleteConfirm = () => {
-    setRows((prev) => prev.filter((r) => r.id !== deleteRow.id));
-    setSelected((prev) => prev.filter((id) => id !== deleteRow.id));
-    setDeleteRow(null);
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteProduct(deleteRow.category, deleteRow.barcode);
+
+      setDeleteRow(null);
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
+
+      setSnackbar({
+        open: true,
+        message: "ลบสินค้าสำเร็จ",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error(
+        "❌ Error deleting product:",
+        error.response?.data || error.message
+      );
+
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถลบสินค้าได้",
+        severity: "error",
+      });
+    }
   };
 
+  const filteredRows = useMemo(() => {
+    const search = searchText.trim().toLowerCase();
+
+    return rows.filter((row) => {
+      if (
+        filter === "lowStock" &&
+        !(row.stockQty > 0 && row.stockQty < row.stockMin)
+      ) {
+        return false;
+      }
+      if (filter === "outOfStock" && row.stockQty > 0) {
+        return false;
+      }
+
+      if (!search) {
+        return true;
+      }
+
+      const nameMatch = row.name.toLowerCase().includes(search);
+      const barcodeMatch = String(row.barcode).toLowerCase().includes(search);
+
+      return nameMatch || barcodeMatch;
+    });
+  }, [rows, filter, searchText]);
+
+  // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
+  const isOutOfStock = (product) => product.stockQty === 0;
+  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 5;
+
+  // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
+  // --- แถวที่แสดงตามหน้าปัจจุบัน (คำนวณ sort + pagination) ---
+  const visibleRows = useMemo(
     () =>
       [...rows]
         .sort(getComparator(order, orderBy))
@@ -320,10 +433,112 @@ export default function EnhancedTable() {
     >
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
-        <TableContainer
+        <Box
           sx={{
+            p: "24px 24px 4px 24px",
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            justifyContent: "space-between",
+            gap: 3,
+            backgroundColor: theme.palette.background.chartBackground,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
+          }}
+        >
+          {/* ซ้าย: Filter Dropdown */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              justifyContent: "flex-start",
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <Button
+              size="ls"
+              sx={{ px: 1.8, py: 1, borderRadius: 2.5 }}
+              startIcon={<FilterListIcon />}
+              onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              fullWidth={false}
+              variant="outlined"
+            >
+              {filter === "all" && "กรองทั้งหมด"}
+              {filter === "lowStock" && "สินค้าเหลือน้อย"}
+              {filter === "outOfStock" && "สินค้าหมด"}
+            </Button>
+            <Menu
+              anchorEl={filterAnchorEl}
+              open={filterOpen}
+              onClose={() => setFilterAnchorEl(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  setFilter("all");
+                  setFilterAnchorEl(null);
+                }}
+              >
+                ทั้งหมด
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setFilter("lowStock");
+                  setFilterAnchorEl(null);
+                }}
+              >
+                สินค้าเหลือน้อย
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setFilter("outOfStock");
+                  setFilterAnchorEl(null);
+                }}
+              >
+                สินค้าหมด
+              </MenuItem>
+            </Menu>
+          </Box>
+
+          {/* ขวา: Search */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "stretch", sm: "center" },
+              gap: 3,
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <TextField
+              size="small"
+              placeholder="ค้นหาชื่อหรือบาร์โค้ด..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              sx={{ width: { xs: "100%", sm: 500 } }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ ml: 1 }} color="action" />
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: 3,
+                  px: 0.5,
+                  py: 0.3,
+                },
+              }}
+              inputProps={{
+                style: {
+                  fontWeight: 500,
+                },
+              }}
+            />
+          </Box>
+        </Box>
+
+        <TableContainer
+          sx={{
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
             overflowX: "auto",
@@ -350,7 +565,7 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={filteredRows.length}
             />
             <TableBody
               sx={{
@@ -359,123 +574,144 @@ export default function EnhancedTable() {
                 },
               }}
             >
+              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
                     ยังไม่มีรายการสินค้า
                   </TableCell>
                 </TableRow>
+              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
+              filteredRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    ไม่มีสินค้าตามเงื่อนไขที่เลือก
+                  </TableCell>
+                </TableRow>
               ) : (
-                visibleRows.map((row, index) => {
-                  const isItemSelected = selected.includes(row.id);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+                // แสดงแถวสินค้า filtered + sort + pagination
+                filteredRows
+                  .sort(getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => {
+                    const isItemSelected = selected.includes(row.id);
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.id)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.id}
-                      selected={isItemSelected}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <TableCell padding="checkbox" sx={{ width: 48 }}>
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{ "aria-labelledby": labelId }}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(event) => handleClick(event, row.id)}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(event) => handleClick(event, row.id)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
                         sx={{
-                          width: "20%",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          px: 1,
+                          cursor: "pointer",
+                          bgcolor: isOutOfStock(row)
+                            ? "rgba(255, 0, 0, 0.30)"
+                            : isLowStock(row)
+                            ? "rgba(255, 165, 0, 0.30)"
+                            : "inherit",
                         }}
-                        title={row.name}
                       >
-                        {row.name}
-                      </TableCell>
-                      <TableCell
-                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        <img
-                          src={row.imgUrl}
-                          alt={row.name}
-                          style={{ width: 75 }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        {row.barcode}
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        {row.priceSell} บาท
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        {row.priceCost} บาท
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        {row.stockQty} ชิ้น
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        {row.stockMin} ชิ้น
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                      >
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                          sx={{ mr: 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(row);
+                        <TableCell padding="checkbox" sx={{ width: 48 }}>
+                          <Checkbox
+                            color="primary"
+                            checked={isItemSelected}
+                            inputProps={{ "aria-labelledby": labelId }}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(event) => handleClick(event, row.id)}
+                          />
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="none"
+                          sx={{
+                            width: "20%",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            px: 1,
                           }}
+                          title={row.name}
                         >
-                          แก้ไข
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteRow(row);
-                          }}
+                          {row.name}
+                        </TableCell>
+                        <TableCell
+                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
                         >
-                          ลบ
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                          <img
+                            src={row.imgUrl}
+                            alt={row.name}
+                            style={{ width: 75 }}
+                          />
+                        </TableCell>
+                        <TableCell
+                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          {row.barcode}
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          {row.priceSell} บาท
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          {row.priceCost} บาท
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          {row.stockQty} ชิ้น
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          {row.stockMin} ชิ้น
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                        >
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            sx={{ mr: 1 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(row);
+                            }}
+                          >
+                            แก้ไข
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteRow(row);
+                            }}
+                          >
+                            ลบ
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
               )}
+
+              {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={9} />
@@ -500,7 +736,7 @@ export default function EnhancedTable() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={rows.length}
+            count={filteredRows.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -528,11 +764,21 @@ export default function EnhancedTable() {
         onClose={handleDialogClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 6,
-            p: { xs: 2, md: 3 },
-            bgcolor: "background.paper",
+        TransitionComponent={Fade}
+        transitionDuration={300} // ทำให้ทั้ง backdrop และ dialog ใช้เวลาเท่ากัน
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
@@ -581,7 +827,14 @@ export default function EnhancedTable() {
           </Box>
 
           <Box
-            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "100%",
+              minWidth: 0,
+            }}
           >
             <TextField
               label="URL รูปภาพ"
@@ -591,6 +844,11 @@ export default function EnhancedTable() {
               placeholder="วาง URL รูปภาพที่นี่"
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ชื่อสินค้า"
@@ -599,6 +857,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("name", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="BARCODE"
@@ -607,6 +870,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("barcode", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาขาย"
@@ -616,6 +884,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("priceSell", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="ราคาต้นทุน"
@@ -625,6 +898,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("priceCost", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="จำนวนสต็อก"
@@ -634,6 +912,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("stockQty", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
             <TextField
               label="สต็อกต่ำสุด"
@@ -643,6 +926,11 @@ export default function EnhancedTable() {
               onChange={(e) => handleDialogChange("stockMin", e.target.value)}
               variant="outlined"
               size="medium"
+              InputProps={{
+                sx: {
+                  borderRadius: 4,
+                },
+              }}
             />
           </Box>
         </DialogContent>
@@ -674,22 +962,31 @@ export default function EnhancedTable() {
               },
             }}
           >
-            บันทึก
+            บันทึกการแก้ไข
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog ลบสินค้า */}
       <Dialog
         open={!!deleteRow}
         onClose={() => setDeleteRow(null)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            p: 3,
-            bgcolor: "background.paper",
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
@@ -738,11 +1035,7 @@ export default function EnhancedTable() {
             variant="contained"
             color="error"
             size="medium"
-            onClick={() => {
-              setRows((prev) => prev.filter((r) => r.id !== deleteRow.id));
-              setSelected((prev) => prev.filter((id) => id !== deleteRow.id));
-              setDeleteRow(null);
-            }}
+            onClick={handleDeleteConfirm}
             sx={{
               boxShadow: "none",
               textTransform: "none",
@@ -752,6 +1045,26 @@ export default function EnhancedTable() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

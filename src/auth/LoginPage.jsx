@@ -16,7 +16,7 @@ import { login as apiLogin } from "../api/authService";
 import "@fontsource/noto-sans-thai";
 import "@fontsource/noto-sans";
 
-import Aurora from "../ui/Aurora";
+import Aurora from "../theme/Aurora";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

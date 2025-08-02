@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+// =================== React & Hooks ===================
+import React, { useState, useEffect, useMemo, } from "react";
 import PropTypes from "prop-types";
-import "@fontsource/noto-sans-thai";
-import "@fontsource/noto-sans";
-import LogoBox from "../hooks/LogoBox";
-import ProfilePanel from "../components/ProfilePanel";
-import { getAppTheme } from "../theme/theme";
 
+// =================== React Router ===================
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+
+// =================== MUI Core ===================
 import {
   Box,
   Typography,
@@ -24,49 +24,72 @@ import {
   useMediaQuery,
   Button,
 } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { keyframes } from "@mui/system";
+
+// =================== MUI Icons ===================
+
+// ---- เมนูนำทาง (Drawer / Navigation) ----
 import {
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
   ExpandLess,
   ExpandMore,
-  Brightness4 as Brightness4Icon,
-  Brightness7 as Brightness7Icon,
-  Settings as SettingsIcon,
-  AccountCircle as AccountCircleIcon,
-  CalendarMonth as CalendarMonthIcon,
-  ShoppingBasket as ShoppingBasketIcon,
-  AreaChart as AreaChartIcon,
-  BarChart as BarChartIcon,
-  Description as DescriptionIcon,
-  Layers as LayersIcon,
-  People as PeopleIcon,
-  PersonAdd as PersonAddIcon,
-  VerifiedUser as VerifiedUserIcon,
-  UploadFile as UploadFileIcon,
-  Category as CategoryIcon,
-  LocalDrink as LocalDrinkIcon,
-  AcUnit as AcUnitIcon,
-  Fastfood as FastfoodIcon,
-  Create as CreateIcon,
-  AdminPanelSettings as AdminPanelSettingsIcon,
-  CookieRounded as CookieRoundedIcon,
-  FoodBankRounded as FoodBankRoundedIcon,
-  LunchDining as LunchDiningIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+} from "@mui/icons-material";
+
+// ---- เปลี่ยนธีม (โหมดสว่าง / มืด) ----
+import {
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
-  AssignmentTurnedInRounded as AssignmentTurnedInRoundedIcon,
+} from "@mui/icons-material";
+
+// ---- ผู้ใช้ / ผู้ดูแลระบบ ----
+import {
+  AccountCircle as AccountCircleIcon,
   ManageAccounts as ManageAccountsIcon,
   AssignmentInd as AssignmentIndIcon,
-  UploadFileRounded as UploadFileRoundedIcon,
-  ShoppingBag as ShoppingBagIcon,
-  Inventory2Rounded as Inventory2RoundedIcon,
-  Inventory as InventoryIcon,
 } from "@mui/icons-material";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+
+// ---- สินค้าและคลังสินค้า ----
+import {
+  ShoppingBasket as ShoppingBasketIcon,
+  InsertPageBreak as InsertPageBreakIcon,
+  UploadFileRounded as UploadFileRoundedIcon,
+  Warehouse as WarehouseIcon,
+} from "@mui/icons-material";
+
+// ---- หมวดอาหารและเครื่องดื่ม ----
+import {
+  LocalDrink as LocalDrinkIcon,
+  RamenDining as RamenDiningIcon,
+  LunchDining as LunchDiningIcon,
+} from "@mui/icons-material";
+
+// ---- แผนภูมิ / รายงาน / เอกสาร ----
+import {
+  AreaChart as AreaChartIcon,
+  Assignment as AssignmentIcon,
+} from "@mui/icons-material";
+
+// ---- เบ็ดเตล็ด ----
+import {
+  CalendarMonth as CalendarMonthIcon,
+  PersonAdd as PersonAddIcon,
+  DesignServices as DesignServicesIcon,
+} from "@mui/icons-material";
+
+// =================== ฟอนต์ ===================
+import "@fontsource/noto-sans-thai";
+import "@fontsource/noto-sans";
+
+// =================== Context / Theme / Utils ===================
 import { useAuth } from "../context/AuthProvider";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { keyframes } from "@mui/system";
 import { groups } from "../context/groups";
+import { getAppTheme } from "../theme/theme";
+
+// =================== Components ===================
+import LogoBox from "../hooks/LogoBox";
+import ProfilePanel from "../components/ProfilePanel";
 
 const NAVIGATION = [
   {
@@ -86,21 +109,21 @@ const NAVIGATION = [
   {
     segment: "sales-report",
     title: "รายงานขาย",
-    icon: <ShoppingBagIcon />,
+    icon: <ShoppingBasketIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "stock-out",
     title: "ตัดสต๊อก",
-    icon: <Inventory2RoundedIcon />,
+    icon: <InsertPageBreakIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "sales-day",
     title: "ออเดอร์รายวัน",
-    icon: <AssignmentTurnedInRoundedIcon />,
+    icon: <AssignmentIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
@@ -121,7 +144,7 @@ const NAVIGATION = [
       {
         segment: "register-empolyee",
         title: "เพิ่มพนักงาน",
-        icon: <PeopleIcon />,
+        icon: <PersonAddIcon />,
         roles: ["admin"],
         group: "management",
       },
@@ -137,14 +160,14 @@ const NAVIGATION = [
   {
     segment: "all-products",
     title: "สินค้าทั้งหมด",
-    icon: <InventoryIcon />,
+    icon: <WarehouseIcon />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "dried-category",
     title: "ประเภทแห้ง",
-    icon: <FoodBankRoundedIcon />,
+    icon: <RamenDiningIcon />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
@@ -172,7 +195,7 @@ const NAVIGATION = [
   {
     segment: "stationery-category",
     title: "ประเภทเครื่องเขียน",
-    icon: <CreateIcon />,
+    icon: <DesignServicesIcon />,
     roles: ["admin", "superadmin"],
     group: "product",
   },

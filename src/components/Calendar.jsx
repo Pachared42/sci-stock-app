@@ -25,6 +25,7 @@ import {
   TextField,
   MenuItem,
   Tooltip,
+  Fade,
 } from "@mui/material";
 
 import {
@@ -400,6 +401,23 @@ export default function CalendarPage() {
         fullWidth
         PaperProps={{
           sx: { borderRadius: isMobile ? 0 : 6, p: isMobile ? 1.5 : 2 },
+        }}
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
         }}
       >
         <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
