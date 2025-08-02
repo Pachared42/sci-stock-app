@@ -64,13 +64,13 @@ export default function LoginPage() {
 
       <Snackbar
         open={!!error}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={() => setError("")}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          onClose={() => setError("")}
           severity="error"
+          variant="filled"
           sx={{ width: "100%", fontWeight: "bold", borderRadius: 4, }}
         >
           {error}
