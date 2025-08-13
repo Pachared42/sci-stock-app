@@ -3,4 +3,5 @@ export const groups = [
     { id: "upload", label: "เมนูอัพโหลด" },
     { id: "product", label: "เมนูสินค้า" },
     { id: "management", label: "เมนูจัดการ" },
+    { id: "profile", label: "เมนูโปรไฟล์" },
   ];

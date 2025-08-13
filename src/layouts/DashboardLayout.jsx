@@ -48,6 +48,8 @@ import {
   AccountCircle as AccountCircleIcon,
   ManageAccounts as ManageAccountsIcon,
   AssignmentInd as AssignmentIndIcon,
+  Settings as SettingsIcon,
+  RecentActors as RecentActorsIcon, 
 } from "@mui/icons-material";
 
 // ---- สินค้าและคลังสินค้า ----
@@ -90,6 +92,18 @@ import { getAppTheme } from "../theme/theme";
 // =================== Components ===================
 import LogoBox from "../hooks/LogoBox";
 import ProfilePanel from "../components/ProfilePanel";
+
+const spinningIcon = (
+  <SettingsIcon
+    sx={{
+      animation: 'spin 6s linear infinite',
+      '@keyframes spin': {
+        '0%': { transform: 'rotate(0deg)' },
+        '100%': { transform: 'rotate(360deg)' },
+      },
+    }}
+  />
+);
 
 const NAVIGATION = [
   {
@@ -148,6 +162,13 @@ const NAVIGATION = [
         roles: ["admin"],
         group: "management",
       },
+      {
+        segment: "empolyee-data",
+        title: "ข้อมูลพนักงาน",
+        icon: <RecentActorsIcon />,
+        roles: ["admin"],
+        group: "management",
+      },
     ],
   },
   {
@@ -198,6 +219,13 @@ const NAVIGATION = [
     icon: <DesignServicesIcon />,
     roles: ["admin", "superadmin"],
     group: "product",
+  },
+  {
+    segment: "profile-settings",
+    title: "ตั้งค่าโปรไฟล์",
+    icon: spinningIcon,
+    roles: ["admin", "superadmin"],
+    group: "profile",
   },
 ];
 
@@ -266,7 +294,7 @@ export default function DashboardLayout() {
             flexGrow: 1,
             px: 1.5,
             pt: 0,
-            pb: 0,
+            pb: 1.5,
             overflowY: "auto",
             scrollbarWidth: "thin",
             scrollbarColor: "rgba(0,0,0,0.1) transparent",
@@ -615,20 +643,20 @@ export default function DashboardLayout() {
             BackdropProps: {
               sx: {
                 backdropFilter: "blur(6px)",
-                zIndex: theme.zIndex.modal + 1000,
+                zIndex: (theme) => theme.zIndex.modal + 1000, // สูงกว่า Drawer รอง
                 backgroundColor: "rgba(0,0,0,0.3)",
               },
             },
           }}
           sx={{
             position: "fixed",
-            zIndex: theme.zIndex.modal + 1001,
+            zIndex: (theme) => theme.zIndex.modal + 1001, // สูงกว่า Drawer รอง
           }}
           PaperProps={{
             sx: {
               width: 300,
               paddingTop: "64px",
-              backgroundColor:
+              backgroundColor: (theme) =>
                 theme.palette.mode === "dark"
                   ? "rgba(12, 16, 20, 0.98)"
                   : "rgba(255, 255, 255, 0.98)",
@@ -637,10 +665,14 @@ export default function DashboardLayout() {
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              zIndex: theme.zIndex.modal + 1002,
-              borderLeft: darkMode
-                ? "1px solid rgba(255,255,255,0.1)"
-                : "1px solid rgba(0,0,0,0.05)",
+              zIndex: (theme) => theme.zIndex.modal + 1001, // สูงกว่า Drawer รอง
+              borderLeft: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "1px solid rgba(255,255,255,0.1)"
+                  : "1px solid rgba(0,0,0,0.05)",
+              position: "fixed",
+              right: 0,
+              top: 0,
             },
           }}
         >
@@ -650,14 +682,14 @@ export default function DashboardLayout() {
             sx={{
               position: "sticky",
               bottom: 0,
-              backgroundColor:
+              backgroundColor: (theme) =>
                 theme.palette.mode === "dark"
                   ? "rgba(12, 16, 20, 0.98)"
                   : "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               p: 2.5,
-              zIndex: theme.zIndex.modal + 1003,
+              zIndex: (theme) => theme.zIndex.modal + 1003,
             }}
           >
             <Button

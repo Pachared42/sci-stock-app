@@ -18,6 +18,7 @@ import ApproveStaff from "./components/ApproveStaff";
 import UploadProductsXlsx from "./components/UploadProductsXlsx";
 import StockOutPage from "./components/StockOutPage";
 import ProductAll from "./components/ProductAll"
+import ProfileSettings from "./components/ProfileSettings";
 
 function AppRoutes() {
   useRouteProgress();
@@ -48,6 +49,7 @@ function AppRoutes() {
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="profile-settings" element={<ProfileSettings />} />
         {/* เพิ่ม route ลูกอื่นๆ ได้ตามต้องการ */}
       </Route>
 
