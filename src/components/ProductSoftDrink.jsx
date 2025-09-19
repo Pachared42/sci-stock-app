@@ -514,7 +514,7 @@ export default function EnhancedTable() {
       sx={{
         width: "100%",
         overflow: "hidden",
-        px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 },
+        px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
       }}
     >
       <Paper sx={{ width: "100%", mb: 2 }}>

@@ -9,7 +9,6 @@ import {
   Box,
   Typography,
   Stack,
-  useMediaQuery,
   Alert,
   Paper,
   Table,
@@ -181,7 +180,9 @@ const UploadBox = ({ label, onFileChange, disabled, uploading }) => {
             </>
           ) : (
             <>
-              <CloudUploadIcon sx={{ fontSize: 80, marginBottom: 1, color: "#2196f3", }} />
+              <CloudUploadIcon
+                sx={{ fontSize: 80, marginBottom: 1, color: "#2196f3" }}
+              />
               <Typography variant="body2" color="textSecondary">
                 คลิกหรือวางไฟล์ที่นี่
               </Typography>
@@ -270,7 +271,9 @@ export default function UploadThreeTables() {
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
           const mappedData = jsonData.map((row, index) => ({
-            product_name: row["ชื่อสินค้า"] ? String(row["ชื่อสินค้า"]).trim() : "",
+            product_name: row["ชื่อสินค้า"]
+              ? String(row["ชื่อสินค้า"]).trim()
+              : "",
             barcode: row["BARCODE"] ? String(row["BARCODE"]).trim() : "",
             price: Number(row["ราคาขาย"]) || 0,
             cost: Number(row["ราคาต้นทุน"]) || 0,
@@ -352,10 +355,6 @@ export default function UploadThreeTables() {
             ))}
           </Box>
         )}
-
-        <Typography variant="caption" sx={{ mb: 1, display: "block", textAlign: "right" }}>
-          แสดง {rows.length} รายการ
-        </Typography>
 
         <Paper sx={{ width: "100%", mb: 2 }}>
           <EnhancedTableToolbar title={title} />
@@ -494,10 +493,11 @@ export default function UploadThreeTables() {
               sx={{
                 px: { xs: 1, sm: 2 },
                 ".MuiTablePagination-spacer": { display: "none" },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+                ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                  {
+                    fontSize: { xs: "0.8rem", sm: "1rem" },
+                    whiteSpace: "nowrap",
+                  },
                 backgroundColor: "transparent",
                 zIndex: 1100,
                 minWidth: 300,
@@ -510,7 +510,13 @@ export default function UploadThreeTables() {
   }
 
   return (
-    <Box sx={{ px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 } }}>
+    <Box
+      sx={{
+        width: "100%",
+        overflow: "hidden",
+        px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
+      }}
+    >
       <Typography variant="h5" gutterBottom>
         อัปโหลดไฟล์สินค้า .xlsx
       </Typography>
@@ -530,7 +536,20 @@ export default function UploadThreeTables() {
             uploading={uploading1}
           />
           <TableComponent
-            title="ข้อมูลประเภทแห้ง"
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">ข้อมูลประเภทแห้ง</Typography>
+                <Typography variant="caption">
+                  แสดง {data1.length} รายการ
+                </Typography>
+              </Box>
+            }
             rows={data1}
             errors={errors1}
             order={order1}
@@ -558,7 +577,20 @@ export default function UploadThreeTables() {
             uploading={uploading2}
           />
           <TableComponent
-            title="ข้อมูลประเภทเครื่องดื่ม"
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">ข้อมูลประเภทเครื่องดื่ม</Typography>
+                <Typography variant="caption">
+                  แสดง {data1.length} รายการ
+                </Typography>
+              </Box>
+            }
             rows={data2}
             errors={errors2}
             order={order2}
@@ -586,7 +618,20 @@ export default function UploadThreeTables() {
             uploading={uploading3}
           />
           <TableComponent
-            title="ข้อมูลประเภทเครื่องเขียน"
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">ข้อมูลประเภทเครื่องเขียน</Typography>
+                <Typography variant="caption">
+                  แสดง {data1.length} รายการ
+                </Typography>
+              </Box>
+            }
             rows={data3}
             errors={errors3}
             order={order3}

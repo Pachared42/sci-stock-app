@@ -1,20 +1,23 @@
 import React, { createContext, useContext, useState } from "react";
 import PropTypes from "prop-types";
-import { alpha } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Toolbar,
+  Typography,
+  Paper,
+  Checkbox,
+  Button,
+  Grid,
+  TextField,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../context/AuthProvider";
 import {
@@ -303,7 +306,119 @@ export default function EnhancedTable() {
       : 0;
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
+    <Box
+      sx={{
+        width: "100%",
+        overflow: "hidden",
+        px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
+      }}
+    >
+<Grid
+        spacing={2}
+        sx={{
+          mt: 3,
+          mb: 3,
+          justifyContent: "center",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 4,
+          borderRadius: 4,
+          p: 2,
+          width: "100%",
+        }}
+      >
+        {/* กล่องเงินค่าจ้างรายวันพนักงาน */}
+        <Grid xs={12} sm={4}>
+          <Paper
+            sx={{
+              p: 2,
+              pt: 4,
+              pb: 4,
+              backgroundColor: theme.palette.background.chartBackground,
+              borderRadius: 4,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              เงินค่าจ้างรายวันพนักงาน
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              placeholder="กรอกเงินค่าจ้างรายวัน"
+              size="small"
+              InputProps={{ sx: { borderRadius: 2 } }}
+              sx={{ mb: 2 }}
+            />
+            <Button variant="contained" fullWidth>
+              เพิ่ม
+            </Button>
+          </Paper>
+        </Grid>
+
+        {/* กล่องค่าน้ำแข็ง */}
+        <Grid xs={12} sm={4}>
+          <Paper
+            sx={{
+              p: 2,
+              pt: 4,
+              pb: 4,
+              backgroundColor: theme.palette.background.chartBackground,
+              borderRadius: 4,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              ค่าน้ำแข็ง
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              placeholder="กรอกราคา"
+              size="small"
+              sx={{ mb: 2 }}
+              InputProps={{ sx: { borderRadius: 2 } }}
+            />
+            <Button variant="contained" fullWidth>
+              เพิ่ม
+            </Button>
+          </Paper>
+        </Grid>
+
+        {/* กล่องอื่นๆ */}
+        <Grid xs={12} sm={4}>
+          <Paper
+            sx={{
+              p: 2,
+              pt: 4,
+              pb: 4,
+              backgroundColor: theme.palette.background.chartBackground,
+              borderRadius: 4,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              อื่นๆ
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+              <TextField
+                fullWidth
+                placeholder="ระบุชื่อ"
+                size="small"
+                InputProps={{ sx: { borderRadius: 2 } }}
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <TextField
+                type="number"
+                placeholder="กรอกราคา"
+                size="small"
+                sx={{ flex: 1 }}
+                InputProps={{ sx: { borderRadius: 2 } }}
+              />
+              <Button variant="contained">เพิ่ม</Button>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar
           numSelected={selected.length}

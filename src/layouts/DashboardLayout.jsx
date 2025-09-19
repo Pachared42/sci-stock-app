@@ -122,14 +122,14 @@ const NAVIGATION = [
   },
   {
     segment: "sales-report",
-    title: "รายงานขาย",
-    icon: <ShoppingBasketIcon />,
+    title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
+    icon: <InsertPageBreakIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "stock-out",
-    title: "ตัดสต๊อก",
+    title: "ตัดสต๊อกสินค้า",
     icon: <InsertPageBreakIcon />,
     roles: ["admin", "superadmin"],
     group: "main",

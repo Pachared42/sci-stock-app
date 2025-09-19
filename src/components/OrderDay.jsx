@@ -488,7 +488,7 @@ export default function SalesTablesGroupByDate() {
   const formattedSelectedDate = selectedDate.format("YYYY-MM-DD");
 
   return (
-    <Box sx={{ width: "100%", px: { xs: 0, md: 1.5, lg: 1.5, xl: 20 } }}>
+    <Box sx={{ width: "100%", px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, }}>
       {/* Header บนสุด */}
       <Box
         sx={{
