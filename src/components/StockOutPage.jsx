@@ -18,9 +18,16 @@ import {
   TablePagination,
   Paper,
   Grid,
+  Snackbar,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+import { useAuth } from "../context/AuthProvider";
+import {
+  sellStockOut,
+  getProductByBarcode,
+  createDailyPayment,
+} from "../api/sellStockOut";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -42,16 +49,21 @@ function stableSort(array, comparator) {
   return stabilized.map((el) => el[0]);
 }
 
-const headCells = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+const headCellsStockOut = [
+  { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
   { id: "image_url", label: "รูปภาพ", width: "20%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "price", label: "ราคาขาย", width: "10%" },
-  { id: "cost", label: "ราคาต้นทุน", width: "10%" },
-  { id: "manage", label: "ตัดสต๊กอกสินค้า", width: "30%" },
+  { id: "price", label: "ราคาขาย", width: "15%" },
+  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "25%" },
 ];
 
-function EnhancedTableHead({ order, orderBy, onRequestSort }) {
+const headCellsDailyPayment = [
+  { id: "item_name", label: "รายการ", width: "60%" },
+  { id: "item_price", label: "ราคา", width: "20%" },
+  { id: "item_manage", label: "จัดการ", width: "20%" },
+];
+
+function EnhancedTableHeadStockOut({ order, orderBy, onRequestSort }) {
   const theme = useTheme();
   const createSortHandler = (property) => (event) =>
     onRequestSort(event, property);
@@ -59,14 +71,14 @@ function EnhancedTableHead({ order, orderBy, onRequestSort }) {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((headCell) => (
+        {headCellsStockOut.map((headCell) => (
           <TableCell
             key={headCell.id}
             align="left"
             sx={{
               width: headCell.width,
               whiteSpace: "nowrap",
-              px: 1,
+              px: 2,
               backgroundColor: `${theme.palette.background.chartBackground} !important`,
             }}
             sortDirection={orderBy === headCell.id ? order : false}
@@ -77,11 +89,6 @@ function EnhancedTableHead({ order, orderBy, onRequestSort }) {
               onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
             </TableSortLabel>
           </TableCell>
         ))}
@@ -89,11 +96,40 @@ function EnhancedTableHead({ order, orderBy, onRequestSort }) {
     </TableHead>
   );
 }
-EnhancedTableHead.propTypes = {
-  onRequestSort: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(["asc", "desc"]).isRequired,
-  orderBy: PropTypes.string.isRequired,
-};
+
+function EnhancedTableHeadDailyPayment({ order, orderBy, onRequestSort }) {
+  const theme = useTheme();
+  const createSortHandler = (property) => (event) =>
+    onRequestSort(event, property);
+
+  return (
+    <TableHead>
+      <TableRow>
+        {headCellsDailyPayment.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align="left"
+            sx={{
+              width: headCell.width,
+              whiteSpace: "nowrap",
+              px: 2,
+              backgroundColor: `${theme.palette.background.chartBackground} !important`,
+            }}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : "asc"}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
 
 function EnhancedTableToolbar({ title }) {
   return (
@@ -115,12 +151,11 @@ function EnhancedTableToolbar({ title }) {
     </Toolbar>
   );
 }
-EnhancedTableToolbar.propTypes = {
-  title: PropTypes.string.isRequired,
-};
 
 export default function StockOutPage() {
   const theme = useTheme();
+  const { user } = useAuth();
+  const token = user?.token;
   const [barcode, setBarcode] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -129,26 +164,204 @@ export default function StockOutPage() {
   const [orderBy, setOrderBy] = useState("product_name");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const handleStockOut = async () => {
-    try {
-      setError(null);
-      setResult(null);
-      const res = await fetch(`/api/stock-out`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ barcode }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "ตัดสต๊อกไม่สำเร็จ");
 
-      setResult(data);
-      setBarcode("");
-      setRows((prev) => [...prev, data]);
+  const [dailyPayment, setDailyPayment] = useState("");
+  const [icePrice, setIcePrice] = useState("");
+  const [otherName, setOtherName] = useState("");
+  const [otherPrice, setOtherPrice] = useState("");
+
+  const [stockRows, setStockRows] = useState(() => {
+    const stored = localStorage.getItem("stockOutItems");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const [dailyRows, setDailyRows] = useState(() => {
+    const stored = localStorage.getItem("dailyPayments");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleAddDailyRow = (name, price) => {
+    const numPrice = Number(price);
+    if (!name || isNaN(numPrice) || numPrice < 0) {
+      showSnackbar("กรุณากรอกชื่อและจำนวนเงินที่ถูกต้อง", "error");
+      return;
+    }
+
+    const newRow = {
+      id: Date.now(),
+      item_name: name,
+      item_price: numPrice,
+    };
+
+    setDailyRows((prev) => {
+      const updated = [...prev, newRow];
+      localStorage.setItem("dailyPayments", JSON.stringify(updated));
+      return updated;
+    });
+
+    showSnackbar(`เพิ่มรายการ "${name}" จำนวน ${numPrice} บาท แล้ว`, "success");
+
+    if (name === "เงินค่าจ้างรายวันพนักงาน") setDailyPayment("");
+    else if (name === "ค่าน้ำแข็ง") setIcePrice("");
+    else setOtherName("");
+    setOtherPrice("");
+  };
+
+  const handleConfirm = async (id) => {
+    if (!token) return showSnackbar("กรุณาเข้าสู่ระบบ", "error");
+
+    const row = dailyRows.find((r) => r.id === id);
+    if (!row) return showSnackbar("ไม่พบข้อมูลรายการ", "error");
+
+    const amount = Number(row.item_price);
+    if (isNaN(amount) || amount <= 0)
+      return showSnackbar("จำนวนเงินไม่ถูกต้อง", "error");
+
+    try {
+      const data = await createDailyPayment(token, {
+        item_name: row.item_name,
+        amount: amount,
+        payment_date: new Date().toISOString().split("T")[0],
+      });
+
+      console.log("ยืนยันสำเร็จ:", data);
+
+      setDailyRows((prev) => {
+        const updated = prev.filter((r) => r.id !== id);
+        localStorage.setItem("dailyPayments", JSON.stringify(updated));
+        return updated;
+      });
+
+      showSnackbar(data.message || "ยืนยันรายการสำเร็จ!", "success");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      showSnackbar(err.message, "error");
+    }
+  };
+
+  const handleDeleteDailyRow = (id) => {
+    setDailyRows((prev) => {
+      const updated = prev.filter((row) => row.id !== id);
+      localStorage.setItem("dailyPayments", JSON.stringify(updated));
+      return updated;
+    });
+
+    showSnackbar("ลบรายการเรียบร้อยแล้ว", "info");
+  };
+
+  const handleStockOut = async () => {
+    if (!barcode) {
+      showSnackbar("กรุณากรอก barcode", "warning");
+      return;
+    }
+    if (!token) {
+      showSnackbar("กรุณาเข้าสู่ระบบ", "warning");
+      return;
+    }
+
+    try {
+      const product = await getProductByBarcode(token, barcode);
+      console.log(product.product_name);
+
+      setStockRows((prev) => {
+        const updated = [
+          ...prev,
+          {
+            id: product.id,
+            product_name: product.product_name,
+            barcode: product.barcode,
+            price: product.price,
+            image_url: product.image_url,
+            quantity: 0,
+          },
+        ];
+        localStorage.setItem("stockOutItems", JSON.stringify(updated));
+        return updated;
+      });
+
+      showSnackbar(
+        `เพิ่มสินค้า ${product.product_name} เรียบร้อยแล้ว`,
+        "success"
+      );
+      setBarcode("");
+    } catch (err) {
+      console.error(err);
+      showSnackbar(err.message, "error");
+    }
+  };
+
+  const handleQuantityChange = (id, value) => {
+    setStockRows((prev) => {
+      const updated = prev.map((row) =>
+        row.id === id ? { ...row, quantity: value } : row
+      );
+      localStorage.setItem("stockOutItems", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleRemoveRow = (id) => {
+    setStockRows((prev) => {
+      const updated = prev.filter((row) => row.id !== id);
+      localStorage.setItem("stockOutItems", JSON.stringify(updated));
+      return updated;
+    });
+
+    showSnackbar("ลบรายการเรียบร้อยแล้ว", "info");
+  };
+
+  const handleDeductStock = async (id) => {
+    if (!token) {
+      showSnackbar("กรุณาเข้าสู่ระบบ", "warning");
+      return;
+    }
+
+    const product = stockRows.find((row) => row.id === id);
+    if (!product) {
+      showSnackbar("ไม่พบสินค้าในรายการ", "error");
+      return;
+    }
+
+    if (!product.quantity || product.quantity <= 0) {
+      showSnackbar("กรุณาใส่จำนวนที่จะตัดสต๊อก", "warning");
+      return;
+    }
+
+    try {
+      const result = await sellStockOut(token, {
+        barcode: product.barcode,
+        quantity: product.quantity,
+      });
+
+      console.log("ตัดสต๊อกสำเร็จจาก API:", result);
+
+      setStockRows((prev) => {
+        const updated = prev.filter((row) => row.id !== id);
+
+        localStorage.setItem("stockOutItems", JSON.stringify(updated));
+        console.log("อัปเดต LocalStorage:", updated);
+
+        return updated;
+      });
+
+      showSnackbar(result.message || "ตัดสต๊อกสำเร็จ", "success");
+    } catch (err) {
+      console.error("Error จาก API:", err);
+      showSnackbar(err.message || "เกิดข้อผิดพลาด", "error");
     }
   };
 
@@ -163,13 +376,22 @@ export default function StockOutPage() {
     setPage(0);
   };
 
-  const visibleRows = useMemo(
+  const visibleDailyRows = useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
+      stableSort(dailyRows, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [rows, order, orderBy, page, rowsPerPage]
+    [dailyRows, order, orderBy, page, rowsPerPage]
+  );
+
+  const visibleStockRows = useMemo(
+    () =>
+      stableSort(stockRows, getComparator(order, orderBy)).slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      ),
+    [stockRows, order, orderBy, page, rowsPerPage]
   );
 
   const emptyRows =
@@ -187,13 +409,11 @@ export default function StockOutPage() {
         spacing={2}
         sx={{
           mt: 3,
-          mb: 3,
           justifyContent: "center",
           display: "flex",
           flexWrap: "wrap",
-          gap: 4,
+          gap: 7,
           borderRadius: 4,
-          p: 2,
           width: "100%",
         }}
       >
@@ -201,7 +421,7 @@ export default function StockOutPage() {
         <Grid xs={12} sm={4}>
           <Paper
             sx={{
-              p: 2,
+              p: 6.3,
               pt: 4,
               pb: 4,
               backgroundColor: theme.palette.background.chartBackground,
@@ -213,13 +433,36 @@ export default function StockOutPage() {
             </Typography>
             <TextField
               fullWidth
-              type="number"
               placeholder="กรอกเงินค่าจ้างรายวัน"
               size="small"
+              value={dailyPayment}
+              onChange={(e) => setDailyPayment(e.target.value)}
+              onKeyDown={(e) => {
+                if (["e", "E", "+", "-"].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               InputProps={{ sx: { borderRadius: 2 } }}
+              inputProps={{
+                inputMode: "numeric",
+                pattern: "[0-9]*",
+                min: 0,
+              }}
               sx={{ mb: 2 }}
             />
-            <Button variant="contained" fullWidth>
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={
+                !dailyPayment ||
+                isNaN(Number(dailyPayment)) ||
+                Number(dailyPayment) <= 0
+              }
+              onClick={() => {
+                handleAddDailyRow("ค่าจ้างรายวัน", dailyPayment);
+                setDailyPayment("");
+              }}
+            >
               เพิ่ม
             </Button>
           </Paper>
@@ -229,7 +472,7 @@ export default function StockOutPage() {
         <Grid xs={12} sm={4}>
           <Paper
             sx={{
-              p: 2,
+              p: 6.3,
               pt: 4,
               pb: 4,
               backgroundColor: theme.palette.background.chartBackground,
@@ -241,13 +484,34 @@ export default function StockOutPage() {
             </Typography>
             <TextField
               fullWidth
-              type="number"
-              placeholder="กรอกราคา"
+              placeholder="กรอกค่าน้ำแข็ง"
               size="small"
-              sx={{ mb: 2 }}
+              value={icePrice}
+              onChange={(e) => setIcePrice(e.target.value)}
+              onKeyDown={(e) => {
+                if (["e", "E", "+", "-"].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               InputProps={{ sx: { borderRadius: 2 } }}
+              inputProps={{
+                inputMode: "numeric",
+                pattern: "[0-9]*",
+                min: 0,
+              }}
+              sx={{ mb: 2 }}
             />
-            <Button variant="contained" fullWidth>
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={
+                !icePrice || isNaN(Number(icePrice)) || Number(icePrice) <= 0
+              }
+              onClick={() => {
+                handleAddDailyRow("ค่าน้ำแข็ง", icePrice);
+                setIcePrice("");
+              }}
+            >
               เพิ่ม
             </Button>
           </Paper>
@@ -257,7 +521,7 @@ export default function StockOutPage() {
         <Grid xs={12} sm={4}>
           <Paper
             sx={{
-              p: 2,
+              p: 6.3,
               pt: 4,
               pb: 4,
               backgroundColor: theme.palette.background.chartBackground,
@@ -267,73 +531,60 @@ export default function StockOutPage() {
             <Typography variant="h6" gutterBottom>
               อื่นๆ
             </Typography>
-            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-              <TextField
-                fullWidth
-                placeholder="ระบุชื่อ"
-                size="small"
-                InputProps={{ sx: { borderRadius: 2 } }}
-              />
-            </Box>
+
+            {/* ช่องกรอกชื่อ */}
+            <TextField
+              fullWidth
+              placeholder="ระบุชื่อรายการ"
+              size="small"
+              value={otherName}
+              onChange={(e) => setOtherName(e.target.value)}
+              sx={{ mb: 2 }}
+              InputProps={{ sx: { borderRadius: 2 } }}
+            />
+
+            {/* ช่องกรอกราคาพร้อมปุ่ม เพิ่ม */}
             <Box sx={{ display: "flex", gap: 1 }}>
               <TextField
-                type="number"
+                fullWidth
                 placeholder="กรอกราคา"
                 size="small"
-                sx={{ flex: 1 }}
+                value={otherPrice}
+                onChange={(e) => setOtherPrice(e.target.value)}
+                onKeyDown={(e) => {
+                  if (["e", "E", "+", "-"].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 InputProps={{ sx: { borderRadius: 2 } }}
+                inputProps={{
+                  inputMode: "numeric",
+                  pattern: "[0-9]*",
+                  min: 0,
+                }}
               />
-              <Button variant="contained">เพิ่ม</Button>
+              <Button
+                variant="contained"
+                disabled={
+                  !otherName ||
+                  !otherPrice ||
+                  isNaN(Number(otherPrice)) ||
+                  Number(otherPrice) <= 0
+                }
+                onClick={() => {
+                  handleAddDailyRow(otherName, otherPrice);
+                  setOtherName("");
+                  setOtherPrice("");
+                }}
+              >
+                เพิ่ม
+              </Button>
             </Box>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* barcode input */}
-      <Typography variant="h5" gutterBottom>
-        ตัดสต๊อกสินค้า
-      </Typography>
-      <Stack spacing={2}>
-        <Box sx={{ position: "relative", width: "100%" }}>
-          <TextField
-            label="กรอกบาร์โค้ด"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            fullWidth
-            InputProps={{ sx: { borderRadius: 4 } }}
-          />
-
-          <Button
-            variant="contained"
-            onClick={handleStockOut}
-            disabled={!barcode}
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: 10,
-              transform: "translateY(-50%)",
-              zIndex: 10,
-              whiteSpace: "nowrap",
-            }}
-          >
-            ค้นหาสินค้า
-          </Button>
-        </Box>
-      </Stack>
-
-      {result && (
-        <Alert severity="success" sx={{ mt: 3 }}>
-          ตัดสต๊อกเรียบร้อย: {result.product_name} จำนวน {result.quantity}
-        </Alert>
-      )}
-      {error && (
-        <Alert severity="error" sx={{ mt: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {/* table */}
-      <Paper sx={{ width: "100%", mb: 2, mt: 4 }}>
+      <Paper sx={{ width: "100%", mb: 10 }}>
         <Box
           sx={{
             display: "flex",
@@ -342,14 +593,15 @@ export default function StockOutPage() {
           }}
         >
           <EnhancedTableToolbar
-            title="รายการสินค้าที่ตัดสต๊อก"
+            title="รายการจ่ายรายวัน"
             sx={{ textAlign: "left" }}
           />
 
           <Typography variant="caption" sx={{ textAlign: "right", pr: 2 }}>
-            แสดง {rows.length} รายการ
+            แสดง {dailyRows.length} รายการ
           </Typography>
         </Box>
+
         <TableContainer
           sx={{
             borderTopLeftRadius: 20,
@@ -373,11 +625,12 @@ export default function StockOutPage() {
             }}
             stickyHeader
           >
-            <EnhancedTableHead
+            <EnhancedTableHeadDailyPayment
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
             />
+
             <TableBody
               sx={{
                 "& .MuiTableCell-root": {
@@ -385,64 +638,44 @@ export default function StockOutPage() {
                 },
               }}
             >
-              {rows.length === 0 ? (
+              {dailyRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    ยังไม่มีรายการสินค้า
+                  <TableCell colSpan={3} align="center">
+                    ยังไม่มีรายการ
                   </TableCell>
                 </TableRow>
               ) : (
-                visibleRows.map((row, index) => (
+                visibleDailyRows.map((row, index) => (
                   <TableRow hover key={row.id ?? row.barcode ?? index}>
-                    <TableCell
-                      sx={{ width: "20%", px: 1 }}
-                      title={row.product_name}
-                    >
-                      {row.product_name}
-                    </TableCell>
-                    <TableCell sx={{ width: "20%", px: 1 }}>
-                      {row.image_url ? (
-                        <img
-                          src={row.image_url}
-                          alt={row.product_name}
-                          style={{
-                            width: 75,
-                            height: 75,
-                            objectFit: "contain",
-                          }}
-                        />
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell sx={{ width: "15%", px: 1 }}>
-                      {row.barcode}
-                    </TableCell>
-                    <TableCell sx={{ width: "10%", px: 1 }}>
-                      {row.price} บาท
-                    </TableCell>
-                    <TableCell sx={{ width: "10%", px: 1 }}>
-                      {row.cost} บาท
-                    </TableCell>
-                    <TableCell sx={{ width: "30%", px: 1 }}>
-                      <TextField
-                        type="number"
+                    <TableCell title={row.item_name}>{row.item_name}</TableCell>
+                    <TableCell>{row.item_price} บาท</TableCell>
+
+                    {/* ปุ่มจัดการ */}
+                    <TableCell sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="success"
                         size="small"
-                        value={row.quantity || ""} // กำหนดค่าเริ่มต้น
-                        onClick={(e) => e.stopPropagation()} // กันไม่ให้ไป trigger row click
-                        onChange={(e) =>
-                          handleQuantityChange(row.id, e.target.value)
-                        } // ฟังก์ชันอัปเดตจำนวน
-                        sx={{ width: "100px" }} // ปรับขนาดได้ตามต้องการ
-                        inputProps={{ min: 0 }} // กันไม่ให้กรอกค่าติดลบ
-                      />
+                        onClick={() => handleConfirm(row.id)}
+                      >
+                        ยืนยัน
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteDailyRow(row.id)}
+                      >
+                        ลบ
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
               )}
+
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={7} />
+                  <TableCell colSpan={3} />
                 </TableRow>
               )}
             </TableBody>
@@ -486,6 +719,217 @@ export default function StockOutPage() {
           />
         </Box>
       </Paper>
+
+      <Stack spacing={2}>
+        <Box sx={{ position: "relative", width: "100%" }}>
+          <TextField
+            label="กรอกบาร์โค้ด"
+            value={barcode}
+            onChange={(e) => setBarcode(e.target.value)}
+            fullWidth
+            InputProps={{ sx: { borderRadius: 4 } }}
+          />
+
+          <Button
+            variant="contained"
+            onClick={handleStockOut}
+            disabled={!barcode}
+            sx={{
+              position: "absolute",
+              top: "50%",
+              right: 10,
+              transform: "translateY(-50%)",
+              zIndex: 10,
+              whiteSpace: "nowrap",
+            }}
+          >
+            ค้นหาสินค้า
+          </Button>
+        </Box>
+      </Stack>
+
+      {/* table */}
+      <Paper sx={{ width: "100%", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <EnhancedTableToolbar
+            title="รายการสินค้าที่ตัดสต๊อก"
+            sx={{ textAlign: "left" }}
+          />
+
+          <Typography variant="caption" sx={{ textAlign: "right", pr: 2 }}>
+            แสดง {stockRows.length} รายการ
+          </Typography>
+        </Box>
+        <TableContainer
+          sx={{
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+            overflowX: "auto",
+            width: "100%",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "thin",
+            "&::-webkit-scrollbar": {
+              height: 6,
+            },
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Table
+            sx={{
+              minWidth: { xs: "300%", sm: 850 },
+              tableLayout: "fixed",
+            }}
+            stickyHeader
+          >
+            <EnhancedTableHeadStockOut
+              order={order}
+              orderBy={orderBy}
+              onRequestSort={handleRequestSort}
+            />
+
+            <TableBody
+              sx={{
+                "& .MuiTableCell-root": {
+                  borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+                },
+              }}
+            >
+              {stockRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    ยังไม่มีรายการสินค้า
+                  </TableCell>
+                </TableRow>
+              ) : (
+                visibleStockRows.map((row, index) => (
+                  <TableRow hover key={row.id ?? row.barcode ?? index}>
+                    <TableCell>{row.product_name}</TableCell>
+                    <TableCell>
+                      {row.image_url ? (
+                        <img
+                          src={row.image_url}
+                          style={{ width: 75, height: 75, objectFit: "cover" }}
+                          alt={row.product_name}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
+                    <TableCell>{row.barcode}</TableCell>
+                    <TableCell>{row.price} บาท</TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <TextField
+                          type="number"
+                          size="small"
+                          value={row.quantity || ""}
+                          onChange={(e) =>
+                            handleQuantityChange(row.id, Number(e.target.value))
+                          }
+                          inputProps={{ min: 0 }}
+                          sx={{
+                            width: "80px",
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              padding: "2px 6px",
+                            },
+                            "& .MuiOutlinedInput-input": {
+                              padding: "2.5px 6px",
+                            },
+                          }}
+                        />
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          onClick={() => handleDeductStock(row.id)}
+                        >
+                          ตัดสต๊อก
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={() => handleRemoveRow(row.id)}
+                        >
+                          ลบ
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            backgroundColor: theme.palette.background.chartBackground,
+            py: 3,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+          }}
+        >
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="แสดงต่อหน้า:"
+            sx={{
+              px: { xs: 1, sm: 2 },
+              ".MuiTablePagination-spacer": { display: "none" },
+              ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                {
+                  fontSize: { xs: "0.8rem", sm: "1rem" },
+                  whiteSpace: "nowrap",
+                },
+              backgroundColor: "transparent",
+              zIndex: 1100,
+              minWidth: 300,
+            }}
+          />
+        </Box>
+      </Paper>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -63,7 +63,7 @@ function EnhancedTableHead(props) {
             sx={{
               width: headCell.width,
               whiteSpace: "nowrap",
-              px: 1,
+              px: 2,
               backgroundColor: `${theme.palette.background.chartBackground} !important`,
             }}
             sortDirection={orderBy === headCell.id ? order : false}
