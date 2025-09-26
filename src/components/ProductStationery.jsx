@@ -494,7 +494,7 @@ export default function EnhancedTable() {
 
   // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 5;
+  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
 
   // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =

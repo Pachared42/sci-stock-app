@@ -48,7 +48,3 @@ export async function deleteProduct(category, barcode) {
     throw error;
   }
 }
-
-
-
-

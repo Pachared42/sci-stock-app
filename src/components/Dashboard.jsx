@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -24,90 +24,152 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import {
+  fetchTotalProducts,
+  fetchLowStockProducts,
+  fetchOutOfStockProducts,
+} from "../api/dashboardStatsApi";
+
 const Dashboard = () => {
   const theme = useTheme();
+  const token = localStorage.getItem("token");
 
-  const statCards = useMemo(() => [
-    {
-      label: "ออเดอร์วันนี้",
-      value: "0",
-      icon: <ShoppingCartIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.redDark,
-    },
-    {
-      label: "รายได้ต่อวัน",
-      value: "0",
-      icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.purpleDark,
-    },
-    {
-      label: "รายได้ต่อเดือน",
-      value: "0",
-      icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.goldDark,
-    },
-    {
-      label: "รายได้ต่อปี",
-      value: "0",
-      icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.orangeDark,
-    },
-    {
-      label: "สินค้าในสต็อก",
-      value: "0",
-      icon: <InventoryIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.tealDark,
-    },
-    {
-      label: "สินค้ากำลังจะหมด",
-      value: "0",
-      icon: <WarningAmberIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.blueDark,
-    },
-    {
-      label: "สินค้าหมดสต็อก",
-      value: "0",
-      icon: <RemoveShoppingCartIcon sx={{ fontSize: 40 }} />,
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.background.deepPinkDark,
-    },
-  ], [theme.palette, theme.palette.background]);
-  
-  const salesData = useMemo(() => [
-    { month: "ม.ค.", sales: 0 },
-    { month: "ก.พ.", sales: 50 },
-    { month: "มี.ค.", sales: 0 },
-    { month: "เม.ย.", sales: 250 },
-    { month: "พ.ค.", sales: 300 },
-    { month: "มิ.ย.", sales: 222 },
-    { month: "ก.ค.", sales: 350 },
-    { month: "ส.ค.", sales: 90 },
-    { month: "ก.ย.", sales: 320 },
-    { month: "ต.ค.", sales: 290 },
-    { month: "พ.ย.", sales: 310 },
-    { month: "ธ.ค.", sales: 370 },
-  ], []);
-  
-  const sales = useMemo(() => [
-    { month: "ม.ค.", inbound: 50, outbound: 30 },
-    { month: "ก.พ.", inbound: 70, outbound: 45 },
-    { month: "มี.ค.", inbound: 60, outbound: 40 },
-    { month: "เม.ย.", inbound: 90, outbound: 65 },
-    { month: "พ.ค.", inbound: 80, outbound: 70 },
-    { month: "มิ.ย.", inbound: 95, outbound: 85 },
-    { month: "ก.ค.", inbound: 70, outbound: 60 },
-    { month: "ส.ค.", inbound: 85, outbound: 75 },
-    { month: "ก.ย.", inbound: 90, outbound: 80 },
-    { month: "ต.ค.", inbound: 75, outbound: 70 },
-    { month: "พ.ย.", inbound: 80, outbound: 75 },
-    { month: "ธ.ค.", inbound: 10, outbound: 90 },
-  ], []);  
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [outOfStockCount, setOutOfStockCount] = useState(0);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // จำนวนสินค้าทั้งหมด
+        const totalData = await fetchTotalProducts(token);
+        setTotalProducts(totalData?.["จำนวนสินค้าทั้งหมด"] ?? 0);
+
+        // สินค้าใกล้หมดสต๊อก
+        const lowData = await fetchLowStockProducts(token);
+        const lowStockObj = lowData?.["สินค้าใกล้หมดสต๊อก"] ?? {};
+        let lowCount = 0;
+        Object.values(lowStockObj).forEach((arr) => {
+          if (Array.isArray(arr)) {
+            lowCount += arr.length;
+          }
+        });
+        setLowStockCount(lowCount);
+
+        // สินค้าหมดสต๊อก
+        const outData = await fetchOutOfStockProducts(token);
+        const outStockObj = outData?.["สินค้าหมดสต๊อก"] ?? {};
+        let outCount = 0;
+        Object.values(outStockObj).forEach((arr) => {
+          if (Array.isArray(arr)) {
+            outCount += arr.length;
+          }
+        });
+        setOutOfStockCount(outCount);
+      } catch (err) {
+        console.error("❌ โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
+      }
+    };
+
+    if (token) loadDashboardData();
+  }, [token]);
+
+  const statCards = useMemo(
+    () => [
+      // {
+      //   label: "ออเดอร์วันนี้",
+      //   value: "0",
+      //   icon: <ShoppingCartIcon sx={{ fontSize: 40 }} />,
+      //   color: theme.palette.primary.contrastText,
+      //   background: theme.palette.background.redDark,
+      // },
+      // {
+      //   label: "รายได้ต่อวัน",
+      //   value: "0",
+      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
+      //   color: theme.palette.primary.contrastText,
+      //   background: theme.palette.background.purpleDark,
+      // },
+      // {
+      //   label: "รายได้ต่อเดือน",
+      //   value: "0",
+      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
+      //   color: theme.palette.primary.contrastText,
+      //   background: theme.palette.background.goldDark,
+      // },
+      // {
+      //   label: "รายได้ต่อปี",
+      //   value: "0",
+      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
+      //   color: theme.palette.primary.contrastText,
+      //   background: theme.palette.background.orangeDark,
+      // },
+      {
+        label: "สินค้าในสต็อก",
+        value: totalProducts,
+        icon: <InventoryIcon sx={{ fontSize: 40 }} />,
+        color: theme.palette.primary.contrastText,
+        background: theme.palette.background.tealDark,
+      },
+      {
+        label: "สินค้ากำลังจะหมด",
+        value: lowStockCount,
+        icon: <WarningAmberIcon sx={{ fontSize: 40 }} />,
+        color: theme.palette.primary.contrastText,
+        background: theme.palette.background.blueDark,
+      },
+      {
+        label: "สินค้าหมดสต็อก",
+        value: outOfStockCount,
+        icon: <RemoveShoppingCartIcon sx={{ fontSize: 40 }} />,
+        color: theme.palette.primary.contrastText,
+        background: theme.palette.background.deepPinkDark,
+      },
+    ],
+    [
+      theme.palette,
+      theme.palette.background,
+      totalProducts,
+      lowStockCount,
+      outOfStockCount,
+    ]
+  );
+
+  const salesData = useMemo(
+    () => [
+      { month: "ม.ค.", sales: 0 },
+      { month: "ก.พ.", sales: 50 },
+      { month: "มี.ค.", sales: 0 },
+      { month: "เม.ย.", sales: 250 },
+      { month: "พ.ค.", sales: 300 },
+      { month: "มิ.ย.", sales: 222 },
+      { month: "ก.ค.", sales: 350 },
+      { month: "ส.ค.", sales: 90 },
+      { month: "ก.ย.", sales: 320 },
+      { month: "ต.ค.", sales: 290 },
+      { month: "พ.ย.", sales: 310 },
+      { month: "ธ.ค.", sales: 370 },
+    ],
+    []
+  );
+
+  const sales = useMemo(
+    () => [
+      { month: "ม.ค.", inbound: 50, outbound: 30 },
+      { month: "ก.พ.", inbound: 70, outbound: 45 },
+      { month: "มี.ค.", inbound: 60, outbound: 40 },
+      { month: "เม.ย.", inbound: 90, outbound: 65 },
+      { month: "พ.ค.", inbound: 80, outbound: 70 },
+      { month: "มิ.ย.", inbound: 95, outbound: 85 },
+      { month: "ก.ค.", inbound: 70, outbound: 60 },
+      { month: "ส.ค.", inbound: 85, outbound: 75 },
+      { month: "ก.ย.", inbound: 90, outbound: 80 },
+      { month: "ต.ค.", inbound: 75, outbound: 70 },
+      { month: "พ.ย.", inbound: 80, outbound: 75 },
+      { month: "ธ.ค.", inbound: 10, outbound: 90 },
+    ],
+    []
+  );
 
   return (
     <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
@@ -128,11 +190,7 @@ const Dashboard = () => {
             <Card
               sx={{
                 borderRadius: 5,
-                aspectRatio: {
-                  xs: "2",
-                  sm: "1.5",
-                  md: "1",
-                },
+                aspectRatio: { xs: "2", sm: "1.5", md: "1" },
                 backgroundColor: card.background,
                 position: "relative",
                 overflow: "hidden",
@@ -205,7 +263,7 @@ const Dashboard = () => {
         ))}
       </Grid>
 
-      <Box mt={2}>
+      {/* <Box mt={2}>
         <Card
           sx={{
             borderRadius: 5,
@@ -320,9 +378,9 @@ const Dashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </Card>
-      </Box>
+      </Box> */}
     </Box>
   );
 };
 
-export default React.memo(Dashboard);
+export default Dashboard;

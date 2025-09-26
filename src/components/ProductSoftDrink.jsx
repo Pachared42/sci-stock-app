@@ -32,7 +32,6 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
-
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
@@ -200,7 +199,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function EnhancedTable() {
-  // ตัวแปร state ต่าง ๆ
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
@@ -208,8 +206,6 @@ export default function EnhancedTable() {
   const [page, setPage] = useState(0);
   const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // สถานะ Dialog ต่าง ๆ
   const [editRow, setEditRow] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
@@ -223,29 +219,20 @@ export default function EnhancedTable() {
     stockQty: "",
     stockMin: "",
   });
-
-  // ตัวแปรสำหรับการกรองและค้นหา
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const filterOpen = Boolean(filterAnchorEl);
   const [filter, setFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
-
-  // Snackbar สำหรับแจ้งเตือนสถานะ
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-
-  // ตัวแปรสถานะอื่น ๆ
   const [reload, setReload] = useState(false);
-
-  // Hooks ต่าง ๆ
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // --- โหลดข้อมูลสินค้า ---
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -270,7 +257,6 @@ export default function EnhancedTable() {
     loadData();
   }, [reload]);
 
-  // --- ฟังก์ชันจัดการการเลือกทั้งหมด ---
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelected = rows.map((n) => n.id);
@@ -280,7 +266,6 @@ export default function EnhancedTable() {
     setSelected([]);
   };
 
-  // --- ฟังก์ชันจัดการเลือกแถวเดียว ---
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -301,25 +286,21 @@ export default function EnhancedTable() {
     setSelected(newSelected);
   };
 
-  // --- ฟังก์ชันจัดการการเรียงลำดับ ---
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  // --- ฟังก์ชันจัดการเปลี่ยนหน้า ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  // --- ฟังก์ชันจัดการเปลี่ยนจำนวนแถวต่อหน้า ---
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  // --- ฟังก์ชันจัดการ Dialog แก้ไข ---
   const handleEdit = (row) => {
     setEditRow(row);
     setEditValues(row);
@@ -369,7 +350,6 @@ export default function EnhancedTable() {
     setEditRow(null);
   };
 
-  // --- ฟังก์ชันจัดการลบสินค้า ---
   const handleDeleteConfirm = async () => {
     try {
       await deleteProduct("soft_drink", deleteRow.barcode);
@@ -397,7 +377,6 @@ export default function EnhancedTable() {
     }
   };
 
-  // --- ฟังก์ชันเพิ่มสินค้าใหม่ ---
   const handleAddProduct = async () => {
     const productPayload = {
       product_name: newProduct.name.trim(),
@@ -466,7 +445,6 @@ export default function EnhancedTable() {
     }
   };
 
-  // --- ฟังก์ชันกรองและค้นหาข้อมูล ---
   const filteredRows = useMemo(() => {
     const search = searchText.trim().toLowerCase();
 
@@ -492,15 +470,10 @@ export default function EnhancedTable() {
     });
   }, [rows, filter, searchText]);
 
-  // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 5;
-
-  // --- การคำนวณแถวว่างสำหรับ pagination ---
+  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  // --- แถวที่แสดงตามหน้าปัจจุบัน (คำนวณ sort + pagination) ---
   const visibleRows = useMemo(
     () =>
       [...rows]

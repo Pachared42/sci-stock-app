@@ -15,5 +15,3 @@ export async function getProfile() {
   const res = await api.get('/auth/profile');
   return res.data;
 }
-
-

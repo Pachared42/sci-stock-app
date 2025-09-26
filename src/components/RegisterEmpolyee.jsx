@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { registerAdmin } from "../api/registerAdmin";
+import { registerAdmin } from "../api/registerAdminApi";
 
 export default function RegisterAdmin() {
   const theme = useTheme();

@@ -27,7 +27,7 @@ import {
   sellStockOut,
   getProductByBarcode,
   createDailyPayment,
-} from "../api/sellStockOut";
+} from "../api/sellStockOutApi";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;

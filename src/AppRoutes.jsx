@@ -19,6 +19,8 @@ import UploadProductsXlsx from "./components/UploadProductsXlsx";
 import StockOutPage from "./components/StockOutPage";
 import ProductAll from "./components/ProductAll"
 import ProfileSettings from "./components/ProfileSettings";
+import EmpolyeeData from "./components/EmpolyeeData";
+import AdminData from "./components/AdminData";
 
 function AppRoutes() {
   useRouteProgress();
@@ -50,6 +52,7 @@ function AppRoutes() {
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
+        <Route path="empolyee-data" element={<EmpolyeeData />} />
         {/* เพิ่ม route ลูกอื่นๆ ได้ตามต้องการ */}
       </Route>
 
@@ -66,12 +69,19 @@ function AppRoutes() {
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="sales-report" element={<ProductsFromSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
+        <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="register-empolyee" element={<RegisterEmpolyee />} />
+        <Route path="all-products" element={<ProductAll />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />
         <Route path="drink-category" element={<SoftDrink />} />
         <Route path="snack-category" element={<Snack />} />
         <Route path="stationery-category" element={<Stationery />} />
+        <Route path="upload-products" element={<UploadProductsXlsx />} />
+        <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="profile-settings" element={<ProfileSettings />} />
+        <Route path="empolyee-data" element={<EmpolyeeData />} />
+        <Route path="admin-data" element={<AdminData />} />
         {/* เพิ่ม route ลูกอื่นๆ */}
       </Route>
 

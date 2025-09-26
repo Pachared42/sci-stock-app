@@ -1,11 +1,6 @@
-// =================== React & Hooks ===================
-import React, { useState, useEffect, useMemo, } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-
-// =================== React Router ===================
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-
-// =================== MUI Core ===================
 import {
   Box,
   Typography,
@@ -26,80 +21,60 @@ import {
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { keyframes } from "@mui/system";
-
-// =================== MUI Icons ===================
-
-// ---- เมนูนำทาง (Drawer / Navigation) ----
 import {
   ExpandLess,
   ExpandMore,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
-
-// ---- เปลี่ยนธีม (โหมดสว่าง / มืด) ----
 import {
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
 } from "@mui/icons-material";
-
-// ---- ผู้ใช้ / ผู้ดูแลระบบ ----
 import {
   AccountCircle as AccountCircleIcon,
   ManageAccounts as ManageAccountsIcon,
   AssignmentInd as AssignmentIndIcon,
   Settings as SettingsIcon,
-  RecentActors as RecentActorsIcon, 
+  RecentActors as RecentActorsIcon,
 } from "@mui/icons-material";
-
-// ---- สินค้าและคลังสินค้า ----
 import {
   ShoppingBasket as ShoppingBasketIcon,
   InsertPageBreak as InsertPageBreakIcon,
   UploadFileRounded as UploadFileRoundedIcon,
   Warehouse as WarehouseIcon,
 } from "@mui/icons-material";
-
-// ---- หมวดอาหารและเครื่องดื่ม ----
 import {
   LocalDrink as LocalDrinkIcon,
   RamenDining as RamenDiningIcon,
   LunchDining as LunchDiningIcon,
+  AcUnit as AcUnitIcon,
+  CookieRounded as CookieRoundedIcon,
 } from "@mui/icons-material";
-
-// ---- แผนภูมิ / รายงาน / เอกสาร ----
 import {
   AreaChart as AreaChartIcon,
   Assignment as AssignmentIcon,
 } from "@mui/icons-material";
-
-// ---- เบ็ดเตล็ด ----
 import {
   CalendarMonth as CalendarMonthIcon,
   PersonAdd as PersonAddIcon,
   DesignServices as DesignServicesIcon,
 } from "@mui/icons-material";
-
-// =================== ฟอนต์ ===================
 import "@fontsource/noto-sans-thai";
 import "@fontsource/noto-sans";
-
-// =================== Context / Theme / Utils ===================
 import { useAuth } from "../context/AuthProvider";
 import { groups } from "../context/groups";
 import { getAppTheme } from "../theme/theme";
-
-// =================== Components ===================
 import LogoBox from "../hooks/LogoBox";
 import ProfilePanel from "../components/ProfilePanel";
 
 const spinningIcon = (
   <SettingsIcon
     sx={{
-      animation: 'spin 6s linear infinite',
-      '@keyframes spin': {
-        '0%': { transform: 'rotate(0deg)' },
-        '100%': { transform: 'rotate(360deg)' },
+      animation: "spin 6s linear infinite",
+      "@keyframes spin": {
+        "0%": { transform: "rotate(0deg)" },
+        "100%": { transform: "rotate(360deg)" },
       },
     }}
   />
@@ -141,35 +116,41 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
+  // {
+  //   segment: "user-management",
+  //   title: "จัดการยูสเซอร์",
+  //   icon: <ManageAccountsIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "management",
+  //   children: [],
+  // },
   {
-    segment: "user-management",
-    title: "จัดการพนักงาน",
-    icon: <ManageAccountsIcon />,
+    segment: "staff-management",
+    title: "อนุมัติพนักงาน",
+    icon: <AssignmentIndIcon />,
     roles: ["admin", "superadmin"],
-    group: "upload",
-    children: [
-      {
-        segment: "staff-management",
-        title: "อนุมัติพนักงาน",
-        icon: <AssignmentIndIcon />,
-        roles: ["admin", "superadmin"],
-        group: "management",
-      },
-      {
-        segment: "register-empolyee",
-        title: "เพิ่มพนักงาน",
-        icon: <PersonAddIcon />,
-        roles: ["admin"],
-        group: "management",
-      },
-      {
-        segment: "empolyee-data",
-        title: "ข้อมูลพนักงาน",
-        icon: <RecentActorsIcon />,
-        roles: ["admin"],
-        group: "management",
-      },
-    ],
+    group: "management",
+  },
+  {
+    segment: "register-empolyee",
+    title: "เพิ่มพนักงาน",
+    icon: <PersonAddIcon />,
+    roles: ["admin", "superadmin"],
+    group: "management",
+  },
+  {
+    segment: "empolyee-data",
+    title: "ข้อมูลพนักงาน",
+    icon: <RecentActorsIcon />,
+    roles: ["admin", "superadmin"],
+    group: "management",
+  },
+  {
+    segment: "admin-data",
+    title: "ข้อมูลแอดมิน",
+    icon: <RecentActorsIcon />,
+    roles: ["superadmin"],
+    group: "management",
   },
   {
     segment: "upload-products",
@@ -310,11 +291,11 @@ export default function DashboardLayout() {
               backgroundColor: "rgba(0,0,0,0.4)",
             },
             "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment":
-            {
-              display: "none",
-              width: 0,
-              height: 0,
-            },
+              {
+                display: "none",
+                width: 0,
+                height: 0,
+              },
           }}
         >
           {groups.map(({ id, label }, index) => {
@@ -476,8 +457,8 @@ export default function DashboardLayout() {
             width: isMobile
               ? "100%"
               : open
-                ? `calc(100% - ${drawerWidth}px)`
-                : `calc(100% - ${collapsedWidth}px)`,
+              ? `calc(100% - ${drawerWidth}px)`
+              : `calc(100% - ${collapsedWidth}px)`,
             backgroundColor: darkMode
               ? "rgba(12, 16, 20, 0.6)"
               : "rgba(255, 255, 255, 0.6)",

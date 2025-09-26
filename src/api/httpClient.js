@@ -10,4 +10,3 @@ export function apiFetch(path, options = {}) {
     headers: options.headers,
   });
 }
-

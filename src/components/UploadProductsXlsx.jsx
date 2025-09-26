@@ -48,7 +48,7 @@ const headCells = [
 
 function EnhancedTableHead(props) {
   const theme = useTheme();
-  const { order, orderBy, onRequestSort, rowCount } = props;
+  const { order, orderBy, onRequestSort, } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -100,7 +100,7 @@ function EnhancedTableToolbar(props) {
       sx={{
         px: { xs: 1, sm: 2 },
         flexWrap: "wrap",
-        justifyContent: "center",
+        justifyContent: { xs: "center", sm: "space-between" },
         gap: 1,
         position: { xs: "sticky", sm: "static" },
         top: 0,
