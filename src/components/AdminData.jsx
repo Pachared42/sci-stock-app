@@ -659,7 +659,12 @@ export default function EnhancedTable() {
                           <img
                             src={row.profileImage || "/AvatarAdmin.png"}
                             alt={row.firstName}
-                            style={{ width: 50, borderRadius: "50%" }}
+                            style={{
+                              width: 50,
+                              height: 50,
+                              objectFit: "cover",
+                              borderRadius: "50%",
+                            }}
                           />
                         </TableCell>
 
