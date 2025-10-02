@@ -76,10 +76,10 @@ export default function UserProfileSettings() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPhotoPreview(reader.result);
-      setFormData((prev) => ({ ...prev, photo: file }));
+      setFormData((prev) => ({ ...prev, photoFile: file }));
     };
     reader.readAsDataURL(file);
-  };
+  };  
 
   const handleSubmit = async () => {
     try {
@@ -89,15 +89,14 @@ export default function UserProfileSettings() {
       };
       if (formData.password) payload.password = formData.password;
       if (formData.photoFile) payload.profile_image = formData.photoFile;
-
       await updateUserProfile(payload);
-
+  
       setSnackbar({
         open: true,
         message: "อัปเดตโปรไฟล์สำเร็จ",
         severity: "success",
       });
-
+  
       setFormData((prev) => ({ ...prev, password: "" }));
     } catch (err) {
       console.error(err);
@@ -190,8 +189,8 @@ export default function UserProfileSettings() {
                 <Box
                   className="overlay"
                   sx={{
-                    width: 125,
-                    height: 125,
+                    width: 170,
+                    height: 170,
                     borderRadius: "50%",
                     backgroundColor: "#f0f0f0",
                     display: "flex",

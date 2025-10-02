@@ -18,9 +18,10 @@ export async function updateUserProfile(profileData) {
 
   try {
     const formData = new FormData();
-    for (const key in profileData) {
-      formData.append(key, profileData[key]);
-    }
+    if (profileData.first_name) formData.append("first_name", profileData.first_name);
+    if (profileData.last_name) formData.append("last_name", profileData.last_name);
+    if (profileData.password) formData.append("password", profileData.password);
+    if (profileData.profile_image) formData.append("profile_image", profileData.profile_image);
 
     const response = await axiosInstance.put("/auth/profile", formData, {
       headers: {
