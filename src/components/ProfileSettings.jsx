@@ -7,14 +7,21 @@ import {
   useMediaQuery,
   useTheme,
   Avatar,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { fetchUserProfile } from "../api/profileApi";
+import { fetchUserProfile, updateUserProfile } from "../api/profileApi";
 
 export default function UserProfileSettings() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const [formData, setFormData] = useState({
     gmail: "",
@@ -38,8 +45,8 @@ export default function UserProfileSettings() {
           photo: null,
         });
         if (profile.profileImage) {
-          const url = URL.createObjectURL(new Blob([profile.profileImage]));
-          setPhotoPreview(url);
+          const base64 = profile.profileImage;
+          setPhotoPreview(`data:image/jpeg;base64,${base64}`);
         }
       } catch (err) {
         console.error("โหลดข้อมูลโปรไฟล์ไม่สำเร็จ", err);
@@ -53,20 +60,52 @@ export default function UserProfileSettings() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePhotoUpload = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, photo: file }));
-      setPhotoPreview(URL.createObjectURL(file));
+    if (!file) return;
+  
+    if (!file.type.startsWith("image/")) {
+      setSnackbar({ open: true, message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น", severity: "error" });
+      return;
     }
+    if (file.size > 3 * 1024 * 1024) {
+      setSnackbar({ open: true, message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB", severity: "error" });
+      return;
+    }
+  
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result);
+      setFormData((prev) => ({ ...prev, photo: file }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async () => {
     try {
-      // await updateProfile(formData);
-      alert("อัปเดตโปรไฟล์สำเร็จ");
+      const payload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      };
+      if (formData.password) payload.password = formData.password;
+      if (formData.photoFile) payload.profile_image = formData.photoFile;
+
+      await updateUserProfile(payload);
+
+      setSnackbar({
+        open: true,
+        message: "อัปเดตโปรไฟล์สำเร็จ",
+        severity: "success",
+      });
+
+      setFormData((prev) => ({ ...prev, password: "" }));
     } catch (err) {
-      alert(err.message || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์");
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.error || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
+        severity: "error",
+      });
     }
   };
 
@@ -106,8 +145,8 @@ export default function UserProfileSettings() {
             <Box
               sx={{
                 position: "relative",
-                width: 150,
-                height: 150,
+                width: 200,
+                height: 200,
                 borderRadius: "50%",
                 border: "1.8px dashed #666666",
                 display: "flex",
@@ -129,8 +168,8 @@ export default function UserProfileSettings() {
                     className="overlay"
                     sx={{
                       position: "absolute",
-                      width: 125,
-                      height: 125,
+                      width: 170,
+                      height: 170,
                       borderRadius: "50%",
                       backgroundColor: "rgba(240, 240, 240, 0.85)",
                       display: "flex",
@@ -177,16 +216,11 @@ export default function UserProfileSettings() {
             type="file"
             accept="image/*"
             hidden
-            onChange={handlePhotoUpload}
+            onChange={handleFileChange}
           />
-          <Typography
-            variant="caption"
-            color="gray"
-            textAlign="center"
-            mb={2}
-            fontSize={14}
-          >
-            อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 1MB
+
+          <Typography variant="caption" color="gray" textAlign="center" mt={4}>
+            อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
           </Typography>
         </Box>
 
@@ -278,6 +312,25 @@ export default function UserProfileSettings() {
           </Box>
         </Box>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

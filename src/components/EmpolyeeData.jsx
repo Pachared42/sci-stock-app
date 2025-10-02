@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -289,12 +289,20 @@ export default function EnhancedTable() {
         !newEmployee.email ||
         !newEmployee.password
       ) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        setSnackbar({
+          open: true,
+          message: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          severity: "error",
+        });
         return;
       }
 
       if (newEmployee.password !== newEmployee.confirmPassword) {
-        alert("รหัสผ่านไม่ตรงกัน");
+        setSnackbar({
+          open: true,
+          message: "รหัสผ่านไม่ตรงกัน",
+          severity: "error",
+        });
         return;
       }
 
@@ -315,8 +323,11 @@ export default function EnhancedTable() {
       };
 
       const result = await createUserRequest(payload, token);
-      console.log("สมัครพนักงานสำเร็จ:", result);
-      alert("เพิ่มพนักงานสำเร็จ! กรุณากรอกรหัส OTP เพื่อยืนยัน");
+      setSnackbar({
+        open: true,
+        message: "เพิ่มพนักงานสำเร็จ! กรุณากรอกรหัส OTP เพื่อยืนยัน",
+        severity: "success",
+      });
 
       setShowOtpForm(true);
       localStorage.setItem(
@@ -338,13 +349,21 @@ export default function EnhancedTable() {
   const handleVerifyOtp = async () => {
     try {
       if (otp.length !== 6) {
-        alert("กรุณากรอกรหัส OTP ให้ครบ 6 หลัก");
+        setSnackbar({
+          open: true,
+          message: "กรุณากรอกรหัส OTP ให้ครบ 6 หลัก",
+          severity: "info",
+        });
         return;
       }
 
       const result = await verifyUserRequest(newEmployee.email, otp, token);
       console.log("ยืนยัน OTP สำเร็จ:", result);
-      alert("เพิ่มพนักงานสำเร็จ!");
+      setSnackbar({
+        open: true,
+        message: "เพิ่มพนักงานสำเร็จ",
+        severity: "success",
+      });
       setOpenAddDialog(false);
       setShowOtpForm(false);
       setNewEmployee({
@@ -407,9 +426,9 @@ export default function EnhancedTable() {
       firstName: row.firstName || "",
       lastName: row.lastName || "",
       roleId: row.roleId,
-      profileImage: row.profileImage || "", // URL ของรูปเดิม
-      profileImageFile: null, // สำหรับไฟล์ใหม่
-      password: "", // ให้ช่อง password ว่าง
+      profileImage: row.profileImage || "",
+      profileImageFile: null,
+      password: "",
     });
   };
 
@@ -424,7 +443,7 @@ export default function EnhancedTable() {
         firstName: editValues.firstName,
         lastName: editValues.lastName,
         roleId: editValues.roleId,
-        profileImage: editValues.profileImageFile, // File จริง
+        profileImage: editValues.profileImageFile,
       };
 
       await updateUser(editValues.gmail, updatedUser, token);
@@ -459,10 +478,10 @@ export default function EnhancedTable() {
     if (!deleteRow || !deleteRow.gmail) return;
 
     try {
-      await deleteUser(deleteRow.gmail, token); // เรียก API ลบผู้ใช้ตาม Gmail
+      await deleteUser(deleteRow.gmail, token);
 
-      setDeleteRow(null); // ปิด dialog
-      setReload((r) => !r); // รีเฟรชตาราง
+      setDeleteRow(null);
+      setReload((r) => !r);
       navigate(location.pathname, { replace: true });
 
       setSnackbar({
@@ -825,7 +844,7 @@ export default function EnhancedTable() {
                     width: 250,
                     height: 250,
                     borderRadius: "50%",
-                    border: "1.8px dashed #666",
+                    border: "3px dashed #666",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -844,8 +863,8 @@ export default function EnhancedTable() {
                         className="overlay"
                         sx={{
                           position: "absolute",
-                          width: "100%",
-                          height: "100%",
+                          width: 220,
+                          height: 220,
                           borderRadius: "50%",
                           backgroundColor: "rgba(240,240,240,0.85)",
                           display: "flex",
@@ -898,21 +917,35 @@ export default function EnhancedTable() {
                   const file = e.target.files[0];
                   if (!file) return;
                   if (!file.type.startsWith("image/")) {
-                    alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                    setSnackbar({
+                      open: true,
+                      message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+                      severity: "error",
+                    });
                     return;
                   }
                   if (file.size > 1024 * 1024) {
-                    alert("ไฟล์ต้องมีขนาดไม่เกิน 1MB");
+                    setSnackbar({
+                      open: true,
+                      message: "ไฟล์ต้องมีขนาดไม่เกิน 1MB",
+                      severity: "error",
+                    });
                     return;
                   }
 
                   const reader = new FileReader();
                   reader.onloadend = () => {
-                    setNewEmployee((prev) => ({
+                    setNewAdmin((prev) => ({
                       ...prev,
                       profileimage: reader.result,
                       profileimageFile: file,
                     }));
+
+                    setSnackbar({
+                      open: true,
+                      message: "อัปโหลดรูปภาพสำเร็จ",
+                      severity: "success",
+                    });
                   };
                   reader.readAsDataURL(file);
                 }}
@@ -923,7 +956,7 @@ export default function EnhancedTable() {
                 textAlign="center"
                 mt={4}
               >
-                อนุญาตเฉพาะไฟล์ .jpg, .png, ขนาดสูงสุด 1MB
+                อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
               </Typography>
             </Box>
           )}
@@ -1154,10 +1187,10 @@ export default function EnhancedTable() {
                 <Box
                   sx={{
                     position: "relative",
-                    width: 180,
-                    height: 180,
+                    width: 200,
+                    height: 200,
                     borderRadius: "50%",
-                    border: "1.8px dashed #666",
+                    border: "3px dashed #666",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1176,8 +1209,8 @@ export default function EnhancedTable() {
                         className="overlay"
                         sx={{
                           position: "absolute",
-                          width: "100%",
-                          height: "100%",
+                          width: 170,
+                          height: 170,
                           borderRadius: "50%",
                           backgroundColor: "rgba(240,240,240,0.85)",
                           display: "flex",
@@ -1229,27 +1262,36 @@ export default function EnhancedTable() {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (!file) return;
+
                   if (!file.type.startsWith("image/")) {
-                    alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-                    return;
-                  }
-                  if (file.size > 1024 * 1024) {
-                    alert("ไฟล์ต้องมีขนาดไม่เกิน 1MB");
+                    setSnackbar({
+                      open: true,
+                      message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+                      severity: "error",
+                    });
                     return;
                   }
 
-                  handleDialogChange("profileImageFile", file); // เก็บ File จริง
-                  handleDialogChange("profileImage", URL.createObjectURL(file)); // สำหรับ preview
+                  if (file.size > 3 * 1024 * 1024) {
+                    setSnackbar({
+                      open: true,
+                      message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB",
+                      severity: "error",
+                    });
+                    return;
+                  }
+
+                  handleDialogChange("profileImageFile", file);
+                  handleDialogChange("profileImage", URL.createObjectURL(file));
                 }}
               />
-
               <Typography
                 variant="caption"
                 color="gray"
                 textAlign="center"
                 mt={2}
               >
-                อนุญาตเฉพาะไฟล์ .jpg, .png, ขนาดสูงสุด 1MB
+                อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
               </Typography>
             </Box>
           </Box>
@@ -1303,7 +1345,7 @@ export default function EnhancedTable() {
               label="รหัสผ่านใหม่"
               type="password"
               fullWidth
-              value={editValues.password || ""} // จะเป็นค่าว่างเสมอ
+              value={editValues.password || ""}
               onChange={(e) => handleDialogChange("password", e.target.value)}
               variant="outlined"
               size="medium"
