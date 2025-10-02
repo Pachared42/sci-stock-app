@@ -63,23 +63,31 @@ export default function UserProfileSettings() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     if (!file.type.startsWith("image/")) {
-      setSnackbar({ open: true, message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น", severity: "error" });
+      setSnackbar({
+        open: true,
+        message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+        severity: "error",
+      });
       return;
     }
     if (file.size > 3 * 1024 * 1024) {
-      setSnackbar({ open: true, message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB", severity: "error" });
+      setSnackbar({
+        open: true,
+        message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB",
+        severity: "error",
+      });
       return;
     }
-  
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setPhotoPreview(reader.result);
       setFormData((prev) => ({ ...prev, photoFile: file }));
     };
     reader.readAsDataURL(file);
-  };  
+  };
 
   const handleSubmit = async () => {
     try {
@@ -90,19 +98,20 @@ export default function UserProfileSettings() {
       if (formData.password) payload.password = formData.password;
       if (formData.photoFile) payload.profile_image = formData.photoFile;
       await updateUserProfile(payload);
-  
+
       setSnackbar({
         open: true,
         message: "อัปเดตโปรไฟล์สำเร็จ",
         severity: "success",
       });
-  
+
       setFormData((prev) => ({ ...prev, password: "" }));
     } catch (err) {
       console.error(err);
       setSnackbar({
         open: true,
-        message: err.response?.data?.error || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
+        message:
+          err.response?.data?.error || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
         severity: "error",
       });
     }
@@ -274,15 +283,14 @@ export default function UserProfileSettings() {
             />
             <TextField
               fullWidth
-              label="รหัสผ่านใหม่"
-              name="password"
+              label="รหัสผ่านใหม่ *เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน*"
+              name="new_password"
               type="password"
               onChange={handleChange}
               value={formData.password}
-              placeholder="เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน"
-              sx={{
-                "& .MuiOutlinedInput-root": { borderRadius: 4 },
-              }}
+              autoComplete="new-password"
+              inputProps={{ autoComplete: "new-password" }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
             />
           </Box>
 
