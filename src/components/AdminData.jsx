@@ -994,8 +994,10 @@ export default function EnhancedTable() {
                 }
                 variant="outlined"
                 size="medium"
+                inputProps={{ autoComplete: "new-email" }}
                 InputProps={{ sx: { borderRadius: 4 } }}
               />
+
               <TextField
                 label="รหัสผ่าน"
                 type="password"
@@ -1009,6 +1011,7 @@ export default function EnhancedTable() {
                 }
                 variant="outlined"
                 size="medium"
+                inputProps={{ autoComplete: "new-password" }}
                 InputProps={{ sx: { borderRadius: 4 } }}
               />
               <TextField
@@ -1326,13 +1329,16 @@ export default function EnhancedTable() {
             {/* Password (เพิ่มใหม่) */}
             <TextField
               label="รหัสผ่านใหม่"
+              name="new_password"
               type="password"
               fullWidth
-              value={editValues.password || ""} // จะเป็นค่าว่างเสมอ
+              value={editValues.password || ""}
               onChange={(e) => handleDialogChange("password", e.target.value)}
               variant="outlined"
               size="medium"
               placeholder="เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน"
+              autoComplete="new-password"
+              inputProps={{ autoComplete: "new-password" }}
               InputProps={{ sx: { borderRadius: 4 } }}
             />
           </Box>
