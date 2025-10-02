@@ -248,13 +248,13 @@ const Dashboard = () => {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontWeight: "bold",
+                      fontWeight: "600",
                       mt: 0.5,
                       letterSpacing: 0.5,
                       color: "#ffffff",
                     }}
                   >
-                    {card.value}
+                    {card.value} ชิ้น
                   </Typography>
                 </Box>
               </CardContent>

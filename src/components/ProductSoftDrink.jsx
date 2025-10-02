@@ -930,7 +930,7 @@ export default function EnhancedTable() {
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              gap: 2,
+              gap: 1.5,
               width: "100%",
               minWidth: 0,
             }}
@@ -1159,7 +1159,7 @@ export default function EnhancedTable() {
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              gap: 2,
+              gap: 1.5,
               width: "100%",
               minWidth: 0,
             }}

@@ -8,7 +8,6 @@ import ProductsFromSheet from './components/ProductsFromSheet';
 import useRouteProgress from "./hooks/useRouteProgress";
 import Dashboard from "./components/Dashboard";
 import CalendarPage from "./components/Calendar";
-import RegisterEmpolyee from "./components/RegisterEmpolyee";
 import DriedFood from "./components/ProductDriedFood";
 import FreshFood from "./components/ProductFreshFood";
 import SoftDrink from "./components/ProductSoftDrink";
@@ -42,7 +41,6 @@ function AppRoutes() {
         <Route path="sales-report" element={<ProductsFromSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
-        <Route path="register-empolyee" element={<RegisterEmpolyee />} />
         <Route path="all-products" element={<ProductAll />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />
@@ -70,7 +68,6 @@ function AppRoutes() {
         <Route path="sales-report" element={<ProductsFromSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
-        <Route path="register-empolyee" element={<RegisterEmpolyee />} />
         <Route path="all-products" element={<ProductAll />} />
         <Route path="dried-category" element={<DriedFood />} />
         <Route path="fresh-category" element={<FreshFood />} />

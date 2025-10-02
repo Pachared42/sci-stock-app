@@ -95,13 +95,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
-  {
-    segment: "sales-report",
-    title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
-    icon: <InsertPageBreakIcon />,
-    roles: ["admin", "superadmin"],
-    group: "main",
-  },
+  // {
+  //   segment: "sales-report",
+  //   title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
+  //   icon: <InsertPageBreakIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "main",
+  // },
   {
     segment: "stock-out",
     title: "ตัดสต๊อกสินค้า",
@@ -111,7 +111,7 @@ const NAVIGATION = [
   },
   {
     segment: "sales-day",
-    title: "ออเดอร์รายวัน",
+    title: "รายงานรายวัน",
     icon: <AssignmentIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
@@ -128,13 +128,6 @@ const NAVIGATION = [
     segment: "staff-management",
     title: "อนุมัติพนักงาน",
     icon: <AssignmentIndIcon />,
-    roles: ["admin", "superadmin"],
-    group: "management",
-  },
-  {
-    segment: "register-empolyee",
-    title: "เพิ่มพนักงาน",
-    icon: <PersonAddIcon />,
     roles: ["admin", "superadmin"],
     group: "management",
   },

@@ -29,7 +29,7 @@ import {
   approveStudentApplication,
   rejectStudentApplication,
   deleteApprovedApplication,
-} from "../api/registerEmpolyeeApi";
+} from "../api/registerStudentEmployeeApi";
 
 const headCells = [
   { id: "firstName", label: "ชื่อ", width: "15%" },

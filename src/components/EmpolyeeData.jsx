@@ -22,49 +22,28 @@ import {
   DialogTitle,
   TextField,
   Button,
-  Menu,
-  MenuItem,
   Snackbar,
   Alert,
   InputAdornment,
   Fade,
 } from "@mui/material";
 
+import { useAuth } from "../context/AuthProvider";
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
-import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import Avatar from "@mui/material/Avatar";
 
 import {
-  fetchProductsByCategory,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "../api/productApi";
-
-function createData(
-  id,
-  name,
-  imgUrl,
-  barcode,
-  priceSell,
-  priceCost,
-  stockQty,
-  stockMin
-) {
-  return {
-    id,
-    name,
-    imgUrl,
-    barcode,
-    priceSell,
-    priceCost,
-    stockQty,
-    stockMin,
-  };
-}
+  createUserRequest,
+  verifyUserRequest,
+  fetchUsers,
+  updateUser,
+  deleteUser,
+} from "../api/personsApi";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -82,15 +61,12 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
-  { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
-  { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
-  { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
-  { id: "manage", label: "จัดการสินค้า", width: "20%" },
+const headCellsEmployee = [
+  { id: "first_name", label: "ชื่อ", width: "20%" },
+  { id: "last_name", label: "นามสกุล", width: "20%" },
+  { id: "email", label: "อีเมล", width: "25%" },
+  { id: "profileimage_img", label: "รูปโปรไฟล์", width: "15%" },
+  { id: "manage", label: "จัดการข้อมูล", width: "20%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -120,7 +96,7 @@ function EnhancedTableHead(props) {
             }}
           />
         </TableCell>
-        {headCells.map((headCell) => (
+        {headCellsEmployee.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -187,7 +163,7 @@ function EnhancedTableToolbar(props) {
           id="tableTitle"
           component="div"
         >
-          สินค้าประเภทเครื่องดื่ม
+          ข้อมูลพนักงานทั้งหมด
         </Typography>
       )}
     </Toolbar>
@@ -210,18 +186,16 @@ export default function EnhancedTable() {
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    barcode: "",
-    imgUrl: "",
-    priceSell: "",
-    priceCost: "",
-    stockQty: "",
-    stockMin: "",
+  const [newEmployee, setNewEmployee] = useState({
+    profileimage: "/AvatarUser.png",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
-  const filterOpen = Boolean(filterAnchorEl);
-  const [filter, setFilter] = useState("all");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -232,30 +206,62 @@ export default function EnhancedTable() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const token = user?.token;
+  const [showOtpForm, setShowOtpForm] = useState(false);
+  const [otp, setOtp] = useState("");
+  const filteredRows = rows;
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadData = async () => {
       try {
-        const data = await fetchProductsByCategory("soft_drink");
-        const formatted = data.map((item, index) =>
-          createData(
-            index + 1,
-            item.product_name,
-            item.image_url,
-            item.barcode,
-            item.price,
-            item.cost,
-            item.stock,
-            item.reorder_level
-          )
-        );
-        setRows(formatted);
+        const data = await fetchUsers(token);
+        if (!isMounted) return;
+        const employees = Array.isArray(data)
+          ? data.filter((user) => user.roleId === 3)
+          : [];
+
+        const mappedRows = employees.map((item, index) => ({
+          id: index + 1,
+          gmail: item.gmail,
+          firstName: item.firstName,
+          lastName: item.lastName,
+          profileImage: item.profileImage
+            ? `data:image/png;base64,${item.profileImage}`
+            : null,
+          roleId: item.roleId,
+        }));
+
+        setRows(mappedRows);
       } catch (err) {
-        console.error("โหลดสินค้าล้มเหลว:", err);
+        console.error("โหลดพนักงานล้มเหลว:", err);
+        setRows([]);
       }
     };
+
     loadData();
-  }, [reload]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [reload, token]);
+
+  useEffect(() => {
+    if (!searchText) {
+      setFilteredUsers(users);
+    } else {
+      const lowerSearch = searchText.toLowerCase();
+      setFilteredUsers(
+        users.filter(
+          (user) =>
+            user.gmail.toLowerCase().includes(lowerSearch) ||
+            user.first_name.toLowerCase().includes(lowerSearch)
+        )
+      );
+    }
+  }, [searchText, users]);
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -264,6 +270,99 @@ export default function EnhancedTable() {
       return;
     }
     setSelected([]);
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("employeePendingOtp");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setNewEmployee(parsed.newEmployee);
+      setShowOtpForm(parsed.showOtpForm);
+    }
+  }, []);
+
+  const handleAddEmployee = async () => {
+    try {
+      if (
+        !newEmployee.firstName ||
+        !newEmployee.lastName ||
+        !newEmployee.email ||
+        !newEmployee.password
+      ) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        return;
+      }
+
+      if (newEmployee.password !== newEmployee.confirmPassword) {
+        alert("รหัสผ่านไม่ตรงกัน");
+        return;
+      }
+
+      let file = null;
+      if (!newEmployee.profileimageFile) {
+        const response = await fetch("/AvatarUser.png");
+        const blob = await response.blob();
+        file = new File([blob], "AvatarUser.png", { type: blob.type });
+      }
+
+      const payload = {
+        gmail: newEmployee.email,
+        password: newEmployee.password,
+        firstName: newEmployee.firstName,
+        lastName: newEmployee.lastName,
+        profileImage: newEmployee.profileimageFile || file,
+        roleId: 3,
+      };
+
+      const result = await createUserRequest(payload, token);
+      console.log("สมัครพนักงานสำเร็จ:", result);
+      alert("เพิ่มพนักงานสำเร็จ! กรุณากรอกรหัส OTP เพื่อยืนยัน");
+
+      setShowOtpForm(true);
+      localStorage.setItem(
+        "employeePendingOtp",
+        JSON.stringify({
+          newEmployee: {
+            ...newEmployee,
+            profileimageFile: newEmployee.profileimageFile || file,
+          },
+          showOtpForm: true,
+        })
+      );
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      if (otp.length !== 6) {
+        alert("กรุณากรอกรหัส OTP ให้ครบ 6 หลัก");
+        return;
+      }
+
+      const result = await verifyUserRequest(newEmployee.email, otp, token);
+      console.log("ยืนยัน OTP สำเร็จ:", result);
+      alert("เพิ่มพนักงานสำเร็จ!");
+      setOpenAddDialog(false);
+      setShowOtpForm(false);
+      setNewEmployee({
+        profileimage: "/AvatarUser.png",
+        profileimageFile: null,
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setOtp("");
+      localStorage.removeItem("employeePendingOtp");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
   const handleClick = (event, id) => {
@@ -303,7 +402,15 @@ export default function EnhancedTable() {
 
   const handleEdit = (row) => {
     setEditRow(row);
-    setEditValues(row);
+    setEditValues({
+      gmail: row.gmail || "",
+      firstName: row.firstName || "",
+      lastName: row.lastName || "",
+      roleId: row.roleId,
+      profileImage: row.profileImage || "", // URL ของรูปเดิม
+      profileImageFile: null, // สำหรับไฟล์ใหม่
+      password: "", // ให้ช่อง password ว่าง
+    });
   };
 
   const handleDialogChange = (field, value) => {
@@ -312,21 +419,19 @@ export default function EnhancedTable() {
 
   const handleDialogSave = async () => {
     try {
-      const updatedPayload = {
-        product_name: editValues.name,
-        barcode: editValues.barcode,
-        price: parseFloat(editValues.priceSell),
-        cost: parseFloat(editValues.priceCost),
-        stock: parseInt(editValues.stockQty, 10),
-        reorder_level: parseInt(editValues.stockMin, 10),
-        image_url: editValues.imgUrl,
+      const updatedUser = {
+        password: editValues.password || undefined,
+        firstName: editValues.firstName,
+        lastName: editValues.lastName,
+        roleId: editValues.roleId,
+        profileImage: editValues.profileImageFile, // File จริง
       };
 
-      await updateProduct("soft_drink", editValues.barcode, updatedPayload);
+      await updateUser(editValues.gmail, updatedUser, token);
 
       setSnackbar({
         open: true,
-        message: "แก้ไขสินค้าสำเร็จ",
+        message: "อัปเดตข้อมูลพนักงานสำเร็จ",
         severity: "success",
       });
 
@@ -334,153 +439,50 @@ export default function EnhancedTable() {
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
     } catch (error) {
-      console.error(
-        "❌ Error updating product:",
-        error.response?.data || error.message
-      );
+      console.error("❌ Error updating user:", error);
       setSnackbar({
         open: true,
-        message: "ไม่สามารถแก้ไขสินค้าได้",
+        message: "ไม่สามารถอัปเดตผู้ใช้ได้",
         severity: "error",
       });
     }
   };
 
   const handleDialogClose = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setEditRow(null);
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteProduct("soft_drink", deleteRow.barcode);
+  const handleDeleteUserConfirm = async () => {
+    if (!deleteRow || !deleteRow.gmail) return;
 
-      setDeleteRow(null);
-      setReload((r) => !r);
+    try {
+      await deleteUser(deleteRow.gmail, token); // เรียก API ลบผู้ใช้ตาม Gmail
+
+      setDeleteRow(null); // ปิด dialog
+      setReload((r) => !r); // รีเฟรชตาราง
       navigate(location.pathname, { replace: true });
 
       setSnackbar({
         open: true,
-        message: "ลบสินค้าสำเร็จ",
+        message: "ลบพนักงานสำเร็จ",
         severity: "success",
       });
     } catch (error) {
       console.error(
-        "❌ Error deleting product:",
+        "❌ Error deleting user:",
         error.response?.data || error.message
       );
 
       setSnackbar({
         open: true,
-        message: "ไม่สามารถลบสินค้าได้",
+        message: error.message || "ไม่สามารถลบผู้ใช้ได้",
         severity: "error",
       });
     }
   };
-
-  const handleAddProduct = async () => {
-    const productPayload = {
-      product_name: newProduct.name.trim(),
-      barcode: newProduct.barcode.trim(),
-      price: parseFloat(newProduct.priceSell),
-      cost: parseFloat(newProduct.priceCost),
-      stock: parseInt(newProduct.stockQty, 10) || 0,
-      reorder_level: parseInt(newProduct.stockMin, 10) || 0,
-      image_url:
-        typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
-    };
-
-    if (
-      !productPayload.product_name ||
-      !productPayload.barcode ||
-      isNaN(productPayload.price) ||
-      isNaN(productPayload.cost)
-    ) {
-      setSnackbar({
-        open: true,
-        message:
-          "กรุณากรอกชื่อสินค้า, barcode, ราคาขาย และราคาต้นทุนให้ถูกต้อง",
-        severity: "warning",
-      });
-      return;
-    }
-
-    try {
-      await createProduct("soft_drink", [productPayload]);
-
-      setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
-
-      setRows((prev) => [
-        ...prev,
-        {
-          id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
-          name: productPayload.product_name,
-          barcode: productPayload.barcode,
-          imgUrl: productPayload.image_url,
-          priceSell: productPayload.price,
-          priceCost: productPayload.cost,
-          stockQty: productPayload.stock,
-          stockMin: productPayload.reorder_level,
-        },
-      ]);
-
-      setSnackbar({
-        open: true,
-        message: "เพิ่มสินค้าสำเร็จ",
-        severity: "success",
-      });
-
-      setOpenAddDialog(false);
-    } catch (error) {
-      console.error(
-        "Error adding product:",
-        error.response?.data || error.message
-      );
-
-      setSnackbar({
-        open: true,
-        message: "ไม่สามารถเพิ่มสินค้าได้",
-        severity: "error",
-      });
-    }
-  };
-
-  const filteredRows = useMemo(() => {
-    const search = searchText.trim().toLowerCase();
-
-    return rows.filter((row) => {
-      if (
-        filter === "lowStock" &&
-        !(row.stockQty > 0 && row.stockQty < row.stockMin)
-      ) {
-        return false;
-      }
-      if (filter === "outOfStock" && row.stockQty > 0) {
-        return false;
-      }
-
-      if (!search) {
-        return true;
-      }
-
-      const nameMatch = row.name.toLowerCase().includes(search);
-      const barcodeMatch = String(row.barcode).toLowerCase().includes(search);
-
-      return nameMatch || barcodeMatch;
-    });
-  }, [rows, filter, searchText]);
-
-  const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 5;
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-  const visibleRows = useMemo(
-    () =>
-      [...rows]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage, rows]
-  );
 
   return (
     <Box
@@ -505,60 +507,6 @@ export default function EnhancedTable() {
             borderTopRightRadius: 20,
           }}
         >
-          {/* ซ้าย: Filter Dropdown */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-              justifyContent: "flex-start",
-              width: { xs: "100%", sm: "auto" },
-            }}
-          >
-            <Button
-              size="ls"
-              sx={{ px: 1.8, py: 1, borderRadius: 2.5 }}
-              startIcon={<FilterListIcon />}
-              onClick={(e) => setFilterAnchorEl(e.currentTarget)}
-              fullWidth={false}
-              variant="outlined"
-            >
-              {filter === "all" && "กรองทั้งหมด"}
-              {filter === "lowStock" && "สินค้าเหลือน้อย"}
-              {filter === "outOfStock" && "สินค้าหมด"}
-            </Button>
-            <Menu
-              anchorEl={filterAnchorEl}
-              open={filterOpen}
-              onClose={() => setFilterAnchorEl(null)}
-            >
-              <MenuItem
-                onClick={() => {
-                  setFilter("all");
-                  setFilterAnchorEl(null);
-                }}
-              >
-                ทั้งหมด
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setFilter("lowStock");
-                  setFilterAnchorEl(null);
-                }}
-              >
-                สินค้าเหลือน้อย
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setFilter("outOfStock");
-                  setFilterAnchorEl(null);
-                }}
-              >
-                สินค้าหมด
-              </MenuItem>
-            </Menu>
-          </Box>
-
           {/* ขวา: Search + Add Button (แนวนอนบน desktop, แนวตั้งบน mobile) */}
           <Box
             sx={{
@@ -571,7 +519,7 @@ export default function EnhancedTable() {
           >
             <TextField
               size="small"
-              placeholder="ค้นหาชื่อหรือบาร์โค้ด..."
+              placeholder="ค้นหาชื่อหรืออีเมล..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               sx={{ width: { xs: "100%", sm: 500 } }}
@@ -603,12 +551,16 @@ export default function EnhancedTable() {
                   px: 3,
                   py: 1.2,
                   borderRadius: 3,
+                  backgroundColor: theme.palette.background.ButtonDay,
                   color: theme.palette.text.hint,
+                  "&:hover": {
+                    backgroundColor: theme.palette.background.ButtonDay,
+                  },
                   fontSize: "0.9rem",
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มพนักงาน
               </Button>
             </Box>
           </Box>
@@ -651,22 +603,19 @@ export default function EnhancedTable() {
                 },
               }}
             >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
               {rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ยังไม่มีรายการสินค้า
+                  <TableCell colSpan={6} align="center">
+                    ยังไม่มีรายการพนักงาน
                   </TableCell>
                 </TableRow>
-              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
-              filteredRows.length === 0 ? (
+              ) : filteredRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ไม่มีสินค้าตามเงื่อนไขที่เลือก
+                  <TableCell colSpan={6} align="center">
+                    ไม่มีพนักงานตามเงื่อนไขที่เลือก
                   </TableCell>
                 </TableRow>
               ) : (
-                // แสดงแถวสินค้า filtered + sort + pagination
                 filteredRows
                   .sort(getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -683,15 +632,8 @@ export default function EnhancedTable() {
                         tabIndex={-1}
                         key={row.id}
                         selected={isItemSelected}
-                        sx={{
-                          cursor: "pointer",
-                          bgcolor: isOutOfStock(row)
-                            ? "rgba(255, 0, 0, 0.30)"
-                            : isLowStock(row)
-                            ? "rgba(255, 165, 0, 0.30)"
-                            : "inherit",
-                        }}
                       >
+                        {/* Checkbox */}
                         <TableCell padding="checkbox" sx={{ width: 48 }}>
                           <Checkbox
                             color="primary"
@@ -701,63 +643,47 @@ export default function EnhancedTable() {
                             onChange={(event) => handleClick(event, row.id)}
                           />
                         </TableCell>
+
+                        {/* ชื่อ */}
                         <TableCell
                           component="th"
                           id={labelId}
                           scope="row"
                           padding="none"
                           sx={{
-                            width: "20%",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             px: 1,
                           }}
-                          title={row.name}
+                          title={row.firstName}
                         >
-                          {row.name}
+                          {row.firstName}
                         </TableCell>
-                        <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                        >
+
+                        {/* นามสกุล */}
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
+                          {row.lastName}
+                        </TableCell>
+
+                        {/* อีเมล */}
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
+                          {row.gmail}
+                        </TableCell>
+
+                        {/* รูปโปรไฟล์ */}
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
                           <img
-                            src={row.imgUrl}
-                            alt={row.name}
-                            style={{ width: 75 }}
+                            src={row.profileImage || "/AvatarUser.png"}
+                            alt={row.firstName}
+                            style={{ width: 50, borderRadius: "50%" }}
                           />
                         </TableCell>
-                        <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          {row.barcode}
-                        </TableCell>
+
+                        {/* จัดการข้อมูล */}
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          {row.priceSell} บาท
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          {row.priceCost} บาท
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          {row.stockQty} ชิ้น
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          {row.stockMin} ชิ้น
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
                             variant="outlined"
@@ -786,13 +712,6 @@ export default function EnhancedTable() {
                       </TableRow>
                     );
                   })
-              )}
-
-              {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
-              {emptyRows > 0 && rows.length > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={9} />
-                </TableRow>
               )}
             </TableBody>
           </Table>
@@ -835,10 +754,333 @@ export default function EnhancedTable() {
         </Box>
       </Paper>
 
-      {/* Dialog เพิ่มสินค้าใหม่ */}
+      {/* Dialog เพิ่มพนักงานใหม่ */}
       <Dialog
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
+        disableEnforceFocus
+        maxWidth="md"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: "500",
+            fontSize: { xs: "1.5rem", md: "1.8rem" },
+            pb: { xs: 2, md: 3 },
+            pt: 0,
+            textAlign: "center",
+            color: "primary.main",
+          }}
+        >
+          เพิ่มพนักงานใหม่
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 3, md: 4 },
+            alignItems: { xs: "center", md: "flex-start" },
+          }}
+        >
+          {/* รูปโปรไฟล์ */}
+          {!showOtpForm && (
+            <Box
+              sx={{
+                flexShrink: 0,
+                width: { xs: "100%", md: 320 },
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: { xs: 3, md: 0 },
+              }}
+            >
+              <label htmlFor="photo-upload">
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: 250,
+                    height: 250,
+                    borderRadius: "50%",
+                    border: "1.8px dashed #666",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    "&:hover .overlay": { opacity: 1 },
+                  }}
+                >
+                  {newEmployee.profileimage ? (
+                    <>
+                      <Avatar
+                        src={newEmployee.profileimage}
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                      <Box
+                        className="overlay"
+                        sx={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(240,240,240,0.85)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                        }}
+                      >
+                        <PhotoCameraIcon sx={{ fontSize: 28, color: "#666" }} />
+                        <Typography variant="caption" color="#666">
+                          อัปโหลดรูป
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <Box
+                      className="overlay"
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
+                        backgroundColor: "#f0f0f0",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "background-color 0.3s ease",
+                        "&:hover": { backgroundColor: "#e0e0e0" },
+                      }}
+                    >
+                      <AddPhotoAlternateIcon
+                        sx={{ fontSize: 28, color: "#666" }}
+                      />
+                      <Typography variant="caption" color="#666">
+                        อัปโหลดรูป
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </label>
+
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  if (!file.type.startsWith("image/")) {
+                    alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                    return;
+                  }
+                  if (file.size > 1024 * 1024) {
+                    alert("ไฟล์ต้องมีขนาดไม่เกิน 1MB");
+                    return;
+                  }
+
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setNewEmployee((prev) => ({
+                      ...prev,
+                      profileimage: reader.result,
+                      profileimageFile: file,
+                    }));
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <Typography
+                variant="caption"
+                color="gray"
+                textAlign="center"
+                mt={4}
+              >
+                อนุญาตเฉพาะไฟล์ .jpg, .png, ขนาดสูงสุด 1MB
+              </Typography>
+            </Box>
+          )}
+
+          {/* ฟอร์มเพิ่มพนักงาน */}
+          {!showOtpForm && (
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                width: "100%",
+                minWidth: 0,
+                pt: { xs: 0, md: 1.5 },
+              }}
+            >
+              <TextField
+                label="ชื่อ"
+                fullWidth
+                value={newEmployee.firstName}
+                onChange={(e) =>
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    firstName: e.target.value,
+                  }))
+                }
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+              />
+              <TextField
+                label="นามสกุล"
+                fullWidth
+                value={newEmployee.lastName}
+                onChange={(e) =>
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    lastName: e.target.value,
+                  }))
+                }
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+              />
+              <TextField
+                label="อีเมล"
+                fullWidth
+                value={newEmployee.email}
+                onChange={(e) =>
+                  setNewEmployee((prev) => ({ ...prev, email: e.target.value }))
+                }
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+              />
+              <TextField
+                label="รหัสผ่าน"
+                type="password"
+                fullWidth
+                value={newEmployee.password}
+                onChange={(e) =>
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+              />
+              <TextField
+                label="ยืนยันรหัสผ่าน"
+                type="password"
+                fullWidth
+                value={newEmployee.confirmPassword}
+                onChange={(e) =>
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    confirmPassword: e.target.value,
+                  }))
+                }
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+              />
+            </Box>
+          )}
+
+          {/* ฟอร์ม OTP */}
+          {showOtpForm && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h6" color="primary">
+                กรอกรหัส OTP
+              </Typography>
+              <TextField
+                label="OTP"
+                value={otp}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) setOtp(value);
+                }}
+                type="tel"
+                inputProps={{ maxLength: 6 }}
+                variant="outlined"
+                size="medium"
+                InputProps={{ sx: { borderRadius: 4 } }}
+                sx={{ maxWidth: 200 }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            justifyContent: { xs: "center", md: "flex-end" },
+            gap: 0.5,
+            py: 2,
+            px: { xs: 2, md: 3 },
+          }}
+        >
+          <Button
+            onClick={() => setOpenAddDialog(false)}
+            color="inherit"
+            variant="outlined"
+          >
+            ยกเลิก
+          </Button>
+
+          {!showOtpForm ? (
+            <Button
+              onClick={handleAddEmployee}
+              variant="contained"
+              color="primary"
+            >
+              เพิ่มพนักงาน
+            </Button>
+          ) : (
+            <Button
+              onClick={handleVerifyOtp}
+              variant="contained"
+              color="success"
+            >
+              ยืนยัน OTP
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog แก้ไขข้อมูลพนักงาน */}
+      <Dialog
+        open={!!editRow}
+        onClose={handleDialogClose}
+        disableEnforceFocus
         maxWidth="md"
         fullWidth
         TransitionComponent={Fade}
@@ -868,8 +1110,9 @@ export default function EnhancedTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          แก้ไขข้อมูลพนักงาน
         </DialogTitle>
+
         <DialogContent
           sx={{
             display: "flex",
@@ -881,279 +1124,132 @@ export default function EnhancedTable() {
             pb: { xs: 2, md: 3 },
           }}
         >
+          {/* รูปโปรไฟล์ */}
           <Box
             sx={{
               flexShrink: 0,
-              width: { xs: "100%", md: 320 },
-              overflow: "hidden",
-              borderRadius: 6,
-              mb: { xs: 3, md: 0 },
-            }}
-          >
-            {newProduct.imgUrl ? (
-              <Box
-                component="img"
-                src={newProduct.imgUrl}
-                alt={newProduct.name}
-                sx={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                  borderRadius: 6,
-                  border: "none",
-                }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 400,
-                  borderRadius: 6,
-                  border: "1px dashed gray",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "gray",
-                  fontStyle: "italic",
-                  userSelect: "none",
-                  gap: 1,
-                }}
-              >
-                <ImageNotSupportedIcon fontSize="large" />
-                ไม่มีรูปภาพ
-              </Box>
-            )}
-          </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              width: "100%",
-              minWidth: 0,
-            }}
-          >
-            <TextField
-              label="URL รูปภาพ"
-              fullWidth
-              value={newProduct.imgUrl}
-              onChange={(e) =>
-                setNewProduct((prev) => ({ ...prev, imgUrl: e.target.value }))
-              }
-              placeholder="วาง URL รูปภาพที่นี่"
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ชื่อสินค้า"
-              fullWidth
-              value={newProduct.name}
-              onChange={(e) =>
-                setNewProduct((prev) => ({ ...prev, name: e.target.value }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="BARCODE"
-              fullWidth
-              value={newProduct.barcode}
-              onChange={(e) =>
-                setNewProduct((prev) => ({ ...prev, barcode: e.target.value }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ราคาขาย"
-              fullWidth
-              type="number"
-              value={newProduct.priceSell}
-              onChange={(e) =>
-                setNewProduct((prev) => ({
-                  ...prev,
-                  priceSell: e.target.value,
-                }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ราคาต้นทุน"
-              fullWidth
-              type="number"
-              value={newProduct.priceCost}
-              onChange={(e) =>
-                setNewProduct((prev) => ({
-                  ...prev,
-                  priceCost: e.target.value,
-                }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="จำนวนสต็อก"
-              fullWidth
-              type="number"
-              value={newProduct.stockQty}
-              onChange={(e) =>
-                setNewProduct((prev) => ({ ...prev, stockQty: e.target.value }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="สต็อกต่ำสุด"
-              fullWidth
-              type="number"
-              value={newProduct.stockMin}
-              onChange={(e) =>
-                setNewProduct((prev) => ({ ...prev, stockMin: e.target.value }))
-              }
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            justifyContent: { xs: "center", md: "flex-end" },
-            gap: 0.5,
-            py: 2,
-            px: { xs: 2, md: 3 },
-          }}
-        >
-          <Button
-            onClick={() => setOpenAddDialog(false)}
-            color="inherit"
-            variant="outlined"
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            onClick={handleAddProduct}
-            variant="contained"
-            color="primary"
-            sx={{
-              backgroundColor: theme.palette.background.ButtonDay,
-              color: theme.palette.text.hint,
-              "&:hover": {
-                backgroundColor: theme.palette.background.ButtonDay,
-              },
-            }}
-          >
-            เพิ่มสินค้า
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog แก้ไขสินค้า */}
-      <Dialog
-        open={!!editRow}
-        onClose={handleDialogClose}
-        maxWidth="md"
-        fullWidth
-        TransitionComponent={Fade}
-        transitionDuration={300} // ทำให้ทั้ง backdrop และ dialog ใช้เวลาเท่ากัน
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: 6,
-              p: { xs: 2, md: 3 },
-              bgcolor: "background.paper",
-            },
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            fontWeight: "500",
-            fontSize: { xs: "1.5rem", md: "1.8rem" },
-            pb: 2,
-            textAlign: "center",
-            color: "primary.main",
-          }}
-        >
-          แก้ไขข้อมูลสินค้า
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: { xs: 3, md: 4 },
-            alignItems: { xs: "center", md: "flex-start" },
-            pt: "24px !important",
-            px: { xs: 2, md: 3 },
-            pb: { xs: 2, md: 3 },
-          }}
-        >
-          <Box
-            sx={{
-              flexShrink: 0,
-              width: { xs: "100%", md: 320 },
+              width: { xs: "100%", md: 250 },
               overflow: "hidden",
               borderRadius: 6,
               mb: { xs: 3, md: 0 },
             }}
           >
             <Box
-              component="img"
-              src={editValues.imgUrl || ""}
-              alt={editValues.name}
               sx={{
-                width: "100%",
-                height: "auto",
-                objectFit: "contain",
-                borderRadius: 6,
+                flexShrink: 0,
+                width: { xs: "100%", md: 250 },
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                mt: 2,
               }}
-            />
+            >
+              <label htmlFor="photo-upload">
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: 180,
+                    height: 180,
+                    borderRadius: "50%",
+                    border: "1.8px dashed #666",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    "&:hover .overlay": { opacity: 1 },
+                  }}
+                >
+                  {editValues.profileImage ? (
+                    <>
+                      <Avatar
+                        src={editValues.profileImage}
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                      <Box
+                        className="overlay"
+                        sx={{
+                          position: "absolute",
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(240,240,240,0.85)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                        }}
+                      >
+                        <PhotoCameraIcon sx={{ fontSize: 28, color: "#666" }} />
+                        <Typography variant="caption" color="#666">
+                          อัปโหลดรูป
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <Box
+                      className="overlay"
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "50%",
+                        backgroundColor: "#f0f0f0",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "background-color 0.3s ease",
+                        "&:hover": { backgroundColor: "#e0e0e0" },
+                      }}
+                    >
+                      <AddPhotoAlternateIcon
+                        sx={{ fontSize: 28, color: "#666" }}
+                      />
+                      <Typography variant="caption" color="#666">
+                        อัปโหลดรูป
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </label>
+
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  if (!file.type.startsWith("image/")) {
+                    alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                    return;
+                  }
+                  if (file.size > 1024 * 1024) {
+                    alert("ไฟล์ต้องมีขนาดไม่เกิน 1MB");
+                    return;
+                  }
+
+                  handleDialogChange("profileImageFile", file); // เก็บ File จริง
+                  handleDialogChange("profileImage", URL.createObjectURL(file)); // สำหรับ preview
+                }}
+              />
+
+              <Typography
+                variant="caption"
+                color="gray"
+                textAlign="center"
+                mt={2}
+              >
+                อนุญาตเฉพาะไฟล์ .jpg, .png, ขนาดสูงสุด 1MB
+              </Typography>
+            </Box>
           </Box>
 
+          {/* ฟอร์ม */}
           <Box
             sx={{
               flex: 1,
@@ -1164,101 +1260,50 @@ export default function EnhancedTable() {
               minWidth: 0,
             }}
           >
+            {/* Gmail แสดงเฉยๆ */}
             <TextField
-              label="URL รูปภาพ"
+              label="อีเมล"
               fullWidth
-              value={editValues.imgUrl || ""}
-              onChange={(e) => handleDialogChange("imgUrl", e.target.value)}
-              placeholder="วาง URL รูปภาพที่นี่"
-              variant="outlined"
-              size="medium"
+              value={editValues.gmail || ""}
               InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
+                readOnly: true,
+                sx: { borderRadius: 4, bgcolor: "action.disabledBackground" },
               }}
             />
+
+            {/* ชื่อ */}
             <TextField
-              label="ชื่อสินค้า"
+              label="ชื่อ"
               fullWidth
-              value={editValues.name || ""}
-              onChange={(e) => handleDialogChange("name", e.target.value)}
+              value={editValues.firstName || ""}
+              onChange={(e) => handleDialogChange("firstName", e.target.value)}
               variant="outlined"
               size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
+              InputProps={{ sx: { borderRadius: 4 } }}
             />
+
+            {/* นามสกุล */}
             <TextField
-              label="BARCODE"
+              label="นามสกุล"
               fullWidth
-              value={editValues.barcode || ""}
-              onChange={(e) => handleDialogChange("barcode", e.target.value)}
+              value={editValues.lastName || ""}
+              onChange={(e) => handleDialogChange("lastName", e.target.value)}
               variant="outlined"
               size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
+              InputProps={{ sx: { borderRadius: 4 } }}
             />
+
+            {/* Password (เพิ่มใหม่) */}
             <TextField
-              label="ราคาขาย"
+              label="รหัสผ่านใหม่"
+              type="password"
               fullWidth
-              type="number"
-              value={editValues.priceSell || ""}
-              onChange={(e) => handleDialogChange("priceSell", e.target.value)}
+              value={editValues.password || ""} // จะเป็นค่าว่างเสมอ
+              onChange={(e) => handleDialogChange("password", e.target.value)}
               variant="outlined"
               size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ราคาต้นทุน"
-              fullWidth
-              type="number"
-              value={editValues.priceCost || ""}
-              onChange={(e) => handleDialogChange("priceCost", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="จำนวนสต็อก"
-              fullWidth
-              type="number"
-              value={editValues.stockQty || ""}
-              onChange={(e) => handleDialogChange("stockQty", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="สต็อกต่ำสุด"
-              fullWidth
-              type="number"
-              value={editValues.stockMin || ""}
-              onChange={(e) => handleDialogChange("stockMin", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
+              placeholder="เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน"
+              InputProps={{ sx: { borderRadius: 4 } }}
             />
           </Box>
         </DialogContent>
@@ -1295,6 +1340,7 @@ export default function EnhancedTable() {
         </DialogActions>
       </Dialog>
 
+      {/* Dialog ลบพนักงาน */}
       <Dialog
         open={!!deleteRow}
         onClose={() => setDeleteRow(null)}
@@ -1328,7 +1374,7 @@ export default function EnhancedTable() {
               mb: 1,
             }}
           >
-            ยืนยันการลบสินค้า
+            ยืนยันการลบพนักงาน
           </DialogTitle>
           <DialogContent
             sx={{
@@ -1336,9 +1382,9 @@ export default function EnhancedTable() {
               color: "text.secondary",
             }}
           >
-            คุณต้องการลบสินค้า <br />
+            คุณต้องการลบพนักงาน <br />
             <Typography component="span" fontWeight="bold" color="error.main">
-              {deleteRow?.name}
+              {deleteRow?.gmail}
             </Typography>{" "}
             ใช่หรือไม่?
           </DialogContent>
@@ -1363,13 +1409,13 @@ export default function EnhancedTable() {
             variant="contained"
             color="error"
             size="medium"
-            onClick={handleDeleteConfirm}
+            onClick={handleDeleteUserConfirm}
             sx={{
               boxShadow: "none",
               textTransform: "none",
             }}
           >
-            ลบสินค้า
+            ลบข้อมูล
           </Button>
         </DialogActions>
       </Dialog>
