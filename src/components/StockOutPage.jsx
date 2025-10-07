@@ -408,31 +408,30 @@ function StockOutPage() {
       }}
     >
       <Grid
+        container
         spacing={2}
         sx={{
           mt: 3,
           justifyContent: "center",
           display: "flex",
           flexWrap: "wrap",
-          gap: 7,
-          borderRadius: 4,
           width: "100%",
         }}
       >
-        {/* กล่องเงินค่าจ้างรายวันพนักงาน */}
-        <Grid xs={12} sm={4}>
+        {/* กล่องค่าจ้างรายวัน */}
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
-              p: 6.3,
-              pt: 4,
-              pb: 4,
+              p: 4,
+              px: 7.8,
               backgroundColor: theme.palette.background.chartBackground,
               borderRadius: 4,
             }}
           >
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom textAlign="center">
               เงินค่าจ้างรายวันพนักงาน
             </Typography>
+
             <TextField
               fullWidth
               placeholder="กรอกเงินค่าจ้างรายวัน"
@@ -440,11 +439,9 @@ function StockOutPage() {
               value={dailyPayment}
               onChange={(e) => setDailyPayment(e.target.value)}
               onKeyDown={(e) => {
-                if (["e", "E", "+", "-"].includes(e.key)) {
-                  e.preventDefault();
-                }
+                if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault();
               }}
-              InputProps={{ sx: { borderRadius: 2 } }}
+              InputProps={{ sx: { borderRadius: 2, height: 40 } }}
               inputProps={{
                 inputMode: "numeric",
                 pattern: "[0-9]*",
@@ -452,44 +449,44 @@ function StockOutPage() {
               }}
               sx={{ mb: 2 }}
             />
-            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
-              <Button
-                variant="contained"
-                fullWidth
-                disabled={
-                  !dailyPayment ||
-                  isNaN(Number(dailyPayment)) ||
-                  Number(dailyPayment) <= 0
-                }
-                onClick={() => {
-                  handleAddDailyRow("ค่าจ้างรายวัน", dailyPayment);
-                  setDailyPayment("");
-                }}
-                sx={{
-                  borderRadius: 2,
-                  color: theme.palette.text.hint,
-                }}
-              >
-                เพิ่ม
-              </Button>
-            </Box>
+
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={
+                !dailyPayment ||
+                isNaN(Number(dailyPayment)) ||
+                Number(dailyPayment) <= 0
+              }
+              onClick={() => {
+                handleAddDailyRow("ค่าจ้างรายวัน", dailyPayment);
+                setDailyPayment("");
+              }}
+              sx={{
+                borderRadius: 2,
+                color: theme.palette.text.hint,
+                height: 40,
+              }}
+            >
+              เพิ่ม
+            </Button>
           </Paper>
         </Grid>
 
         {/* กล่องค่าน้ำแข็ง */}
-        <Grid xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
-              p: 6.3,
-              pt: 4,
-              pb: 4,
+              p: 4,
+              px: 7.8,
               backgroundColor: theme.palette.background.chartBackground,
               borderRadius: 4,
             }}
           >
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom textAlign="center">
               ค่าน้ำแข็ง
             </Typography>
+
             <TextField
               fullWidth
               placeholder="กรอกค่าน้ำแข็ง"
@@ -497,11 +494,9 @@ function StockOutPage() {
               value={icePrice}
               onChange={(e) => setIcePrice(e.target.value)}
               onKeyDown={(e) => {
-                if (["e", "E", "+", "-"].includes(e.key)) {
-                  e.preventDefault();
-                }
+                if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault();
               }}
-              InputProps={{ sx: { borderRadius: 2 } }}
+              InputProps={{ sx: { borderRadius: 2, height: 40 } }}
               inputProps={{
                 inputMode: "numeric",
                 pattern: "[0-9]*",
@@ -509,44 +504,42 @@ function StockOutPage() {
               }}
               sx={{ mb: 2 }}
             />
-            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
-              <Button
-                variant="contained"
-                fullWidth
-                disabled={
-                  !icePrice || isNaN(Number(icePrice)) || Number(icePrice) <= 0
-                }
-                onClick={() => {
-                  handleAddDailyRow("ค่าน้ำแข็ง", icePrice);
-                  setIcePrice("");
-                }}
-                sx={{
-                  borderRadius: 2,
-                  color: theme.palette.text.hint,
-                }}
-              >
-                เพิ่ม
-              </Button>
-            </Box>
+
+            <Button
+              variant="contained"
+              fullWidth
+              disabled={
+                !icePrice || isNaN(Number(icePrice)) || Number(icePrice) <= 0
+              }
+              onClick={() => {
+                handleAddDailyRow("ค่าน้ำแข็ง", icePrice);
+                setIcePrice("");
+              }}
+              sx={{
+                borderRadius: 2,
+                color: theme.palette.text.hint,
+                height: 40,
+              }}
+            >
+              เพิ่ม
+            </Button>
           </Paper>
         </Grid>
 
         {/* กล่องอื่นๆ */}
-        <Grid xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
-              p: 6.3,
-              pt: 4,
-              pb: 4,
+              p: 4,
+              px: 7.8,
               backgroundColor: theme.palette.background.chartBackground,
               borderRadius: 4,
             }}
           >
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom textAlign="center">
               อื่นๆ
             </Typography>
 
-            {/* ช่องกรอกชื่อ */}
             <TextField
               fullWidth
               placeholder="ระบุชื่อรายการ"
@@ -554,10 +547,9 @@ function StockOutPage() {
               value={otherName}
               onChange={(e) => setOtherName(e.target.value)}
               sx={{ mb: 2 }}
-              InputProps={{ sx: { borderRadius: 2 } }}
+              InputProps={{ sx: { borderRadius: 2, height: 40 } }}
             />
 
-            {/* ช่องกรอกราคาพร้อมปุ่ม เพิ่ม */}
             <Box sx={{ display: "flex", gap: 1 }}>
               <TextField
                 fullWidth
@@ -566,39 +558,38 @@ function StockOutPage() {
                 value={otherPrice}
                 onChange={(e) => setOtherPrice(e.target.value)}
                 onKeyDown={(e) => {
-                  if (["e", "E", "+", "-"].includes(e.key)) {
-                    e.preventDefault();
-                  }
+                  if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault();
                 }}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: 2, height: 40 } }}
                 inputProps={{
                   inputMode: "numeric",
                   pattern: "[0-9]*",
                   min: 0,
                 }}
               />
-              <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
-                <Button
-                  variant="contained"
-                  disabled={
-                    !otherName ||
-                    !otherPrice ||
-                    isNaN(Number(otherPrice)) ||
-                    Number(otherPrice) <= 0
-                  }
-                  onClick={() => {
-                    handleAddDailyRow(otherName, otherPrice);
-                    setOtherName("");
-                    setOtherPrice("");
-                  }}
-                  sx={{
-                    borderRadius: 2,
-                    color: theme.palette.text.hint,
-                  }}
-                >
-                  เพิ่ม
-                </Button>
-              </Box>
+              <Button
+                variant="contained"
+                disabled={
+                  !otherName ||
+                  !otherPrice ||
+                  isNaN(Number(otherPrice)) ||
+                  Number(otherPrice) <= 0
+                }
+                onClick={() => {
+                  handleAddDailyRow(otherName, otherPrice);
+                  setOtherName("");
+                  setOtherPrice("");
+                }}
+                sx={{
+                  borderRadius: 2,
+                  color: theme.palette.text.hint,
+                  whiteSpace: "nowrap",
+                  px: 3,
+                  height: 40,
+                }}
+              >
+                เพิ่ม
+              </Button>
             </Box>
           </Paper>
         </Grid>
