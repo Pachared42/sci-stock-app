@@ -199,7 +199,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+function FreshFoodTable() {
   // ตัวแปร state ต่าง ๆ
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
@@ -1422,3 +1422,5 @@ export default function EnhancedTable() {
     </Box>
   );
 }
+
+export default FreshFoodTable;

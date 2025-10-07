@@ -14,7 +14,7 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { fetchUserProfile, updateUserProfile } from "../api/profileApi";
 
-export default function UserProfileSettings() {
+function UserProfileSettings() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [snackbar, setSnackbar] = useState({
@@ -341,3 +341,5 @@ export default function UserProfileSettings() {
     </Box>
   );
 }
+
+export default UserProfileSettings;

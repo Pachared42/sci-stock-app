@@ -18,6 +18,7 @@ import {
   Divider,
   useMediaQuery,
   Button,
+  Fade,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { keyframes } from "@mui/system";
@@ -95,6 +96,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
+  {
+    segment: "calendar-employee",
+    title: "ตารางงาน",
+    icon: <CalendarMonthIcon />,
+    roles: ["employee"],
+    group: "main",
+  },
   // {
   //   segment: "sales-report",
   //   title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
@@ -147,7 +155,7 @@ const NAVIGATION = [
   },
   {
     segment: "upload-products",
-    title: "อัพโหลดสินค้า .xlsx",
+    title: "อัพโหลดสินค้าด้วยไฟล์",
     icon: <UploadFileRoundedIcon />,
     roles: ["admin", "superadmin"],
     group: "upload",
@@ -211,7 +219,7 @@ const spin = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
-export default function DashboardLayout() {
+function DashboardLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -266,29 +274,14 @@ export default function DashboardLayout() {
         <List
           sx={{
             flexGrow: 1,
-            px: 1.5,
+            px: 2,
             pt: 0,
             pb: 1.5,
             overflowY: "auto",
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(0,0,0,0.1) transparent",
+            scrollbarWidth: "none",
             "&::-webkit-scrollbar": {
-              width: "6px",
-              backgroundColor: "transparent",
+              display: "none",
             },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "rgba(0,0,0,0.0)",
-              borderRadius: "3px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "rgba(0,0,0,0.4)",
-            },
-            "&::-webkit-scrollbar-button:vertical:start:decrement, &::-webkit-scrollbar-button:vertical:end:increment":
-              {
-                display: "none",
-                width: 0,
-                height: 0,
-              },
           }}
         >
           {groups.map(({ id, label }, index) => {
@@ -303,7 +296,7 @@ export default function DashboardLayout() {
                 <Typography
                   variant="subtitle2"
                   sx={{
-                    px: 1,
+                    px: 1.2,
                     pt: 1,
                     pb: 1,
                     color: theme.palette.text.secondary,
@@ -335,15 +328,15 @@ export default function DashboardLayout() {
                           }
                           sx={{
                             position: "relative",
-                            flexDirection: open ? "row" : "column",
+                            display: "flex",
+                            flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: open ? "flex-start" : "center",
-                            gap: open ? 1 : 0,
-                            px: 2,
-                            py: open ? 1 : 2.5,
+                            justifyContent: "flex-start",
+                            gap: 1,
+                            px: 2.6,
                             mb: 0.5,
                             ml: isChild && open ? 3 : 0,
-                            borderRadius: 4,
+                            borderRadius: 3,
                             backgroundColor: isSelected
                               ? theme.palette.action.selected
                               : "transparent",
@@ -354,7 +347,6 @@ export default function DashboardLayout() {
                           <ListItemIcon
                             sx={{
                               minWidth: 36,
-                              mb: open ? 0 : 0.5,
                               justifyContent: "center",
                               color: isSelected
                                 ? theme.palette.primary.main
@@ -364,38 +356,51 @@ export default function DashboardLayout() {
                             {menuItem.icon}
                           </ListItemIcon>
 
-                          {open && (
-                            <ListItemText
-                              primary={menuItem.title}
-                              primaryTypographyProps={{ fontSize: "1rem" }}
-                              sx={{
-                                opacity: 1,
-                                color: isSelected
-                                  ? theme.palette.primary.main
-                                  : "text.secondary",
-                                whiteSpace: "nowrap",
-                              }}
-                            />
-                          )}
-
-                          {!open && isExpandable && !isChild && (
-                            <ExpandMore
-                              fontSize="small"
-                              sx={{
-                                position: "absolute",
-                                right: 8,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                pointerEvents: "none",
-                                color: theme.palette.text.secondary,
-                              }}
-                            />
-                          )}
+                          <ListItemText
+                            primary={menuItem.title}
+                            primaryTypographyProps={{ fontSize: "1rem" }}
+                            sx={{
+                              opacity: open ? 1 : 0,
+                              width: open ? "auto" : 0,
+                              overflow: "hidden",
+                              transition: "all 0.25s ease",
+                              color: isSelected
+                                ? theme.palette.primary.main
+                                : "text.secondary",
+                              whiteSpace: "nowrap",
+                            }}
+                          />
 
                           {isExpandable &&
                             !isChild &&
-                            open &&
-                            (isOpen ? <ExpandLess /> : <ExpandMore />)}
+                            (open ? (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  transition:
+                                    "opacity 0.25s ease, transform 0.25s ease",
+                                  opacity: open ? 1 : 0,
+                                  transform: open
+                                    ? "translateX(0)"
+                                    : "translateX(-8px)",
+                                }}
+                              >
+                                {isOpen ? <ExpandLess /> : <ExpandMore />}
+                              </Box>
+                            ) : (
+                              <ExpandMore
+                                fontSize="small"
+                                sx={{
+                                  position: "absolute",
+                                  right: 8,
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  pointerEvents: "none",
+                                  color: theme.palette.text.secondary,
+                                }}
+                              />
+                            ))}
                         </ListItemButton>
                       </ListItem>
                     );
@@ -549,6 +554,7 @@ export default function DashboardLayout() {
           variant={isMobile ? "temporary" : "permanent"}
           open={open}
           onClose={() => setOpen(false)}
+          transitionDuration={{ enter: 200, exit: 200 }}
           ModalProps={{
             keepMounted: true,
             BackdropProps: {
@@ -568,7 +574,7 @@ export default function DashboardLayout() {
             transition: (theme) =>
               theme.transitions.create("width", {
                 easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.standard,
+                duration: 200,
               }),
             overflowX: "hidden",
             "& .MuiDrawer-paper": {
@@ -576,7 +582,7 @@ export default function DashboardLayout() {
               transition: (theme) =>
                 theme.transitions.create("width", {
                   easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.standard,
+                  duration: 200,
                 }),
               backgroundColor: darkMode
                 ? "rgba(12, 16, 20, 0.98)"
@@ -598,9 +604,7 @@ export default function DashboardLayout() {
               overflow: "hidden",
               px: open ? 0 : 0,
               transition: (theme) =>
-                theme.transitions.create(["padding"], {
-                  duration: theme.transitions.duration.standard,
-                }),
+                theme.transitions.create(["padding"], { duration: 200 }),
             }}
           >
             {drawerContent}
@@ -617,14 +621,13 @@ export default function DashboardLayout() {
             BackdropProps: {
               sx: {
                 backdropFilter: "blur(6px)",
-                zIndex: (theme) => theme.zIndex.modal + 1000, // สูงกว่า Drawer รอง
-                backgroundColor: "rgba(0,0,0,0.3)",
+                zIndex: (theme) => theme.zIndex.modal + 1000,
               },
             },
           }}
           sx={{
             position: "fixed",
-            zIndex: (theme) => theme.zIndex.modal + 1001, // สูงกว่า Drawer รอง
+            zIndex: (theme) => theme.zIndex.modal + 1001,
           }}
           PaperProps={{
             sx: {
@@ -639,7 +642,7 @@ export default function DashboardLayout() {
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              zIndex: (theme) => theme.zIndex.modal + 1001, // สูงกว่า Drawer รอง
+              zIndex: (theme) => theme.zIndex.modal + 1001,
               borderLeft: (theme) =>
                 theme.palette.mode === "dark"
                   ? "1px solid rgba(255,255,255,0.1)"
@@ -716,6 +719,8 @@ export default function DashboardLayout() {
     </ThemeProvider>
   );
 }
+
+export default DashboardLayout;
 
 DashboardLayout.propTypes = {
   window: PropTypes.func,

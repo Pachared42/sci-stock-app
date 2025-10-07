@@ -30,7 +30,7 @@ import {
   fetchOutOfStockProducts,
 } from "../api/dashboardStatsApi";
 
-const Dashboard = () => {
+function Dashboard () {
   const theme = useTheme();
   const token = localStorage.getItem("token");
 
@@ -254,7 +254,11 @@ const Dashboard = () => {
                       color: "#ffffff",
                     }}
                   >
-                    {card.value} ชิ้น
+                    {card.value}{" "}
+                    {card.label === "สินค้ากำลังจะหมด" ||
+                    card.label === "สินค้าหมดสต็อก"
+                      ? "รายการ"
+                      : "ชิ้น"}
                   </Typography>
                 </Box>
               </CardContent>

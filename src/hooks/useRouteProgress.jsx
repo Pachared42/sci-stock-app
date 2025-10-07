@@ -5,7 +5,7 @@ import 'nprogress/nprogress.css';
 
 NProgress.configure({ showSpinner: false });
 
-export default function useNProgressRouteChange() {
+function useNProgressRouteChange() {
   const location = useLocation();
   const navigationType = useNavigationType();
 
@@ -18,3 +18,5 @@ export default function useNProgressRouteChange() {
     return () => clearTimeout(timer);
   }, [location, navigationType]);
 }
+
+export default useNProgressRouteChange;

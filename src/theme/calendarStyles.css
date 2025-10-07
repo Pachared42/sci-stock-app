@@ -90,9 +90,8 @@ body.dark-mode {
 .fc-daygrid-event {
   border: none !important;
   box-shadow: none !important;
-  border-radius: 8px !important;
+  border-radius: 0px !important;
   width: 100% !important;
-  padding: 4px 8px !important;
   margin: 2px 0 !important;
   font-weight: 500;
   font-size: 1rem;
@@ -264,6 +263,15 @@ body.dark-mode {
   pointer-events: none !important;
 }
 
+.fc .fc-daygrid-day {
+  height: 130px;
+}
 
+.fc-scroller {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-
+.fc-scroller::-webkit-scrollbar {
+  display: none;
+}

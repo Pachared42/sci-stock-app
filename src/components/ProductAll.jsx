@@ -86,7 +86,6 @@ const headCells = [
   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
-  { id: "manage", label: "จัดการสินค้า", width: "20%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -194,7 +193,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+function ProductAll() {
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
@@ -677,34 +676,6 @@ export default function EnhancedTable() {
                         >
                           {row.stockMin} ชิ้น
                         </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                        >
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            sx={{ mr: 1 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(row);
-                            }}
-                          >
-                            แก้ไข
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteRow(row);
-                            }}
-                          >
-                            ลบ
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -713,7 +684,7 @@ export default function EnhancedTable() {
               {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={9} />
+                  <TableCell colSpan={8} />
                 </TableRow>
               )}
             </TableBody>
@@ -1067,3 +1038,5 @@ export default function EnhancedTable() {
     </Box>
   );
 }
+
+export default ProductAll;

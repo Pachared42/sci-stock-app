@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, Avatar, Divider } from "@mui/material";
 import { fetchUserProfile } from "../api/profileApi";
 
-export default function ProfilePanel() {
+function ProfilePanel() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -101,3 +101,5 @@ export default function ProfilePanel() {
         </Box>
     );
 }
+
+export default ProfilePanel;

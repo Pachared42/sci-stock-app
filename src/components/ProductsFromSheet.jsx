@@ -189,7 +189,7 @@ EnhancedTableToolbar.propTypes = {
   loading: PropTypes.bool.isRequired,
 };
 
-export default function EnhancedTable() {
+function ProductsFromSheet() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
@@ -610,3 +610,5 @@ export default function EnhancedTable() {
     </Box>
   );
 }
+
+export default ProductsFromSheet;

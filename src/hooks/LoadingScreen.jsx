@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/material";
 
-export default function LoadingScreen() {
+function LoadingScreen() {
   return (
     <Box
       sx={{
@@ -39,3 +39,5 @@ export default function LoadingScreen() {
     </Box>
   );
 }
+
+export default LoadingScreen;

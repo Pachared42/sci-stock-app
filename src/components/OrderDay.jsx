@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -15,21 +15,22 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
-
-import { fetchSalesToday } from "../api/orderSalesDay";
-
 import { TextField } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
+import { fetchSalesToday, fetchDailyExpenses } from "../api/orderSalesDay";
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "30%" },
-  { id: "img", label: "รูปภาพ", width: "25%" },
-  { id: "barcode", label: "BARCODE", width: "20%" },
-  { id: "price", label: "ราคา", width: "10%" },
-  { id: "quantity", label: "จำนวน", width: "10%" },
-  { id: "totalPrice", label: "ราคารวม", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "16%" },
+  { id: "img", label: "รูปภาพ", width: "12%" },
+  { id: "quantity", label: "จำนวน", width: "12%" },
+  { id: "cost_price", label: "ราคาต้นทุน/ชิ้น", width: "12%" },
+  { id: "price", label: "ราคาขาย/ชิ้น", width: "12%" },
+  { id: "profit_per_item", label: "กำไร/ชิ้น", width: "12%" },
+  { id: "total_profit", label: "รวมกำไร", width: "12%" },
+  { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -149,7 +150,7 @@ EnhancedTableToolbar.propTypes = {
   date: PropTypes.string.isRequired,
 };
 
-function SalesTableByDate({ date, rows }) {
+function SalesTableByDate({ date, rows, dailyExpenses }) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("name");
   const [selected, setSelected] = React.useState([]);
@@ -211,9 +212,103 @@ function SalesTableByDate({ date, rows }) {
     [order, orderBy, page, rowsPerPage, rows]
   );
 
+  const topProducts = [...rows]
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3);
+
+  const totalSales = rows.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+  const totalCost = rows.reduce(
+    (sum, r) => sum + (r.cost_price || 0) * r.quantity,
+    0
+  );
+  const totalProfit = totalSales - totalCost;
+
+  const filteredExpenses = dailyExpenses.filter((e) => e.date === date);
+  const totalDailyPayments = filteredExpenses.reduce(
+    (sum, e) => sum + (e.amount || 0),
+    0
+  );
+
+  const formattedSelectedDate = new Date(date).toISOString().split("T")[0];
+
   return (
-    <Paper sx={{ width: "100%", mb: 4 }}>
+    <Paper sx={{ width: "100%", p: 2 }}>
       <EnhancedTableToolbar numSelected={selected.length} date={date} />
+      {/* --- Grid บนหัวตาราง --- */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mb: 2,
+          width: "100%",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Top 3 Products */}
+        <Paper
+          sx={{
+            p: 2,
+            backgroundColor: theme.palette.background.chartBackground,
+            flex: "1 1 25%",
+            minWidth: "300px",
+            borderRadius: 5.5,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            mb={1}
+            sx={{ fontSize: "1.25rem" }}
+          >
+            สินค้าขายดี 3 อันดับแรก
+          </Typography>
+          {topProducts.length > 0 ? (
+            topProducts.map((p) => (
+              <Typography key={p.id}>
+                {p.name} - {p.quantity} ชิ้น
+              </Typography>
+            ))
+          ) : (
+            <Typography>ไม่มีข้อมูลสินค้า</Typography>
+          )}
+        </Paper>
+
+        {/* Daily Expenses */}
+        <Paper
+          sx={{
+            p: 2,
+            backgroundColor: theme.palette.background.chartBackground,
+            flex: "1 1 25%",
+            minWidth: "300px",
+            borderRadius: 5.5,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            mb={1}
+            sx={{ fontSize: "1.25rem" }}
+          >
+            รายจ่ายรายวัน
+          </Typography>
+
+          {dailyExpenses.length > 0 ? (
+            dailyExpenses
+              .filter(
+                (e) => dayjs(e.payment_date).format("YYYY-MM-DD") === date
+              )
+              .map((item) => (
+                <Typography key={item.id}>
+                  {item.item_name} - {item.amount} บาท
+                </Typography>
+              ))
+          ) : (
+            <Typography>ไม่มีข้อมูลรายจ่ายวันนี้</Typography>
+          )}
+        </Paper>
+      </Box>
+
+      {/* --- ตารางเดิม --- */}
       <TableContainer
         sx={{
           borderTopLeftRadius: 20,
@@ -231,12 +326,8 @@ function SalesTableByDate({ date, rows }) {
         }}
       >
         <Table
-          sx={{
-            minWidth: { xs: "250%", sm: 850 },
-            tableLayout: "fixed",
-          }}
-          aria-labelledby="tableTitle"
-          size={"medium"}
+          sx={{ minWidth: { xs: "250%", sm: 850 }, tableLayout: "fixed" }}
+          size="medium"
         >
           <EnhancedTableHead
             numSelected={selected.length}
@@ -249,14 +340,13 @@ function SalesTableByDate({ date, rows }) {
           <TableBody
             sx={{
               "& .MuiTableCell-root": {
-                borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)"
+                borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
               },
             }}
           >
             {visibleRows.map((row, index) => {
               const isItemSelected = selected.indexOf(row.id) !== -1;
               const labelId = `enhanced-table-checkbox-${index}`;
-
               return (
                 <TableRow
                   hover
@@ -275,23 +365,18 @@ function SalesTableByDate({ date, rows }) {
                       inputProps={{ "aria-labelledby": labelId }}
                     />
                   </TableCell>
+
                   <TableCell
                     component="th"
                     id={labelId}
                     scope="row"
                     padding="none"
-                    sx={{
-                      width: "25%",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      px: 1,
-                    }}
-                    title={row.name}
+                    sx={{ px: 1 }}
                   >
                     {row.name}
                   </TableCell>
-                  <TableCell sx={{ width: "20%", whiteSpace: "nowrap", px: 1 }}>
+
+                  <TableCell sx={{ px: 1 }}>
                     {row.image_url ? (
                       <img
                         src={row.image_url}
@@ -306,96 +391,233 @@ function SalesTableByDate({ date, rows }) {
                       "-"
                     )}
                   </TableCell>
-                  <TableCell sx={{ width: "20%", whiteSpace: "nowrap", px: 1 }}>
-                    {row.barcode}
+
+                  <TableCell sx={{ px: 1 }}>
+                    {Number(row.quantity || 0)} ชิ้น
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                  >
-                    {row.price} บาท
+
+                  <TableCell sx={{ px: 1 }}>
+                    {row.cost_price.toFixed(2)} บาท
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
-                  >
-                    {row.quantity} ชิ้น
+
+                  <TableCell sx={{ px: 1 }}>
+                    {row.price.toFixed(2)} บาท
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                  >
-                    {row.totalPrice} บาท
+
+                  <TableCell sx={{ px: 1 }}>
+                    {(row.price - row.cost_price).toFixed(2)} บาท
+                  </TableCell>
+
+                  <TableCell sx={{ px: 1 }}>
+                    {((row.price - row.cost_price) * row.quantity).toFixed(2)}{" "}
+                    บาท
+                  </TableCell>
+
+                  <TableCell sx={{ px: 1 }}>
+                    {row.totalPrice.toFixed(2)} บาท
                   </TableCell>
                 </TableRow>
               );
             })}
-
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={7} />
+                <TableCell colSpan={9} />
               </TableRow>
             )}
-
             {/* แถวสรุปราคารวมทั้งหมด */}
-            <TableRow
-              sx={{
-                fontWeight: "500",
-                color: "#000000",
-                height: 60,
-              }}
-            >
+            <TableRow sx={{ fontWeight: 500, height: 50 }}>
               <TableCell
                 padding="checkbox"
-                sx={{ backgroundColor: "mediumseagreen", fontSize: "1.25rem" }}
+                sx={{
+                  backgroundColor: "rgba(60, 179, 113, 0.5)",
+                  fontSize: "1.25rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
               />
               <TableCell
-                colSpan={4}
+                colSpan={7}
                 align="right"
                 sx={{
                   pr: 4.5,
-                  fontWeight: "500",
-                  color: "#000000",
-                  backgroundColor: "mediumseagreen",
+                  fontWeight: 500,
+                  backgroundColor: "rgba(60, 179, 113, 0.5)",
                   fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
                 }}
               >
-                รวมทั้งหมด
+                ยอดขายรวมทั้งหมด
               </TableCell>
               <TableCell
                 align="left"
                 sx={{
-                  fontWeight: "500",
+                  fontWeight: 500,
                   whiteSpace: "nowrap",
                   px: 1,
-                  color: "#000000",
-                  backgroundColor: "mediumseagreen",
+                  backgroundColor: "rgba(60, 179, 113, 0.5)",
                   fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
                 }}
               >
-                {visibleRows.reduce((sum, row) => sum + (row.quantity || 0), 0)}{" "}
-                ชิ้น
-              </TableCell>
-              <TableCell
-                align="left"
-                sx={{
-                  fontWeight: "500",
-                  whiteSpace: "nowrap",
-                  px: 1,
-                  color: "#000000",
-                  backgroundColor: "mediumseagreen",
-                  fontSize: "1rem",
-                }}
-              >
-                {visibleRows
+                {rows
                   .reduce((sum, row) => sum + (row.totalPrice || 0), 0)
                   .toFixed(2)}{" "}
                 บาท
               </TableCell>
             </TableRow>
+
+            {/* แถวสรุปรวมกำไร */}
+            <TableRow sx={{ fontWeight: 500, height: 50 }}>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: "rgba(30, 144, 255, 0.4)",
+                  fontSize: "1.25rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              />
+              <TableCell
+                colSpan={7}
+                align="right"
+                sx={{
+                  pr: 4.5,
+                  fontWeight: 500,
+                  backgroundColor: "rgba(30, 144, 255, 0.4)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                กำไรรวมทั้งหมด
+              </TableCell>
+              <TableCell
+                align="left"
+                sx={{
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  px: 1,
+                  backgroundColor: "rgba(30, 144, 255, 0.4)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                {rows
+                  .reduce(
+                    (sum, row) =>
+                      sum +
+                      ((Number(row.price) || 0) -
+                        (Number(row.cost_price) || 0)) *
+                        (Number(row.quantity) || 0),
+                    0
+                  )
+                  .toFixed(2)}{" "}
+                บาท
+              </TableCell>
+            </TableRow>
+
+            {/* แถวสรุปรายจ่ายทั้งหมด */}
+            <TableRow sx={{ fontWeight: 500, height: 50 }}>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: "rgba(255, 99, 71, 0.4)",
+                  fontSize: "1.25rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              />
+              <TableCell
+                colSpan={7}
+                align="right"
+                sx={{
+                  pr: 4.5,
+                  fontWeight: 500,
+                  backgroundColor: "rgba(255, 99, 71, 0.4)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                รายจ่ายรวมทั้งหมด
+              </TableCell>
+              <TableCell
+                align="left"
+                sx={{
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  px: 1,
+                  backgroundColor: "rgba(255, 99, 71, 0.4)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                {dailyExpenses
+                  .filter(
+                    (e) =>
+                      e.payment_date.split("T")[0] === formattedSelectedDate
+                  )
+                  .reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
+                  .toFixed(2)}{" "}
+                บาท
+              </TableCell>
+            </TableRow>
+
+            {/* แถวสรุปกำไรสุทธิทั้งหมด */}
+            <TableRow sx={{ fontWeight: 600, height: 70 }}>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: "rgba(218, 165, 32, 0.5)",
+                  fontSize: "1.25rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              />
+              <TableCell
+                colSpan={7}
+                align="right"
+                sx={{
+                  pr: 4.5,
+                  fontWeight: 500,
+                  backgroundColor: "rgba(218, 165, 32, 0.5)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                กำไรสุทธิทั้งหมด
+              </TableCell>
+              <TableCell
+                align="left"
+                sx={{
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  px: 1,
+                  backgroundColor: "rgba(218, 165, 32, 0.5)",
+                  fontSize: "1rem",
+                  color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
+                }}
+              >
+                {(() => {
+                  const totalProfit = rows.reduce(
+                    (sum, row) =>
+                      sum +
+                      ((Number(row.price) || 0) -
+                        (Number(row.cost_price) || 0)) *
+                        (Number(row.quantity) || 0),
+                    0
+                  );
+                  const totalExpense = dailyExpenses
+                    .filter(
+                      (e) =>
+                        e.payment_date.split("T")[0] === formattedSelectedDate
+                    )
+                    .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+                  const netProfit = totalProfit - totalExpense;
+
+                  return netProfit.toFixed(2) + " บาท";
+                })()}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
+      {/* --- Pagination --- */}
       <Box
         sx={{
           display: "flex",
@@ -432,28 +654,131 @@ function SalesTableByDate({ date, rows }) {
           }}
         />
       </Box>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mt: 2,
+          width: "100%",
+          flexWrap: "wrap",
+        }}
+      >
+        <Paper
+          sx={{
+            p: 2,
+            textAlign: "center",
+            backgroundColor: theme.palette.background.chartBackground,
+            flex: "1 1 15%",
+            minWidth: "220px",
+            borderRadius: 5,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            mb={1}
+            sx={{ fontSize: "1.25rem" }}
+          >
+            ยอดขายรวม
+          </Typography>
+          <Typography fontWeight={500}>{totalSales.toFixed(2)} บาท</Typography>
+        </Paper>
+
+        <Paper
+          sx={{
+            p: 2,
+            textAlign: "center",
+            backgroundColor: theme.palette.background.chartBackground,
+            flex: "1 1 15%",
+            minWidth: "220px",
+            borderRadius: 5,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            mb={1}
+            sx={{ fontSize: "1.25rem" }}
+          >
+            รายจ่ายรวม
+          </Typography>
+          <Typography fontWeight={500}>
+            {(() => {
+              const totalDailyPayments = dailyExpenses
+                .filter(
+                  (e) => e.payment_date.split("T")[0] === formattedSelectedDate
+                )
+                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+              return totalDailyPayments.toFixed(2) + " บาท";
+            })()}
+          </Typography>
+        </Paper>
+
+        <Paper
+          sx={{
+            p: 2,
+            textAlign: "center",
+            backgroundColor: theme.palette.background.chartBackground,
+            flex: "1 1 15%",
+            minWidth: "220px",
+            borderRadius: 5,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            mb={1}
+            sx={{ fontSize: "1.25rem" }}
+          >
+            กำไรสุทธิ
+          </Typography>
+          <Typography fontWeight={500}>
+            {(() => {
+              const totalRevenue = rows.reduce(
+                (sum, row) =>
+                  sum +
+                  ((Number(row.price) || 0) - (Number(row.cost_price) || 0)) *
+                    (Number(row.quantity) || 0),
+                0
+              );
+
+              const totalExpenses = dailyExpenses
+                .filter(
+                  (e) => e.payment_date.split("T")[0] === formattedSelectedDate
+                )
+                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+              const totalProfit = totalRevenue - totalExpenses;
+
+              return totalProfit.toFixed(2) + " บาท";
+            })()}
+          </Typography>
+        </Paper>
+      </Box>
     </Paper>
   );
 }
 
-export default function SalesTablesGroupByDate() {
+function SalesTablesGroupByDate() {
   const [groupedData, setGroupedData] = React.useState({});
   const [selectedDate, setSelectedDate] = React.useState(dayjs());
+  const [dailyExpenses, setDailyExpenses] = React.useState([]);
+  const [topProducts, setTopProducts] = React.useState([]);
   const theme = useTheme();
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetchSalesToday();
+        // Fetch sales
+        const salesRes = await fetchSalesToday();
 
+        // จัดกลุ่มตามวันที่
         const tempGroup = {};
-
-        res.sales_today.forEach((item) => {
+        salesRes.sales_today.forEach((item) => {
           if (!item.sold_at) return;
-
           const date = new Date(item.sold_at).toISOString().split("T")[0];
           if (!tempGroup[date]) tempGroup[date] = {};
-
           if (tempGroup[date][item.barcode]) {
             tempGroup[date][item.barcode].quantity += item.quantity;
             tempGroup[date][item.barcode].totalPrice +=
@@ -464,21 +789,35 @@ export default function SalesTablesGroupByDate() {
               name: item.product_name || "-",
               image_url: item.image_url || "",
               barcode: item.barcode || "-",
-              price: item.price?.toFixed(2) || "-",
+              price: item.price != null ? Number(item.price) : 0,
+              cost_price: item.cost != null ? Number(item.cost) : 0,
               quantity: item.quantity || 0,
-              totalPrice: item.quantity * item.price || 0,
+              totalPrice: (item.price || 0) * (item.quantity || 0),
             };
           }
         });
 
+        // แปลง object เป็น array
         const finalGroup = {};
         Object.entries(tempGroup).forEach(([date, items]) => {
           finalGroup[date] = Object.values(items);
         });
-
         setGroupedData(finalGroup);
+
+        // คำนวณ Top 3 products จากยอดขายรวม
+        const allProducts = Object.values(tempGroup).flatMap((items) =>
+          Object.values(items)
+        );
+        const sortedProducts = allProducts
+          .sort((a, b) => b.quantity - a.quantity)
+          .slice(0, 3);
+        setTopProducts(sortedProducts);
+
+        // Fetch daily expenses
+        const expensesRes = await fetchDailyExpenses();
+        setDailyExpenses(expensesRes.daily_expenses || []);
       } catch (error) {
-        console.error("Error fetching sales_today:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -488,7 +827,7 @@ export default function SalesTablesGroupByDate() {
   const formattedSelectedDate = selectedDate.format("YYYY-MM-DD");
 
   return (
-    <Box sx={{ width: "100%", px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, }}>
+    <Box sx={{ width: "100%", px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 } }}>
       {/* Header บนสุด */}
       <Box
         sx={{
@@ -544,6 +883,7 @@ export default function SalesTablesGroupByDate() {
           key={formattedSelectedDate}
           date={formattedSelectedDate}
           rows={groupedData[formattedSelectedDate]}
+          dailyExpenses={dailyExpenses}
         />
       ) : (
         <Typography sx={{ textAlign: "center", mt: 6 }}>
@@ -553,3 +893,5 @@ export default function SalesTablesGroupByDate() {
     </Box>
   );
 }
+
+export default SalesTablesGroupByDate;

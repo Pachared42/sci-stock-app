@@ -50,11 +50,12 @@ function stableSort(array, comparator) {
 }
 
 const headCellsStockOut = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
-  { id: "image_url", label: "รูปภาพ", width: "20%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "image_url", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "price", label: "ราคาขาย", width: "15%" },
-  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "25%" },
+  { id: "cost", label: "ราคาทุน", width: "10%" },
+  { id: "price", label: "ราคาขาย", width: "10%" },
+  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
 ];
 
 const headCellsDailyPayment = [
@@ -152,7 +153,7 @@ function EnhancedTableToolbar({ title }) {
   );
 }
 
-export default function StockOutPage() {
+function StockOutPage() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
@@ -165,10 +166,10 @@ export default function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [dailyPayment, setDailyPayment] = useState("");
-  const [icePrice, setIcePrice] = useState("");
+  const [icePrice, setIcePrice] = useState("10");
   const [otherName, setOtherName] = useState("");
   const [otherPrice, setOtherPrice] = useState("");
+  const [dailyPayment, setDailyPayment] = useState("50");
 
   const [stockRows, setStockRows] = useState(() => {
     const stored = localStorage.getItem("stockOutItems");
@@ -284,6 +285,7 @@ export default function StockOutPage() {
             id: product.id,
             product_name: product.product_name,
             barcode: product.barcode,
+            cost: product.cost,
             price: product.price,
             image_url: product.image_url,
             quantity: 0,
@@ -304,14 +306,14 @@ export default function StockOutPage() {
     }
   };
 
-  const handleQuantityChange = (id, value) => {
-    setStockRows((prev) => {
-      const updated = prev.map((row) =>
-        row.id === id ? { ...row, quantity: value } : row
-      );
-      localStorage.setItem("stockOutItems", JSON.stringify(updated));
-      return updated;
-    });
+  const handleQuantityChange = (barcode, value) => {
+    setStockRows((prevRows) =>
+      prevRows.map((row) =>
+        row.barcode === barcode
+          ? { ...row, quantity: value === "" ? "" : Number(value) }
+          : row
+      )
+    );
   };
 
   const handleRemoveRow = (id) => {
@@ -450,21 +452,27 @@ export default function StockOutPage() {
               }}
               sx={{ mb: 2 }}
             />
-            <Button
-              variant="contained"
-              fullWidth
-              disabled={
-                !dailyPayment ||
-                isNaN(Number(dailyPayment)) ||
-                Number(dailyPayment) <= 0
-              }
-              onClick={() => {
-                handleAddDailyRow("ค่าจ้างรายวัน", dailyPayment);
-                setDailyPayment("");
-              }}
-            >
-              เพิ่ม
-            </Button>
+            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+              <Button
+                variant="contained"
+                fullWidth
+                disabled={
+                  !dailyPayment ||
+                  isNaN(Number(dailyPayment)) ||
+                  Number(dailyPayment) <= 0
+                }
+                onClick={() => {
+                  handleAddDailyRow("ค่าจ้างรายวัน", dailyPayment);
+                  setDailyPayment("");
+                }}
+                sx={{
+                  borderRadius: 2,
+                  color: theme.palette.text.hint,
+                }}
+              >
+                เพิ่ม
+              </Button>
+            </Box>
           </Paper>
         </Grid>
 
@@ -501,19 +509,25 @@ export default function StockOutPage() {
               }}
               sx={{ mb: 2 }}
             />
-            <Button
-              variant="contained"
-              fullWidth
-              disabled={
-                !icePrice || isNaN(Number(icePrice)) || Number(icePrice) <= 0
-              }
-              onClick={() => {
-                handleAddDailyRow("ค่าน้ำแข็ง", icePrice);
-                setIcePrice("");
-              }}
-            >
-              เพิ่ม
-            </Button>
+            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+              <Button
+                variant="contained"
+                fullWidth
+                disabled={
+                  !icePrice || isNaN(Number(icePrice)) || Number(icePrice) <= 0
+                }
+                onClick={() => {
+                  handleAddDailyRow("ค่าน้ำแข็ง", icePrice);
+                  setIcePrice("");
+                }}
+                sx={{
+                  borderRadius: 2,
+                  color: theme.palette.text.hint,
+                }}
+              >
+                เพิ่ม
+              </Button>
+            </Box>
           </Paper>
         </Grid>
 
@@ -563,22 +577,28 @@ export default function StockOutPage() {
                   min: 0,
                 }}
               />
-              <Button
-                variant="contained"
-                disabled={
-                  !otherName ||
-                  !otherPrice ||
-                  isNaN(Number(otherPrice)) ||
-                  Number(otherPrice) <= 0
-                }
-                onClick={() => {
-                  handleAddDailyRow(otherName, otherPrice);
-                  setOtherName("");
-                  setOtherPrice("");
-                }}
-              >
-                เพิ่ม
-              </Button>
+              <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+                <Button
+                  variant="contained"
+                  disabled={
+                    !otherName ||
+                    !otherPrice ||
+                    isNaN(Number(otherPrice)) ||
+                    Number(otherPrice) <= 0
+                  }
+                  onClick={() => {
+                    handleAddDailyRow(otherName, otherPrice);
+                    setOtherName("");
+                    setOtherPrice("");
+                  }}
+                  sx={{
+                    borderRadius: 2,
+                    color: theme.palette.text.hint,
+                  }}
+                >
+                  เพิ่ม
+                </Button>
+              </Box>
             </Box>
           </Paper>
         </Grid>
@@ -729,22 +749,25 @@ export default function StockOutPage() {
             fullWidth
             InputProps={{ sx: { borderRadius: 4 } }}
           />
-
-          <Button
-            variant="contained"
-            onClick={handleStockOut}
-            disabled={!barcode}
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: 10,
-              transform: "translateY(-50%)",
-              zIndex: 10,
-              whiteSpace: "nowrap",
-            }}
-          >
-            ค้นหาสินค้า
-          </Button>
+          <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+            <Button
+              variant="contained"
+              onClick={handleStockOut}
+              disabled={!barcode}
+              sx={{
+                position: "absolute",
+                top: "50%",
+                right: 10,
+                transform: "translateY(-50%)",
+                zIndex: 10,
+                whiteSpace: "nowrap",
+                borderRadius: 2,
+                color: theme.palette.text.hint,
+              }}
+            >
+              ค้นหาสินค้า
+            </Button>
+          </Box>
         </Box>
       </Stack>
 
@@ -810,7 +833,7 @@ export default function StockOutPage() {
                 </TableRow>
               ) : (
                 visibleStockRows.map((row, index) => (
-                  <TableRow hover key={row.id ?? row.barcode ?? index}>
+                  <TableRow hover key={`${row.barcode}-${index}`}>
                     <TableCell>{row.product_name}</TableCell>
                     <TableCell>
                       {row.image_url ? (
@@ -824,6 +847,7 @@ export default function StockOutPage() {
                       )}
                     </TableCell>
                     <TableCell>{row.barcode}</TableCell>
+                    <TableCell>{row.cost} บาท</TableCell>
                     <TableCell>{row.price} บาท</TableCell>
                     <TableCell>
                       <Box
@@ -832,9 +856,9 @@ export default function StockOutPage() {
                         <TextField
                           type="number"
                           size="small"
-                          value={row.quantity || ""}
+                          value={row.quantity === "" ? "" : row.quantity ?? 0}
                           onChange={(e) =>
-                            handleQuantityChange(row.id, Number(e.target.value))
+                            handleQuantityChange(row.barcode, e.target.value)
                           }
                           inputProps={{ min: 0 }}
                           sx={{
@@ -933,3 +957,5 @@ export default function StockOutPage() {
     </Box>
   );
 }
+
+export default StockOutPage;

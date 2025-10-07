@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import LoadingScreen from "../hooks/LoadingScreen.jsx";
 
-export default function PrivateRoute({ children, allowedRoles }) {
+function PrivateRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
 
   const [showLoading, setShowLoading] = useState(true);
@@ -30,3 +30,5 @@ export default function PrivateRoute({ children, allowedRoles }) {
 
   return children;
 }
+
+export default PrivateRoute;

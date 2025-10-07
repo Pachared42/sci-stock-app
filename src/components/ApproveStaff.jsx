@@ -122,7 +122,7 @@ EnhancedTableToolbar.propTypes = {
   title: PropTypes.string.isRequired,
 };
 
-export default function EnhancedTable() {
+function ApproveStaff() {
   const [rows, setRows] = useState([]);
   const [pendingRows, setPendingRows] = useState([]);
   const [approvedRows, setApprovedRows] = useState([]);
@@ -717,3 +717,5 @@ export default function EnhancedTable() {
     </Box>
   );
 }
+
+export default ApproveStaff;

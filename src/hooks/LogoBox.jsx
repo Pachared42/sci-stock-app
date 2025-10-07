@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import logoLight from "../assets/logo-sci-light.svg";
 import logoDark from "../assets/logo-sci-dark.svg";
 
-export default function LogoBox() {
+function LogoBox() {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
@@ -28,3 +28,5 @@ export default function LogoBox() {
     </Box>
   );
 }
+
+export default LogoBox;

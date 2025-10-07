@@ -46,7 +46,7 @@ const tagColors = {
   holiday: "#E91E63",
 };
 
-function CalendarPage() {
+function CalendarEmployee() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   const calendarRef = useRef(null);
@@ -255,23 +255,6 @@ function CalendarPage() {
         >
           ปฏิทินตารางงาน
         </Typography>
-
-        <Button
-          variant="contained"
-          onClick={() => setOpenDialog(true)}
-          sx={{
-            borderRadius: 3,
-            minWidth: 0,
-            padding: isMobile ? "4px 10px" : "6px 16px",
-            fontSize: isMobile ? "0.9rem" : "1rem",
-            fontWeight: 400,
-            textTransform: "none",
-            backgroundColor: "#42a5f5",
-            color: "#fff",
-          }}
-        >
-          เพิ่มการทำงาน
-        </Button>
       </Box>
 
       <Card
@@ -286,101 +269,67 @@ function CalendarPage() {
             px: { xs: 1, sm: 2 },
             py: 2,
             display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
             alignItems: "center",
             justifyContent: "space-between",
+            gap: 2,
           }}
         >
-          <Stack direction="row" spacing={1}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => calendarApi()?.changeView("dayGridMonth")}
-            >
-              เดือน
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => calendarApi()?.changeView("listWeek")}
-            >
-              สัปดาห์
-            </Button>
-          </Stack>
-
-          <Box
+          {/* ปุ่มเปลี่ยนเดือนตัดออก เหลือแค่ prev/next/today */}
+          <Button
+            onClick={() => handleNavigate("prev")}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexGrow: 1,
-              gap: 2,
-              maxWidth: "400px",
-              mx: "auto",
+              borderRadius: "50%",
+              minWidth: 40,
+              width: 40,
+              height: 40,
+              p: 0,
             }}
           >
-            <Button
-              onClick={() => handleNavigate("prev")}
-              sx={{
-                borderRadius: "50%",
-                minWidth: 40,
-                width: 40,
-                height: 40,
-                p: 0,
-              }}
-            >
-              <ArrowBackIosRoundedIcon fontSize="small" />
-            </Button>
+            <ArrowBackIosRoundedIcon fontSize="small" />
+          </Button>
 
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{
-                flexGrow: 1,
-                textAlign: "center",
-                fontSize: {
-                  xs: "0.9rem",
-                  sm: "1rem",
-                },
-                fontWeight: 500,
-                userSelect: "none",
-              }}
-            >
-              {currentTitle}
-            </Typography>
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{
+              flexGrow: 1,
+              textAlign: "center",
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+              fontWeight: 500,
+              userSelect: "none",
+            }}
+          >
+            {currentTitle}
+          </Typography>
 
-            <Button
-              onClick={() => handleNavigate("next")}
-              sx={{
-                borderRadius: "50%",
-                minWidth: 40,
-                width: 40,
-                height: 40,
-                p: 0,
-              }}
-            >
-              <ArrowForwardIosRoundedIcon fontSize="small" />
-            </Button>
-          </Box>
+          <Button
+            onClick={() => handleNavigate("next")}
+            sx={{
+              borderRadius: "50%",
+              minWidth: 40,
+              width: 40,
+              height: 40,
+              p: 0,
+            }}
+          >
+            <ArrowForwardIosRoundedIcon fontSize="small" />
+          </Button>
 
-          <Box sx={{ ml: "auto" }}>
-            <Button
-              onClick={() => handleNavigate("today")}
-              variant="contained"
-              sx={{
-                borderRadius: 2,
-                px: "9px",
-                py: "3px",
-                fontSize: "0.9rem",
-                backgroundColor: "#FF5630",
-                color: "#fff",
-                whiteSpace: "nowrap",
-              }}
-            >
-              วันนี้
-            </Button>
-          </Box>
+          <Button
+            onClick={() => handleNavigate("today")}
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              px: "9px",
+              py: "3px",
+              fontSize: "0.9rem",
+              backgroundColor: "#FF5630",
+              color: "#fff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            วันนี้
+          </Button>
         </Box>
 
         <Box
@@ -392,6 +341,8 @@ function CalendarPage() {
           <FullCalendar
             ref={calendarRef}
             {...calendarOptions}
+            initialView="listWeek"
+            headerToolbar={false}
             dayMaxEvents={false}
             eventDisplay="block"
             slotEventOverlap={true}
@@ -399,139 +350,8 @@ function CalendarPage() {
           />
         </Box>
       </Card>
-
-      <Dialog
-        fullScreen={isMobile}
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: { borderRadius: isMobile ? 0 : 6, p: isMobile ? 1.5 : 2 },
-        }}
-        TransitionComponent={Fade}
-        transitionDuration={300}
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: 6,
-              p: { xs: 2, md: 3 },
-              bgcolor: "background.paper",
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-          {editingEvent ? "แก้ไขการทำงาน" : "เพิ่มการทำงาน"}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} mt={1}>
-            <TextField
-              label="ชื่อพนักงาน"
-              fullWidth
-              value={formState.title}
-              onChange={(e) =>
-                setFormState({ ...formState, title: e.target.value })
-              }
-              variant="outlined"
-              placeholder="กรอกชื่อพนักงาน"
-              autoFocus
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
-            />
-            <TextField
-              label="วันที่"
-              type="date"
-              fullWidth
-              value={formState.date}
-              onChange={(e) =>
-                setFormState({ ...formState, date: e.target.value })
-              }
-              InputLabelProps={{ shrink: true }}
-              variant="outlined"
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
-            />
-            <TextField
-              select
-              label="หมวด"
-              fullWidth
-              value={formState.tag}
-              onChange={(e) =>
-                setFormState({ ...formState, tag: e.target.value })
-              }
-              variant="outlined"
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
-            >
-              <MenuItem value="shipping">ทำงาน</MenuItem>
-              <MenuItem value="holiday">ลางาน</MenuItem>
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          {editingEvent && (
-            <Tooltip title="ลบการทำงาน">
-              <Button
-                color="error"
-                onClick={handleDeleteEvent}
-                sx={{ mr: "auto", fontSize: isMobile ? "0.9rem" : "1rem" }}
-                variant="outlined"
-              >
-                <DeleteIcon />
-              </Button>
-            </Tooltip>
-          )}
-          <Button
-            variant="outlined"
-            sx={{
-              fontSize: isMobile ? "0.9rem" : "1rem",
-            }}
-            onClick={() => setOpenDialog(false)}
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleAddOrUpdate}
-            sx={{
-              fontSize: isMobile ? "0.9rem" : "1rem",
-              backgroundColor: theme.palette.background.ButtonDay,
-              color: theme.palette.text.hint,
-              "&:hover": {
-                backgroundColor: theme.palette.background.ButtonDay,
-              },
-            }}
-          >
-            บันทึก
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={alert.open}
-        autoHideDuration={3000}
-        onClose={() => setAlert({ ...alert, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          severity={alert.severity}
-          variant="filled"
-          sx={{
-            width: "100%",
-            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
-            mx: "auto",
-            borderRadius: 3,
-          }}
-        >
-          {alert.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }
 
-export default CalendarPage;
+export default CalendarEmployee;

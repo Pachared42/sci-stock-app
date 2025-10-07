@@ -174,7 +174,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+function AdminTable() {
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
@@ -1478,3 +1478,5 @@ export default function EnhancedTable() {
     </Box>
   );
 }
+
+export default AdminTable;

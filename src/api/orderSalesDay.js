@@ -8,3 +8,12 @@ export async function fetchSalesToday() {
     throw error;
   }
 }
+
+export async function fetchDailyExpenses() {
+  try {
+    const response = await api.get("/api/expenses/today");
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}

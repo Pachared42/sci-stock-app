@@ -226,7 +226,7 @@ function validateData(mappedData) {
   return errors;
 }
 
-export default function UploadThreeTables() {
+function UploadProductsXlsx() {
   const theme = useTheme();
   const [data1, setData1] = useState([]);
   const [errors1, setErrors1] = useState([]);
@@ -648,3 +648,5 @@ export default function UploadThreeTables() {
     </Box>
   );
 }
+
+export default UploadProductsXlsx;
