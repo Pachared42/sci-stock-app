@@ -1,39 +1,56 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import Fade from "@mui/material/Fade";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Toolbar,
+  Typography,
+  Button,
+  Fade,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  InputAdornment,
+  Avatar,
+} from "@mui/material";
 
-import { useAuth } from "../context/AuthProvider";
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import DialogTitle from "@mui/material/DialogTitle";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import TextField from "@mui/material/TextField";
+import EnhancedEncryptionIcon from "@mui/icons-material/EnhancedEncryption";
 
+import { useAuth } from "../context/AuthProvider";
 import {
   getStudentApplications,
   approveStudentApplication,
   rejectStudentApplication,
   deleteApprovedApplication,
+  checkOrAddEmployee,
+  deleteEmployeeByGmail,
 } from "../api/registerStudentEmployeeApi";
+
+import { updateUser } from "../api/personsApi";
 
 const headCells = [
   { id: "firstName", label: "ชื่อ", width: "15%" },
   { id: "lastName", label: "นามสกุล", width: "15%" },
+  { id: "gmail", label: "Gmail", width: "20%" },
   { id: "studentId", label: "เลขประจำตัวนักศึกษา", width: "20%" },
   { id: "schedule", label: "ตารางสอน", width: "15%" },
   { id: "contactInfo", label: "ช่องทางติดต่อ", width: "15%" },
@@ -134,6 +151,198 @@ function ApproveStaff() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    showPassword: false,
+    profileimage: "/AvatarUser.png",
+    profileimageFile: null,
+  });
+
+  const handleOpenEditDialog = (employee) => {
+    setSelectedEmployee({
+      ...employee,
+      email: employee.gmail,
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleEditFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setSnackbar({
+        open: true,
+        message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+        severity: "error",
+      });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setSnackbar({
+        open: true,
+        message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB",
+        severity: "error",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedEmployee((prev) => ({
+        ...prev,
+        profileimageFile: file,
+        profileimage: reader.result,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditEmployee = async () => {
+    try {
+      if (!selectedEmployee.firstName || !selectedEmployee.lastName) {
+        setSnackbar({
+          open: true,
+          message: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          severity: "error",
+        });
+        return;
+      }
+
+      const payload = {
+        firstName: selectedEmployee.firstName,
+        lastName: selectedEmployee.lastName,
+        roleId: selectedEmployee.roleId,
+        password: selectedEmployee.password,
+        profileImage: selectedEmployee.profileimageFile,
+      };
+
+      const result = await updateUser(selectedEmployee.gmail, payload, token);
+
+      setSnackbar({
+        open: true,
+        message: result.message || "แก้ไขพนักงานเรียบร้อย",
+        severity: "success",
+      });
+
+      setApprovedRows((prev) =>
+        prev.map((row) =>
+          row.id === selectedEmployee.id ? { ...row, ...selectedEmployee } : row
+        )
+      );
+
+      setOpenEditDialog(false);
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการแก้ไขพนักงาน",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleOpenAddDialog = (row) => {
+    setSelectedEmployee(row);
+    setNewEmployee({
+      firstName: row.firstName,
+      lastName: row.lastName,
+      email: row.gmail,
+      password: "",
+      confirmPassword: "",
+      showPassword: false,
+      profileimage: row.profileimage || "",
+      profileimageFile: null,
+    });
+    setOpenAddDialog(true);
+  };
+
+  const handleAddEmployee = async () => {
+    try {
+      if (
+        !newEmployee.firstName ||
+        !newEmployee.lastName ||
+        !newEmployee.email ||
+        !newEmployee.password
+      ) {
+        setSnackbar({
+          open: true,
+          message: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          severity: "error",
+        });
+        return;
+      }
+
+      if (newEmployee.password !== newEmployee.confirmPassword) {
+        setSnackbar({
+          open: true,
+          message: "รหัสผ่านไม่ตรงกัน",
+          severity: "error",
+        });
+        return;
+      }
+
+      let file = newEmployee.profileimageFile;
+      if (!file) {
+        const response = await fetch("/AvatarUser.png");
+        const blob = await response.blob();
+        file = new File([blob], "AvatarUser.png", { type: blob.type });
+      }
+
+      const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = (error) => reject(error);
+        });
+
+      const base64Image = await toBase64(file);
+
+      const payload = {
+        gmail: newEmployee.email,
+        password: newEmployee.password,
+        firstName: newEmployee.firstName,
+        lastName: newEmployee.lastName,
+        roleId: 3,
+        profileimage: base64Image,
+      };
+
+      const result = await checkOrAddEmployee(payload, token);
+
+      setSnackbar({
+        open: true,
+        message: result.message || "เพิ่มพนักงานสำเร็จ!",
+        severity: "success",
+      });
+
+      setApprovedRows((prev) =>
+        prev.map((row) =>
+          row.gmail === newEmployee.email ? { ...row, isEmployee: true } : row
+        )
+      );
+
+      setOpenAddDialog(false);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการเพิ่มพนักงาน",
+        severity: "error",
+      });
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -148,10 +357,12 @@ function ApproveStaff() {
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
+            gmail: item.gmail,
             studentId: item.studentId,
             scheduleImg: item.schedule || null,
             contactInfo: item.contactInfo,
             status: item.status,
+            isEmployee: item.isEmployee || false,
           }));
 
         const approved = (data || [])
@@ -160,16 +371,22 @@ function ApproveStaff() {
             id: item.id,
             firstName: item.firstName,
             lastName: item.lastName,
+            gmail: item.gmail,
             studentId: item.studentId,
             scheduleImg: item.schedule || null,
             contactInfo: item.contactInfo,
             status: item.status,
+            isEmployee: item.isEmployee || false,
           }));
 
         setPendingRows(pending);
         setApprovedRows(approved);
       } catch (err) {
-        alert(err.message);
+        setSnackbar({
+          open: true,
+          message: err.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล",
+          severity: "error",
+        });
       }
     }
 
@@ -178,12 +395,40 @@ function ApproveStaff() {
 
   const handleApprove = async (id) => {
     try {
-      if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: "Token ไม่พบ กรุณา login ใหม่",
+          severity: "error",
+        });
+        return;
+      }
+
       const result = await approveStudentApplication(id, token);
-      alert("อนุมัติเรียบร้อย: " + result.message);
-      setRows((prev) => prev.filter((a) => a.id !== id));
+
+      setSnackbar({
+        open: true,
+        message: "อนุมัติเรียบร้อย: " + result.message,
+        severity: "success",
+      });
+
+      setRows((prev) =>
+        prev.map((row) =>
+          row.id === id
+            ? {
+                ...row,
+                status: "อนุมัติ",
+                isEmployee: result.student?.isEmployee || row.isEmployee,
+              }
+            : row
+        )
+      );
     } catch (err) {
-      alert(err.message);
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการอนุมัติ",
+        severity: "error",
+      });
     }
   };
 
@@ -191,10 +436,18 @@ function ApproveStaff() {
     try {
       if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
       const result = await rejectStudentApplication(id, token);
-      alert("ไม่อนุมัติเรียบร้อย: " + result.message);
+      setSnackbar({
+        open: true,
+        message: "ไม่อนุมัติเรียบร้อย: " + result.message,
+        severity: "info",
+      });
       setRows((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      alert(err.message);
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการไม่อนุมัติ",
+        severity: "error",
+      });
     }
   };
 
@@ -202,12 +455,42 @@ function ApproveStaff() {
     try {
       if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
       const result = await deleteApprovedApplication(id, token);
-      alert("ลบเรียบร้อย: " + result.message);
+      setSnackbar({
+        open: true,
+        message: "ลบเรียบร้อย: " + result.message,
+        severity: "success",
+      });
       setApprovedRows((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      alert(err.message);
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการลบ",
+        severity: "error",
+      });
     }
   };
+
+  const handleDeleteStudentAndEmployee = async (gmail) => {
+    try {
+      if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+  
+      const result = await deleteEmployeeByGmail(gmail, token);
+  
+      setSnackbar({
+        open: true,
+        message: "ลบเรียบร้อย: " + result.message,
+        severity: "success",
+      });
+  
+      setApprovedRows((prev) => prev.filter((a) => a.gmail !== gmail));
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการลบ",
+        severity: "error",
+      });
+    }
+  };  
 
   const [openDialog, setOpenDialog] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState(null);
@@ -250,6 +533,75 @@ function ApproveStaff() {
   const handleApprovedRowsPerPageChange = (event) => {
     setApprovedRowsPerPage(parseInt(event.target.value, 10));
     setApprovedPage(0);
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const generateRandomPassword = () => {
+    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lower = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789";
+    const special = "!@#$%&*-_=+[]<>?";
+    const allChars = upper + lower + numbers + special;
+  
+    let pass = "";
+    const length = 10;
+  
+    for (let i = 0; i < length; i++) {
+      pass += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    }
+  
+    return pass;
+  };
+
+  useEffect(() => {
+    const pass = generateRandomPassword();
+    setNewEmployee((prev) => ({
+      ...prev,
+      password: pass,
+      confirmPassword: pass,
+    }));
+  }, []);
+
+  const handleGeneratePassword = () => {
+    const password = generateRandomPassword(10);
+    setNewEmployee((prev) => ({
+      ...prev,
+      password,
+      confirmPassword: password,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setSnackbar({
+        open: true,
+        message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+        severity: "error",
+      });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setSnackbar({
+        open: true,
+        message: "ไฟล์ต้องมีขนาดไม่เกิน 3MB",
+        severity: "error",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewEmployee((prev) => ({
+        ...prev,
+        profileimageFile: file,
+        profileimage: reader.result,
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -315,6 +667,7 @@ function ApproveStaff() {
 
                   return (
                     <TableRow hover key={`pending-${row.id || index}`}>
+                      {/* ชื่อ */}
                       <TableCell
                         component="th"
                         id={labelId}
@@ -331,6 +684,7 @@ function ApproveStaff() {
                         {row.firstName}
                       </TableCell>
 
+                      {/* นามสกุล */}
                       <TableCell
                         sx={{
                           whiteSpace: "nowrap",
@@ -342,6 +696,19 @@ function ApproveStaff() {
                         {row.lastName}
                       </TableCell>
 
+                      {/* Gmail */}
+                      <TableCell
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          px: 2,
+                        }}
+                      >
+                        {row.gmail}
+                      </TableCell>
+
+                      {/* เลขประจำตัวนักศึกษา */}
                       <TableCell
                         sx={{
                           whiteSpace: "nowrap",
@@ -353,6 +720,7 @@ function ApproveStaff() {
                         {row.studentId}
                       </TableCell>
 
+                      {/* ตารางสอน */}
                       <TableCell sx={{ px: 2 }}>
                         <Button
                           variant="outlined"
@@ -362,10 +730,11 @@ function ApproveStaff() {
                             handleOpenSchedule(row.scheduleImg);
                           }}
                         >
-                          ดูตาราง
+                          ดูตารางสอน
                         </Button>
                       </TableCell>
 
+                      {/* ช่องทางติดต่อ */}
                       <TableCell
                         sx={{
                           whiteSpace: "nowrap",
@@ -377,6 +746,7 @@ function ApproveStaff() {
                         {row.contactInfo}
                       </TableCell>
 
+                      {/* ปุ่มจัดการ */}
                       <TableCell sx={{ px: 2, whiteSpace: "nowrap" }}>
                         <Button
                           color="success"
@@ -397,6 +767,17 @@ function ApproveStaff() {
                           onClick={(e) => {
                             e.stopPropagation();
                             handleReject(row.id);
+                          }}
+                          sx={{
+                            borderRadius: 2,
+                            borderColor: theme.palette.error.main,
+                            color: theme.palette.error.main,
+                            "&:hover": {
+                              backgroundColor: theme.palette.error.light,
+                              color: "#fff",
+                            },
+                            fontSize: "0.8rem",
+                            fontWeight: "500",
                           }}
                         >
                           ไม่อนุมัติ
@@ -454,71 +835,12 @@ function ApproveStaff() {
         </Box>
       </Paper>
 
-      {/* Dialog popup ตารางสอน */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth="md"
-        fullWidth
-        TransitionComponent={Fade}
-        transitionDuration={1}
-        disableEnforceFocus={false}
-        disableRestoreFocus={true}
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: 6,
-              p: { xs: 1, md: 1.5 },
-              bgcolor: "background.paper",
-            },
-          },
-        }}
-      >
-        <DialogTitle>ตารางสอน</DialogTitle>
-
-        <DialogContent
-          sx={{
-            borderTop: "none",
-            borderBottom: "none",
-            px: { xs: 1, md: 1.5 },
-            pb: 1.5,
-          }}
-        >
-          {currentSchedule ? (
-            <Box
-              component="img"
-              src={currentSchedule}
-              alt="ตารางสอน"
-              sx={{ width: "100%", height: "auto" }}
-            />
-          ) : (
-            <Typography>ไม่พบรูปภาพ</Typography>
-          )}
-        </DialogContent>
-
-        <DialogActions>
-          <Button
-            color="error"
-            variant="outlined"
-            onClick={handleCloseDialog}
-            autoFocus
-          >
-            ปิด
-          </Button>
-        </DialogActions>
-      </Dialog>
-
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar
           numSelected={selected.length}
           title="นักศึกษา *อนุมัติแล้ว*"
         />
+
         <TableContainer
           sx={{
             borderTopLeftRadius: 20,
@@ -529,19 +851,14 @@ function ApproveStaff() {
             width: "100%",
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "thin",
-            "&::-webkit-scrollbar": {
-              height: 6,
-            },
+            "&::-webkit-scrollbar": { height: 6 },
             backgroundColor: theme.palette.background.chartBackground,
           }}
         >
           <Table
-            sx={{
-              minWidth: { xs: "300%", sm: 850 },
-              tableLayout: "fixed",
-            }}
+            sx={{ minWidth: { xs: "300%", sm: 850 }, tableLayout: "fixed" }}
             aria-labelledby="tableTitle"
-            size={"medium"}
+            size="medium"
           >
             <EnhancedTableHead
               numSelected={selected.length}
@@ -565,8 +882,7 @@ function ApproveStaff() {
                 </TableRow>
               ) : (
                 approvedRows.map((row, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
-
+                  const labelId = `approved-${index}`;
                   return (
                     <TableRow hover key={`approved-${row.id || index}`}>
                       <TableCell
@@ -604,6 +920,17 @@ function ApproveStaff() {
                           px: 2,
                         }}
                       >
+                        {row.gmail}
+                      </TableCell>
+
+                      <TableCell
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          px: 2,
+                        }}
+                      >
                         {row.studentId}
                       </TableCell>
 
@@ -616,7 +943,7 @@ function ApproveStaff() {
                             handleOpenSchedule(row.scheduleImg);
                           }}
                         >
-                          ดูตาราง
+                          ดูตารางสอน
                         </Button>
                       </TableCell>
 
@@ -631,43 +958,69 @@ function ApproveStaff() {
                         {row.contactInfo}
                       </TableCell>
 
-                      <TableCell sx={{ px: 2, whiteSpace: "nowrap" }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            display: "inline-block",
-                            px: 1.2,
-                            py: 0.6,
-                            backgroundColor: theme.palette.success.light,
-                            color: theme.palette.common.black,
-                            borderRadius: 2,
-                            fontWeight: 500,
-                            textAlign: "center",
-                            minWidth: 60,
-                          }}
-                        >
-                          อนุมัติแล้ว
-                        </Typography>
+                      <TableCell sx={{ px: 0 }}>
+                        <Box sx={{ display: "flex", gap: 1, py: 0.5, px: 2 }}>
+                          {!row.isEmployee ? (
+                            <>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleOpenAddDialog(row)}
+                              >
+                                เพิ่มพนักงาน
+                              </Button>
 
-                        {/* ปุ่มลบ */}
-                        <Button
-                          color="error"
-                          variant="outlined"
-                          size="small"
-                          sx={{ ml: 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteApproved(row.id);
-                          }}
-                        >
-                          ลบข้อมูล
-                        </Button>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `ยืนยันการลบข้อมูลของ ${row.firstName}?`
+                                    )
+                                  ) {
+                                    handleDeleteApproved(row.id);
+                                  }
+                                }}
+                              >
+                                ลบข้อมูล
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => handleOpenEditDialog(row)}
+                              >
+                                แก้ไข
+                              </Button>
+
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `ยืนยันการลบข้อมูลของ ${row.firstName}?`
+                                    )
+                                  ) {
+                                    handleDeleteStudentAndEmployee(row.gmail);
+                                  }
+                                }}
+                              >
+                                ลบพนักงาน
+                              </Button>
+                            </>
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
                   );
                 })
               )}
-
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
                   <TableCell colSpan={7} />
@@ -714,6 +1067,650 @@ function ApproveStaff() {
           />
         </Box>
       </Paper>
+
+      {/* Dialog เพิ่มพนักงาน */}
+      <Dialog
+        open={openAddDialog}
+        onClose={() => setOpenAddDialog(false)}
+        disableEnforceFocus
+        maxWidth="md"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 500,
+            fontSize: { xs: "1.5rem", md: "1.8rem" },
+            pb: { xs: 2, md: 3 },
+            pt: 0,
+            textAlign: "center",
+            color: "primary.main",
+          }}
+        >
+          เพิ่มพนักงานใหม่
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 3, md: 4 },
+            alignItems: { xs: "center", md: "flex-start" },
+          }}
+        >
+          {/* รูปโปรไฟล์ */}
+          <Box
+            sx={{
+              flexShrink: 0,
+              width: { xs: "100%", md: 320 },
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: { xs: 3, md: 0 },
+            }}
+          >
+            <label htmlFor="photo-upload">
+              <Box
+                sx={{
+                  position: "relative",
+                  width: 250,
+                  height: 250,
+                  borderRadius: "50%",
+                  border: "3px dashed #666",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  "&:hover .overlay": { opacity: 1 },
+                }}
+              >
+                {/* Avatar: ใช้ค่า profileimage ถ้าไม่มีจะใช้ default */}
+                <Avatar
+                  src={newEmployee.profileimage || "/AvatarUser.png"}
+                  sx={{ width: "100%", height: "100%" }}
+                />
+
+                {/* Overlay สำหรับ hover */}
+                <Box
+                  className="overlay"
+                  sx={{
+                    position: "absolute",
+                    width: 220,
+                    height: 220,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(240,240,240,0.85)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0,
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  <PhotoCameraIcon sx={{ fontSize: 28, color: "#666" }} />
+                  <Typography variant="caption" color="#666">
+                    อัปโหลดรูป
+                  </Typography>
+                </Box>
+              </Box>
+            </label>
+
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleFileChange}
+            />
+
+            <Typography
+              variant="caption"
+              color="gray"
+              textAlign="center"
+              mt={4}
+            >
+              อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
+            </Typography>
+          </Box>
+
+          {/* ฟอร์มเพิ่มพนักงาน */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+              width: "100%",
+              minWidth: 0,
+              pt: { xs: 0, md: 1.5 },
+            }}
+          >
+            <TextField
+              label="ชื่อ"
+              fullWidth
+              value={newEmployee.firstName}
+              onChange={(e) =>
+                setNewEmployee((prev) => ({
+                  ...prev,
+                  firstName: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{ sx: { borderRadius: 4 } }}
+            />
+            <TextField
+              label="นามสกุล"
+              fullWidth
+              value={newEmployee.lastName}
+              onChange={(e) =>
+                setNewEmployee((prev) => ({
+                  ...prev,
+                  lastName: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{ sx: { borderRadius: 4 } }}
+            />
+            <TextField
+              label="อีเมล"
+              fullWidth
+              value={newEmployee.email}
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4, bgcolor: "action.disabledBackground" },
+                autoComplete: "new-email",
+                readOnly: true,
+              }}
+            />
+            <TextField
+              label="รหัสผ่าน"
+              type={newEmployee.showPassword ? "text" : "password"}
+              fullWidth
+              value={newEmployee.password}
+              onChange={(e) =>
+                setNewEmployee((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4 },
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ mr: 0 }}>
+                    <IconButton
+                      onClick={() => {
+                        const pass = generateRandomPassword();
+                        setNewEmployee((prev) => ({
+                          ...prev,
+                          password: pass,
+                          confirmPassword: pass,
+                        }));
+                      }}
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0.5 }}
+                    >
+                      <EnhancedEncryptionIcon />
+                    </IconButton>
+
+                    <IconButton
+                      onClick={() =>
+                        setNewEmployee((prev) => ({
+                          ...prev,
+                          showPassword: !prev.showPassword,
+                        }))
+                      }
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0 }}
+                    >
+                      {newEmployee.showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label="ยืนยันรหัสผ่าน"
+              type={showPassword ? "text" : "password"}
+              fullWidth
+              value={newEmployee.confirmPassword}
+              onChange={(e) =>
+                setNewEmployee((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4 },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0 }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            justifyContent: { xs: "center", md: "flex-end" },
+            gap: 0.5,
+            py: 2,
+            px: { xs: 2, md: 3 },
+          }}
+        >
+          <Button
+            onClick={() => setOpenAddDialog(false)}
+            color="inherit"
+            variant="outlined"
+          >
+            ยกเลิก
+          </Button>
+          <Button
+            onClick={handleAddEmployee}
+            variant="contained"
+            color="primary"
+          >
+            เพิ่มพนักงาน
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog แก้ไขพนักงาน */}
+      <Dialog
+        open={openEditDialog}
+        onClose={() => {
+          setOpenEditDialog(false);
+          setSelectedEmployee(null);
+        }}
+        disableEnforceFocus
+        maxWidth="md"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 500,
+            fontSize: { xs: "1.5rem", md: "1.8rem" },
+            pb: { xs: 2, md: 3 },
+            pt: 0,
+            textAlign: "center",
+            color: "primary.main",
+          }}
+        >
+          แก้ไขข้อมูลพนักงาน
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 3, md: 4 },
+            alignItems: { xs: "center", md: "flex-start" },
+          }}
+        >
+          {/* รูปโปรไฟล์ */}
+          <Box
+            sx={{
+              flexShrink: 0,
+              width: { xs: "100%", md: 320 },
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: { xs: 3, md: 0 },
+            }}
+          >
+            <label htmlFor="edit-photo-upload">
+              <Box
+                sx={{
+                  position: "relative",
+                  width: 250,
+                  height: 250,
+                  borderRadius: "50%",
+                  border: "3px dashed #666",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  "&:hover .overlay": { opacity: 1 },
+                }}
+              >
+                <Avatar
+                  src={selectedEmployee?.profileimage || "/AvatarUser.png"}
+                  sx={{ width: "100%", height: "100%" }}
+                />
+                <Box
+                  className="overlay"
+                  sx={{
+                    position: "absolute",
+                    width: 220,
+                    height: 220,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(240,240,240,0.85)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0,
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  <PhotoCameraIcon sx={{ fontSize: 28, color: "#666" }} />
+                  <Typography variant="caption" color="#666">
+                    อัปโหลดรูป
+                  </Typography>
+                </Box>
+              </Box>
+            </label>
+            <input
+              id="edit-photo-upload"
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleEditFileChange}
+            />
+            <Typography
+              variant="caption"
+              color="gray"
+              textAlign="center"
+              mt={2}
+            >
+              อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
+            </Typography>
+          </Box>
+
+          {/* ฟอร์มแก้ไข */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+              width: "100%",
+              minWidth: 0,
+              pt: { xs: 0, md: 1.5 },
+            }}
+          >
+            <TextField
+              label="ชื่อ"
+              fullWidth
+              value={selectedEmployee?.firstName || ""}
+              onChange={(e) =>
+                setSelectedEmployee((prev) => ({
+                  ...prev,
+                  firstName: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{ sx: { borderRadius: 4 } }}
+            />
+            <TextField
+              label="นามสกุล"
+              fullWidth
+              value={selectedEmployee?.lastName || ""}
+              onChange={(e) =>
+                setSelectedEmployee((prev) => ({
+                  ...prev,
+                  lastName: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{ sx: { borderRadius: 4 } }}
+            />
+            <TextField
+              label="อีเมล"
+              fullWidth
+              value={selectedEmployee?.email || ""}
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4, bgcolor: "action.disabledBackground" },
+                readOnly: true,
+              }}
+            />
+            <TextField
+              label="รหัสผ่าน"
+              type={selectedEmployee?.showPassword ? "text" : "password"}
+              fullWidth
+              value={selectedEmployee?.password || ""}
+              onChange={(e) =>
+                setSelectedEmployee((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4 },
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ mr: 0 }}>
+                    <IconButton
+                      onClick={() => {
+                        const pass = generateRandomPassword();
+                        setSelectedEmployee((prev) => ({
+                          ...prev,
+                          password: pass,
+                          confirmPassword: pass,
+                        }));
+                      }}
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0.5 }}
+                    >
+                      <EnhancedEncryptionIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() =>
+                        setSelectedEmployee((prev) => ({
+                          ...prev,
+                          showPassword: !prev.showPassword,
+                        }))
+                      }
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0 }}
+                    >
+                      {selectedEmployee?.showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              label="ยืนยันรหัสผ่าน"
+              type={showPassword ? "text" : "password"}
+              fullWidth
+              value={selectedEmployee?.confirmPassword || ""}
+              onChange={(e) =>
+                setSelectedEmployee((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                sx: { borderRadius: 4 },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{ p: 0.8, mr: 0 }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            justifyContent: { xs: "center", md: "flex-end" },
+            gap: 0.5,
+            py: 2,
+            px: { xs: 2, md: 3 },
+          }}
+        >
+          <Button
+            onClick={() => {
+              setOpenEditDialog(false);
+              setSelectedEmployee(null);
+            }}
+            color="inherit"
+            variant="outlined"
+          >
+            ยกเลิก
+          </Button>
+          <Button
+            onClick={handleEditEmployee}
+            variant="contained"
+            color="primary"
+          >
+            บันทึกการแก้ไข
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ตารางสอน */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={1}
+        disableEnforceFocus={false}
+        disableRestoreFocus={true}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 4,
+              p: { xs: 1, md: 1 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <DialogContent
+          sx={{
+            borderTop: "none",
+            borderBottom: "none",
+            px: { xs: 1, md: 1 },
+            py: { xs: 1, md: 1 },
+          }}
+        >
+          {currentSchedule ? (
+            <Box
+              component="img"
+              src={currentSchedule}
+              alt="ตารางสอน"
+              sx={{ width: "100%", height: "auto" }}
+            />
+          ) : (
+            <Typography>ไม่พบรูปภาพ</Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            color="error"
+            variant="outlined"
+            onClick={handleCloseDialog}
+            autoFocus
+          >
+            ปิด
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            mx: "auto",
+            borderRadius: 3,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

@@ -3,16 +3,15 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
 /**
- * ส่งคำขอสร้างผู้ใช้ใหม่
- * @param {Object} details - รายละเอียดของผู้ใช้
- * @param {string} details.gmail - อีเมล
- * @param {string} details.password - รหัสผ่าน
- * @param {string} details.firstName - ชื่อจริง
- * @param {string} details.lastName - นามสกุล
- * @param {string|number} details.roleId - รหัส role
- * @param {File} [details.profileImage] - รูปโปรไฟล์ (ถ้ามี)
- * @param {string} token - JWT token
- * @returns {Promise<Array>} - รายชื่อผู้ใช้ Employee
+ * @param {Object} details
+ * @param {string} details.gmail
+ * @param {string} details.password
+ * @param {string} details.firstName
+ * @param {string} details.lastName
+ * @param {string|number} details.roleId
+ * @param {File} [details.profileImage]
+ * @param {string} token
+ * @returns {Promise<Array>}
  */
 
 export async function createUserRequest(details, token) {
@@ -104,7 +103,6 @@ export async function updateUser(gmail, details, token) {
 
 export async function deleteUser(gmail, token) {
   try {
-    // encode Gmail ให้ URL-safe
     const gmailEncoded = encodeURIComponent(gmail);
     const res = await axios.delete(`${API_URL}/api/users/gmail/${gmailEncoded}`, {
       headers: { Authorization: `Bearer ${token}` },

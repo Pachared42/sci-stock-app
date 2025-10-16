@@ -55,3 +55,28 @@ export async function deleteApprovedApplication(id, token) {
     throw new Error(error.response?.data?.error || "ไม่สามารถลบข้อมูลได้");
   }
 }
+
+export async function checkOrAddEmployee(data, token) {
+  try {
+    const res = await axios.post(
+      `${API_URL}/api/employees/check-or-add`,
+      data,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || "ไม่สามารถเพิ่มพนักงานได้");
+  }
+}
+
+export async function deleteEmployeeByGmail(gmail, token) {
+  try {
+    const res = await axios.delete(
+      `${API_URL}/api/employees/${encodeURIComponent(gmail)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || "ไม่สามารถลบพนักงานได้");
+  }
+}

@@ -139,13 +139,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "management",
   },
-  {
-    segment: "empolyee-data",
-    title: "ข้อมูลพนักงาน",
-    icon: <RecentActorsIcon />,
-    roles: ["admin", "superadmin"],
-    group: "management",
-  },
+  // {
+  //   segment: "empolyee-data",
+  //   title: "ข้อมูลพนักงาน",
+  //   icon: <RecentActorsIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "management",
+  // },
   {
     segment: "admin-data",
     title: "ข้อมูลแอดมิน",
