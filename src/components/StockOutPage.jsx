@@ -53,8 +53,8 @@ const headCellsStockOut = [
   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
   { id: "image_url", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "cost", label: "ราคาทุน", width: "10%" },
-  { id: "price", label: "ราคาขาย", width: "10%" },
+  // { id: "cost", label: "ราคาทุน", width: "10%" },
+  // { id: "price", label: "ราคาขาย", width: "10%" },
   { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
 ];
 
@@ -419,7 +419,7 @@ function StockOutPage() {
         }}
       >
         {/* กล่องค่าจ้างรายวัน */}
-        <Grid item xs={12} sm={4}>
+        {/* <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -471,10 +471,10 @@ function StockOutPage() {
               เพิ่ม
             </Button>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* กล่องค่าน้ำแข็ง */}
-        <Grid item xs={12} sm={4}>
+        {/* <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -524,10 +524,10 @@ function StockOutPage() {
               เพิ่ม
             </Button>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* กล่องอื่นๆ */}
-        <Grid item xs={12} sm={4}>
+        {/* <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -592,10 +592,10 @@ function StockOutPage() {
               </Button>
             </Box>
           </Paper>
-        </Grid>
+        </Grid> */}
       </Grid>
 
-      <Paper sx={{ width: "100%", mb: 10 }}>
+      {/* <Paper sx={{ width: "100%", mb: 10 }}>
         <Box
           sx={{
             display: "flex",
@@ -661,7 +661,6 @@ function StockOutPage() {
                     <TableCell title={row.item_name}>{row.item_name}</TableCell>
                     <TableCell>{row.item_price} บาท</TableCell>
 
-                    {/* ปุ่มจัดการ */}
                     <TableCell sx={{ display: "flex", gap: 1 }}>
                       <Button
                         variant="contained"
@@ -729,7 +728,7 @@ function StockOutPage() {
             }}
           />
         </Box>
-      </Paper>
+      </Paper> */}
 
       <Stack spacing={2}>
         <Box sx={{ position: "relative", width: "100%" }}>
@@ -838,8 +837,8 @@ function StockOutPage() {
                       )}
                     </TableCell>
                     <TableCell>{row.barcode}</TableCell>
-                    <TableCell>{row.cost} บาท</TableCell>
-                    <TableCell>{row.price} บาท</TableCell>
+                    {/* <TableCell>{row.cost} บาท</TableCell>
+                    <TableCell>{row.price} บาท</TableCell> */}
                     <TableCell>
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}

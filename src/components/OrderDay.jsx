@@ -26,11 +26,11 @@ const headCells = [
   { id: "name", label: "ชื่อสินค้า", width: "16%" },
   { id: "img", label: "รูปภาพ", width: "12%" },
   { id: "quantity", label: "จำนวน", width: "12%" },
-  { id: "cost_price", label: "ราคาต้นทุน/ชิ้น", width: "12%" },
-  { id: "price", label: "ราคาขาย/ชิ้น", width: "12%" },
-  { id: "profit_per_item", label: "กำไร/ชิ้น", width: "12%" },
-  { id: "total_profit", label: "รวมกำไร", width: "12%" },
-  { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
+  // { id: "cost_price", label: "ราคาต้นทุน/ชิ้น", width: "12%" },
+  // { id: "price", label: "ราคาขาย/ชิ้น", width: "12%" },
+  // { id: "profit_per_item", label: "กำไร/ชิ้น", width: "12%" },
+  // { id: "total_profit", label: "รวมกำไร", width: "12%" },
+  // { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -245,7 +245,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
         }}
       >
         {/* Top 3 Products */}
-        <Paper
+        {/* <Paper
           sx={{
             p: 2,
             backgroundColor: theme.palette.background.chartBackground,
@@ -271,10 +271,10 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           ) : (
             <Typography>ไม่มีข้อมูลสินค้า</Typography>
           )}
-        </Paper>
+        </Paper> */}
 
         {/* Daily Expenses */}
-        <Paper
+        {/* <Paper
           sx={{
             p: 2,
             backgroundColor: theme.palette.background.chartBackground,
@@ -305,7 +305,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           ) : (
             <Typography>ไม่มีข้อมูลรายจ่ายวันนี้</Typography>
           )}
-        </Paper>
+        </Paper> */}
       </Box>
 
       {/* --- ตารางเดิม --- */}
@@ -396,7 +396,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
                     {Number(row.quantity || 0)} ชิ้น
                   </TableCell>
 
-                  <TableCell sx={{ px: 1 }}>
+                  {/* <TableCell sx={{ px: 1 }}>
                     {row.cost_price.toFixed(2)} บาท
                   </TableCell>
 
@@ -415,7 +415,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
 
                   <TableCell sx={{ px: 1 }}>
                     {row.totalPrice.toFixed(2)} บาท
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               );
             })}
@@ -425,7 +425,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
               </TableRow>
             )}
             {/* แถวสรุปราคารวมทั้งหมด */}
-            <TableRow sx={{ fontWeight: 500, height: 50 }}>
+            {/* <TableRow sx={{ fontWeight: 500, height: 50 }}>
               <TableCell
                 padding="checkbox"
                 sx={{
@@ -463,10 +463,10 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
                   .toFixed(2)}{" "}
                 บาท
               </TableCell>
-            </TableRow>
+            </TableRow> */}
 
             {/* แถวสรุปรวมกำไร */}
-            <TableRow sx={{ fontWeight: 500, height: 50 }}>
+            {/* <TableRow sx={{ fontWeight: 500, height: 50 }}>
               <TableCell
                 padding="checkbox"
                 sx={{
@@ -511,10 +511,10 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
                   .toFixed(2)}{" "}
                 บาท
               </TableCell>
-            </TableRow>
+            </TableRow> */}
 
             {/* แถวสรุปรายจ่ายทั้งหมด */}
-            <TableRow sx={{ fontWeight: 500, height: 50 }}>
+            {/* <TableRow sx={{ fontWeight: 500, height: 50 }}>
               <TableCell
                 padding="checkbox"
                 sx={{
@@ -556,10 +556,10 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
                   .toFixed(2)}{" "}
                 บาท
               </TableCell>
-            </TableRow>
+            </TableRow> */}
 
             {/* แถวสรุปกำไรสุทธิทั้งหมด */}
-            <TableRow sx={{ fontWeight: 600, height: 70 }}>
+            {/* <TableRow sx={{ fontWeight: 600, height: 70 }}>
               <TableCell
                 padding="checkbox"
                 sx={{
@@ -613,7 +613,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
                   return netProfit.toFixed(2) + " บาท";
                 })()}
               </TableCell>
-            </TableRow>
+            </TableRow> */}
           </TableBody>
         </Table>
       </TableContainer>
@@ -654,7 +654,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           }}
         />
       </Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           gap: 2,
@@ -755,7 +755,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
             })()}
           </Typography>
         </Paper>
-      </Box>
+      </Box> */}
     </Paper>
   );
 }

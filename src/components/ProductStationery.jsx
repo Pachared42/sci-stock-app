@@ -87,8 +87,8 @@ const headCells = [
   { id: "name", label: "ชื่อสินค้า", width: "15%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
+  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
   { id: "manage", label: "จัดการสินค้า", width: "20%" },
@@ -757,7 +757,7 @@ function StationeryTable() {
                         >
                           {row.barcode}
                         </TableCell>
-                        <TableCell
+                        {/* <TableCell
                           align="left"
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
                         >
@@ -768,7 +768,7 @@ function StationeryTable() {
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceCost} บาท
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell
                           align="left"
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
@@ -1007,7 +1007,7 @@ function StationeryTable() {
                 },
               }}
             />
-            <TextField
+            {/* <TextField
               label="ราคาขาย"
               fullWidth
               type="number"
@@ -1044,7 +1044,7 @@ function StationeryTable() {
                   borderRadius: 4,
                 },
               }}
-            />
+            /> */}
             <TextField
               label="จำนวนสต็อก"
               fullWidth
@@ -1230,7 +1230,7 @@ function StationeryTable() {
                 },
               }}
             />
-            <TextField
+            {/* <TextField
               label="ราคาขาย"
               fullWidth
               type="number"
@@ -1257,7 +1257,7 @@ function StationeryTable() {
                   borderRadius: 4,
                 },
               }}
-            />
+            /> */}
             <TextField
               label="จำนวนสต็อก"
               fullWidth

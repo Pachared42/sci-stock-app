@@ -87,8 +87,8 @@ const headCells = [
   { id: "name", label: "ชื่อสินค้า", width: "15%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
+  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
   { id: "manage", label: "จัดการสินค้า", width: "20%" },
@@ -398,73 +398,67 @@ function DriedFoodTable() {
   };
 
   // --- ฟังก์ชันเพิ่มสินค้าใหม่ ---
-  const handleAddProduct = async () => {
-    const productPayload = {
-      product_name: newProduct.name.trim(),
-      barcode: newProduct.barcode.trim(),
-      price: parseFloat(newProduct.priceSell),
-      cost: parseFloat(newProduct.priceCost),
-      stock: parseInt(newProduct.stockQty, 10) || 0,
-      reorder_level: parseInt(newProduct.stockMin, 10) || 0,
-      image_url:
-        typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
-    };
-
-    if (
-      !productPayload.product_name ||
-      !productPayload.barcode ||
-      isNaN(productPayload.price) ||
-      isNaN(productPayload.cost)
-    ) {
-      setSnackbar({
-        open: true,
-        message:
-          "กรุณากรอกชื่อสินค้า, barcode, ราคาขาย และราคาต้นทุนให้ถูกต้อง",
-        severity: "warning",
-      });
-      return;
-    }
-
-    try {
-      await createProduct("dried_food", [productPayload]);
-
-      setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
-
-      setRows((prev) => [
-        ...prev,
-        {
-          id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
-          name: productPayload.product_name,
-          barcode: productPayload.barcode,
-          imgUrl: productPayload.image_url,
-          priceSell: productPayload.price,
-          priceCost: productPayload.cost,
-          stockQty: productPayload.stock,
-          stockMin: productPayload.reorder_level,
-        },
-      ]);
-
-      setSnackbar({
-        open: true,
-        message: "เพิ่มสินค้าสำเร็จ",
-        severity: "success",
-      });
-
-      setOpenAddDialog(false);
-    } catch (error) {
-      console.error(
-        "Error adding product:",
-        error.response?.data || error.message
-      );
-
-      setSnackbar({
-        open: true,
-        message: "ไม่สามารถเพิ่มสินค้าได้",
-        severity: "error",
-      });
-    }
+const handleAddProduct = async () => {
+  const productPayload = {
+    product_name: newProduct.name.trim(),
+    barcode: newProduct.barcode.trim(),
+    // price: parseFloat(newProduct.priceSell),
+    // cost: parseFloat(newProduct.priceCost),
+    stock: parseInt(newProduct.stockQty, 10) || 0,
+    reorder_level: parseInt(newProduct.stockMin, 10) || 0,
+    image_url:
+      typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
   };
+
+  // ❌ ลบการเช็ก price / cost ออก
+  if (!productPayload.product_name || !productPayload.barcode) {
+    setSnackbar({
+      open: true,
+      message: "กรุณากรอกชื่อสินค้าและ barcode ให้ครบ",
+      severity: "warning",
+    });
+    return;
+  }
+
+  try {
+    await createProduct("dried_food", [productPayload]);
+
+    setReload((r) => !r);
+    navigate(location.pathname, { replace: true });
+
+    setRows((prev) => [
+      ...prev,
+      {
+        id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
+        name: productPayload.product_name,
+        barcode: productPayload.barcode,
+        imgUrl: productPayload.image_url,
+        // priceSell: productPayload.price,
+        // priceCost: productPayload.cost,
+        stockQty: productPayload.stock,
+        stockMin: productPayload.reorder_level,
+      },
+    ]);
+
+    setSnackbar({
+      open: true,
+      message: "เพิ่มสินค้าสำเร็จ",
+      severity: "success",
+    });
+
+    setOpenAddDialog(false);
+  } catch (error) {
+    console.error(
+      "Error adding product:",
+      error.response?.data || error.message
+    );
+    setSnackbar({
+      open: true,
+      message: "ไม่สามารถเพิ่มสินค้าได้",
+      severity: "error",
+    });
+  }
+};
 
   // --- ฟังก์ชันกรองและค้นหาข้อมูล ---
   const filteredRows = useMemo(() => {
@@ -757,7 +751,7 @@ function DriedFoodTable() {
                         >
                           {row.barcode}
                         </TableCell>
-                        <TableCell
+                        {/* <TableCell
                           align="left"
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
                         >
@@ -768,7 +762,7 @@ function DriedFoodTable() {
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceCost} บาท
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell
                           align="left"
                           sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
@@ -1007,7 +1001,7 @@ function DriedFoodTable() {
                 },
               }}
             />
-            <TextField
+            {/* <TextField
               label="ราคาขาย"
               fullWidth
               type="number"
@@ -1044,7 +1038,7 @@ function DriedFoodTable() {
                   borderRadius: 4,
                 },
               }}
-            />
+            /> */}
             <TextField
               label="จำนวนสต็อก"
               fullWidth
@@ -1230,7 +1224,7 @@ function DriedFoodTable() {
                 },
               }}
             />
-            <TextField
+            {/* <TextField
               label="ราคาขาย"
               fullWidth
               type="number"
@@ -1257,7 +1251,7 @@ function DriedFoodTable() {
                   borderRadius: 4,
                 },
               }}
-            />
+            /> */}
             <TextField
               label="จำนวนสต็อก"
               fullWidth

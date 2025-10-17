@@ -233,7 +233,7 @@ function ApproveStaff() {
 
       setSnackbar({
         open: true,
-        message: result.message || "แก้ไขพนักงานเรียบร้อย",
+        message: result.message,
         severity: "success",
       });
 
@@ -323,7 +323,7 @@ function ApproveStaff() {
 
       setSnackbar({
         open: true,
-        message: result.message || "เพิ่มพนักงานสำเร็จ!",
+        message: result.message,
         severity: "success",
       });
 
@@ -408,7 +408,7 @@ function ApproveStaff() {
 
       setSnackbar({
         open: true,
-        message: "อนุมัติเรียบร้อย: " + result.message,
+        message: result.message,
         severity: "success",
       });
 
@@ -438,7 +438,7 @@ function ApproveStaff() {
       const result = await rejectStudentApplication(id, token);
       setSnackbar({
         open: true,
-        message: "ไม่อนุมัติเรียบร้อย: " + result.message,
+        message: + result.message,
         severity: "info",
       });
       setRows((prev) => prev.filter((a) => a.id !== id));
@@ -457,14 +457,14 @@ function ApproveStaff() {
       const result = await deleteApprovedApplication(id, token);
       setSnackbar({
         open: true,
-        message: "ลบเรียบร้อย: " + result.message,
+        message: result.message,
         severity: "success",
       });
       setApprovedRows((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       setSnackbar({
         open: true,
-        message: err.message || "เกิดข้อผิดพลาดในการลบ",
+        message: err.message ,
         severity: "error",
       });
     }
@@ -478,7 +478,7 @@ function ApproveStaff() {
   
       setSnackbar({
         open: true,
-        message: "ลบเรียบร้อย: " + result.message,
+        message: result.message,
         severity: "success",
       });
   

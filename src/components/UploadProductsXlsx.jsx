@@ -40,8 +40,8 @@ const headCells = [
   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
   { id: "image_url", label: "รูปภาพ", width: "15%" },
   { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "price", label: "ราคาขาย", width: "10%" },
-  { id: "cost", label: "ราคาต้นทุน", width: "10%" },
+  // { id: "price", label: "ราคาขาย", width: "10%" },
+  // { id: "cost", label: "ราคาต้นทุน", width: "10%" },
   { id: "stock", label: "จำนวนสต็อก", width: "10%" },
   { id: "reorder_level", label: "สต็อกต่ำสุด", width: "10%" },
 ];
@@ -443,12 +443,12 @@ function UploadProductsXlsx() {
                         <TableCell sx={{ width: "15%", px: 1 }}>
                           {row.barcode}
                         </TableCell>
-                        <TableCell sx={{ width: "10%", px: 1 }}>
+                        {/* <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.price} บาท
                         </TableCell>
                         <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.cost} บาท
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.stock} ชิ้น
                         </TableCell>
