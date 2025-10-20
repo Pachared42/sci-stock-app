@@ -397,6 +397,73 @@ function DriedFoodTable() {
     }
   };
 
+    // const handleAddProduct = async () => {
+  //   const productPayload = {
+  //     product_name: newProduct.name.trim(),
+  //     barcode: newProduct.barcode.trim(),
+  //     price: parseFloat(newProduct.priceSell),
+  //     cost: parseFloat(newProduct.priceCost),
+  //     stock: parseInt(newProduct.stockQty, 10) || 0,
+  //     reorder_level: parseInt(newProduct.stockMin, 10) || 0,
+  //     image_url:
+  //       typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
+  //   };
+
+  //   if (
+  //     !productPayload.product_name ||
+  //     !productPayload.barcode ||
+  //     isNaN(productPayload.price) ||
+  //     isNaN(productPayload.cost)
+  //   ) {
+  //     setSnackbar({
+  //       open: true,
+  //       message:
+  //         "กรุณากรอกชื่อสินค้า, barcode, ราคาขาย และราคาต้นทุนให้ถูกต้อง",
+  //       severity: "warning",
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     await createProduct("dried_food", [productPayload]);
+
+  //     setReload((r) => !r);
+  //     navigate(location.pathname, { replace: true });
+
+  //     setRows((prev) => [
+  //       ...prev,
+  //       {
+  //         id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
+  //         name: productPayload.product_name,
+  //         barcode: productPayload.barcode,
+  //         imgUrl: productPayload.image_url,
+  //         priceSell: productPayload.price,
+  //         priceCost: productPayload.cost,
+  //         stockQty: productPayload.stock,
+  //         stockMin: productPayload.reorder_level,
+  //       },
+  //     ]);
+
+  //     setSnackbar({
+  //       open: true,
+  //       message: "เพิ่มสินค้าสำเร็จ",
+  //       severity: "success",
+  //     });
+
+  //     setOpenAddDialog(false);
+  //   } catch (error) {
+  //     console.error(
+  //       "Error adding product:",
+  //       error.response?.data || error.message
+  //     );
+
+  //     setSnackbar({
+  //       open: true,
+  //       message: "ไม่สามารถเพิ่มสินค้าได้",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
   // --- ฟังก์ชันเพิ่มสินค้าใหม่ ---
 const handleAddProduct = async () => {
   const productPayload = {
