@@ -275,7 +275,7 @@ function AdminTable() {
         setSnackbar({
           open: true,
           message: "กรุณากรอกข้อมูลให้ครบถ้วน",
-          severity: "info",
+          severity: "error",
         });
         return;
       }
@@ -289,43 +289,48 @@ function AdminTable() {
         return;
       }
 
-      let file = null;
-      if (!newAdmin.profileimageFile) {
+      let file = newAdmin.profileimageFile;
+      if (!file) {
         const response = await fetch("/AvatarAdmin.png");
         const blob = await response.blob();
         file = new File([blob], "AvatarAdmin.png", { type: blob.type });
       }
+
+      const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = (error) => reject(error);
+        });
+
+      const base64Image = await toBase64(file);
 
       const payload = {
         gmail: newAdmin.email,
         password: newAdmin.password,
         firstName: newAdmin.firstName,
         lastName: newAdmin.lastName,
-        profileImage: newAdmin.profileimageFile || file,
         roleId: 2,
+        profileimage: base64Image,
       };
 
       const result = await createUserRequest(payload, token);
+
       setSnackbar({
         open: true,
-        message: "เพิ่มแอดมินสำเร็จ! กรุณากรอกรหัส OTP เพื่อยืนยัน",
+        message: result.message || "เพิ่มแอดมินสำเร็จ!",
         severity: "success",
       });
 
-      setShowOtpForm(true);
-      localStorage.setItem(
-        "adminPendingOtp",
-        JSON.stringify({
-          newAdmin: {
-            ...newAdmin,
-            profileimageFile: newAdmin.profileimageFile || file,
-          },
-          showOtpForm: true,
-        })
-      );
+      setOpenAddDialog(false);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการเพิ่มแอดมิน",
+        severity: "error",
+      });
     }
   };
 
