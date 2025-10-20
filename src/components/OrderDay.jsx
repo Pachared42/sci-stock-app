@@ -139,7 +139,7 @@ function EnhancedTableToolbar(props) {
           id="tableTitle"
           component="div"
         >
-          รายการขายวันที่ {date}
+          รายการตัดสต๊อกวันที่ {date}
         </Typography>
       )}
     </Toolbar>
