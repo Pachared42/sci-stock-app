@@ -977,6 +977,10 @@ function ApproveStaff() {
                                 variant="contained"
                                 size="small"
                                 onClick={() => handleOpenAddDialog(row)}
+                                sx={{
+                                  backgroundColor: theme.palette.background.ButtonDay,
+                                  color: theme.palette.text.hint,
+                                }}
                               >
                                 เพิ่มพนักงาน
                               </Button>
@@ -1380,6 +1384,10 @@ function ApproveStaff() {
             onClick={handleAddEmployee}
             variant="contained"
             color="primary"
+            sx={{
+              backgroundColor: theme.palette.background.ButtonDay,
+              color: theme.palette.text.hint,
+            }}
           >
             เพิ่มพนักงาน
           </Button>

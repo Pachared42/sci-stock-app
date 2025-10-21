@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 
 function LoadingScreen() {
+  const [darkMode, setDarkMode] = useState(() => {
+    const stored = localStorage.getItem("darkMode");
+    return stored === "true";
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("darkMode");
+      setDarkMode(stored === "true");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -9,11 +23,12 @@ function LoadingScreen() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "background.default",
+        backgroundColor: darkMode ? "#0C1014" : "#FFFFFF",
+        transition: "background-color 0.3s ease",
       }}
     >
       <img
-        src="/logo-sci-dark.svg"
+        src={darkMode ? "/logo-sci-light.svg" : "/logo-sci-dark.svg"}
         alt="logo"
         width={150}
         height={150}
@@ -22,18 +37,9 @@ function LoadingScreen() {
 
       <style>{`
         @keyframes popFade {
-          0% {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.1);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(1.5);
-          }
+          0% { opacity: 0; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.1); }
+          100% { opacity: 0; transform: scale(1.5); }
         }
       `}</style>
     </Box>

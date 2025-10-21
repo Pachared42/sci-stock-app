@@ -6,6 +6,22 @@
   <link rel="icon" type="image/svg+xml" href="/logo-sci-light.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SCi_NEXT</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script>
+    (function() {
+      const dark = localStorage.getItem("darkMode") === "true";
+      const bg = dark ? "#0C1014" : "#FFFFFF";
+      document.documentElement.style.backgroundColor = bg;
+      document.body.style.backgroundColor = bg;
+    })();
+  </script>
 </head>
 
 <body>
