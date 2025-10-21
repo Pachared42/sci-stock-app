@@ -82,12 +82,21 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+// const headCells = [
+//   { id: "name", label: "ชื่อสินค้า", width: "15%" },
+//   { id: "img", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "priceSell", label: "ราคาขาย", width: "10%" },
+//   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+//   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+//   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+//   { id: "manage", label: "จัดการสินค้า", width: "20%" },
+// ];
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "25%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
   { id: "manage", label: "จัดการสินค้า", width: "20%" },
@@ -655,7 +664,7 @@ function SoftDrinkTable() {
                 },
               }}
             />
-            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+            <Box>
               <Button
                 variant="contained"
                 color="primary"
@@ -665,12 +674,13 @@ function SoftDrinkTable() {
                   px: 3,
                   py: 1.2,
                   borderRadius: 3,
+                  backgroundColor: theme.palette.background.ButtonDay,
                   color: theme.palette.text.hint,
                   fontSize: "0.9rem",
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มสินค้าใหม่
               </Button>
             </Box>
           </Box>
@@ -821,8 +831,8 @@ function SoftDrinkTable() {
                           sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -833,9 +843,20 @@ function SoftDrinkTable() {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -929,7 +950,7 @@ function SoftDrinkTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          เพิ่มสินค้าใหม่ประเภทเครื่องดื่ม
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1142,7 +1163,7 @@ function SoftDrinkTable() {
               },
             }}
           >
-            เพิ่มสินค้า
+            ยืนยันเพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1180,7 +1201,7 @@ function SoftDrinkTable() {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลสินค้า
+          แก้ไขข้อมูลสินค้าประเภทเครื่งองดื่ม
         </DialogTitle>
         <DialogContent
           sx={{

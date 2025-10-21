@@ -22,15 +22,21 @@ import dayjs from "dayjs";
 
 import { fetchSalesToday, fetchDailyExpenses } from "../api/orderSalesDay";
 
+// const headCells = [
+//   { id: "name", label: "ชื่อสินค้า", width: "16%" },
+//   { id: "img", label: "รูปภาพ", width: "12%" },
+//   { id: "quantity", label: "จำนวน", width: "12%" },
+//   { id: "cost_price", label: "ราคาต้นทุน/ชิ้น", width: "12%" },
+//   { id: "price", label: "ราคาขาย/ชิ้น", width: "12%" },
+//   { id: "profit_per_item", label: "กำไร/ชิ้น", width: "12%" },
+//   { id: "total_profit", label: "รวมกำไร", width: "12%" },
+//   { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
+// ];
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "16%" },
-  { id: "img", label: "รูปภาพ", width: "12%" },
-  { id: "quantity", label: "จำนวน", width: "12%" },
-  // { id: "cost_price", label: "ราคาต้นทุน/ชิ้น", width: "12%" },
-  // { id: "price", label: "ราคาขาย/ชิ้น", width: "12%" },
-  // { id: "profit_per_item", label: "กำไร/ชิ้น", width: "12%" },
-  // { id: "total_profit", label: "รวมกำไร", width: "12%" },
-  // { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
+  { id: "name", label: "ชื่อสินค้า", width: "50%" },
+  { id: "img", label: "รูปภาพ", width: "25%" },
+  { id: "quantity", label: "จำนวน", width: "25%" },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -853,24 +859,32 @@ function SalesTablesGroupByDate() {
             slots={{ textField: TextField }}
             slotProps={{
               textField: {
-                size: "small",
+                size: "large",
                 variant: "outlined",
-                sx: {
+                sx: (theme) => ({
                   bgcolor: "background.paper",
-                  borderRadius: 3,
-                  fontSize: "1rem",
-                  minHeight: 56,
+                  borderRadius: 6,
                   "& .MuiOutlinedInput-root": {
                     fontSize: "1rem",
-                    minHeight: 50,
-                    "& fieldset": {
-                      borderColor: "primary.main",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "primary.dark",
+                    "& input": {
+                      color: theme.palette.text.primary,
                     },
                   },
-                },
+                }),
+              },
+              day: {
+                sx: (theme) => ({
+                  "&.Mui-selected": {
+                    backgroundColor: theme.palette.primary.main + " !important",
+                    color:
+                      theme.palette.mode === "light"
+                        ? "#fff"
+                        : "#000 !important",
+                  },
+                  "&.MuiPickersDay-today": {
+                    border: `1px solid ${theme.palette.primary.main}`,
+                  },
+                }),
               },
             }}
           />

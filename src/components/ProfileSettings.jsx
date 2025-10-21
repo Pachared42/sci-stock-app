@@ -126,7 +126,7 @@ function UserProfileSettings() {
         textAlign="left"
         mb={3}
       >
-        ตั้งค่าโปรไฟล์
+        ตั้งค่าโปรไฟล์ส่วนตัว
       </Typography>
 
       <Box
@@ -311,6 +311,7 @@ function UserProfileSettings() {
                 fontSize: "1rem",
                 fontWeight: "500",
                 borderRadius: 3,
+                backgroundColor: theme.palette.background.ButtonDay,
                 color: theme.palette.text.hint,
               }}
             >

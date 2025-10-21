@@ -49,13 +49,20 @@ function stableSort(array, comparator) {
   return stabilized.map((el) => el[0]);
 }
 
+// const headCellsStockOut = [
+//   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+//   { id: "image_url", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "cost", label: "ราคาทุน", width: "10%" },
+//   { id: "price", label: "ราคาขาย", width: "10%" },
+//   { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
+// ];
+
 const headCellsStockOut = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
-  { id: "image_url", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "cost", label: "ราคาทุน", width: "10%" },
-  // { id: "price", label: "ราคาขาย", width: "10%" },
-  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
+  { id: "image_url", label: "รูปภาพ", width: "20%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
+  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "35%" },
 ];
 
 const headCellsDailyPayment = [
@@ -261,7 +268,7 @@ function StockOutPage() {
       return updated;
     });
 
-    showSnackbar("ลบรายการเรียบร้อยแล้ว", "info");
+    showSnackbar("ลบรายการเรียบร้อยแล้ว", "success");
   };
 
   const handleStockOut = async () => {
@@ -296,7 +303,7 @@ function StockOutPage() {
       });
 
       showSnackbar(
-        `เพิ่มสินค้า ${product.product_name} เรียบร้อยแล้ว`,
+        `เพิ่มสินค้าตัดจำนวน ${product.product_name} เรียบร้อยแล้ว`,
         "success"
       );
       setBarcode("");
@@ -739,7 +746,7 @@ function StockOutPage() {
             fullWidth
             InputProps={{ sx: { borderRadius: 4 } }}
           />
-          <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+          <Box>
             <Button
               variant="contained"
               onClick={handleStockOut}
@@ -752,6 +759,7 @@ function StockOutPage() {
                 zIndex: 10,
                 whiteSpace: "nowrap",
                 borderRadius: 2,
+                backgroundColor: theme.palette.background.ButtonDay,
                 color: theme.palette.text.hint,
               }}
             >
@@ -875,6 +883,17 @@ function StockOutPage() {
                           color="error"
                           size="small"
                           onClick={() => handleRemoveRow(row.id)}
+                          sx={{
+                            borderRadius: 2,
+                            borderColor: theme.palette.error.main,
+                            color: theme.palette.error.main,
+                            "&:hover": {
+                              backgroundColor: theme.palette.error.light,
+                              color: "#fff",
+                            },
+                            fontSize: "0.8rem",
+                            fontWeight: "500",
+                          }}
                         >
                           ลบ
                         </Button>

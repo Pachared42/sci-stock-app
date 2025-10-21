@@ -5,7 +5,7 @@ export const getAppTheme = (darkMode) =>
     palette: {
       mode: darkMode ? "dark" : "light",
       primary: {
-        main: darkMode ? "#f0f0f0" : "#333333",
+        main: darkMode ? "#f0f0f0" : "#0d0c22",
         contrastText: darkMode ? "#181E27" : "#181E27",
       },
       background: {
@@ -20,9 +20,10 @@ export const getAppTheme = (darkMode) =>
         blueDark: darkMode ? "#1565C0" : "#1565C0",
         brownDark: darkMode ? "#6D4C41" : "#6D4C41",
         deepPinkDark: darkMode ? "#C2185B" : "#C2185B",
-        ButtonDay: darkMode ? "#F5F5F5" : "#141A21",
+        ButtonDay: darkMode ? "#F5F5F5" : "#0d0c22",
         Backgroundupload: darkMode ? "#141A21" : "#F5F5F5",
         backgroundUploadHover: darkMode ? "#1E252D" : "#F7F9FC",
+        backgroundColorCloudUpload: darkMode ? "#0d0c22" : "#F7F9FC",
       },
       text: {
         primary: darkMode ? "#E0E0E0" : "#2d2d2d",

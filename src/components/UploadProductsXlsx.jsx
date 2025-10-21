@@ -36,19 +36,27 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+// const headCells = [
+//   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+//   { id: "image_url", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "price", label: "ราคาขาย", width: "10%" },
+//   { id: "cost", label: "ราคาต้นทุน", width: "10%" },
+//   { id: "stock", label: "จำนวนสต็อก", width: "10%" },
+//   { id: "reorder_level", label: "สต็อกต่ำสุด", width: "10%" },
+// ];
+
 const headCells = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "30%" },
   { id: "image_url", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "price", label: "ราคาขาย", width: "10%" },
-  // { id: "cost", label: "ราคาต้นทุน", width: "10%" },
-  { id: "stock", label: "จำนวนสต็อก", width: "10%" },
-  { id: "reorder_level", label: "สต็อกต่ำสุด", width: "10%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
+  { id: "stock", label: "จำนวนสต็อก", width: "15%" },
+  { id: "reorder_level", label: "สต็อกต่ำสุด", width: "20%" },
 ];
 
 function EnhancedTableHead(props) {
   const theme = useTheme();
-  const { order, orderBy, onRequestSort, } = props;
+  const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -127,9 +135,18 @@ const UploadBox = ({ label, onFileChange, disabled, uploading }) => {
   const theme = useTheme();
   return (
     <Box width="100%">
-      <Typography variant="subtitle1" gutterBottom>
-        {label}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 100,
+        }}
+      >
+        <Typography variant="h4" fontWeight={600}>
+          {label}
+        </Typography>
+      </Box>
       <Box
         sx={{
           width: "100%",
@@ -148,7 +165,6 @@ const UploadBox = ({ label, onFileChange, disabled, uploading }) => {
               : theme.palette.background.backgroundUploadHover,
             borderColor: disabled ? "rgba(153,153,153,0.2)" : "#888",
           },
-          mb: 1,
         }}
       >
         <input
@@ -181,7 +197,7 @@ const UploadBox = ({ label, onFileChange, disabled, uploading }) => {
           ) : (
             <>
               <CloudUploadIcon
-                sx={{ fontSize: 80, marginBottom: 1, color: "#2196f3" }}
+                sx={{ fontSize: 80, marginBottom: 1, color: "#1565C0" }}
               />
               <Typography variant="body2" color="textSecondary">
                 คลิกหรือวางไฟล์ที่นี่
@@ -270,6 +286,19 @@ function UploadProductsXlsx() {
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
+          if (
+            (category === "dried_food" &&
+              !sheetName.toLowerCase().includes("แห้ง")) ||
+            (category === "soft_drink" &&
+              !sheetName.toLowerCase().includes("เครื่องดื่ม")) ||
+            (category === "stationery" &&
+              !sheetName.toLowerCase().includes("เครื่องเขียน"))
+          ) {
+            setErrors([`ไฟล์นี้ไม่ตรงกับประเภทสินค้า (${sheetName})`]);
+            setUploading(false);
+            return;
+          }
+
           const mappedData = jsonData.map((row, index) => ({
             product_name: row["ชื่อสินค้า"]
               ? String(row["ชื่อสินค้า"]).trim()
@@ -283,7 +312,6 @@ function UploadProductsXlsx() {
             __row: index + 2,
           }));
 
-          // Validate
           const errors = validateData(mappedData);
           if (errors.length > 0) {
             setErrors(errors);
@@ -291,13 +319,12 @@ function UploadProductsXlsx() {
             return;
           }
 
-          const cleanData = mappedData.map(({ __row, ...rest }) => rest);
-
-          await uploadProducts(category, cleanData);
-
+          await uploadProducts(
+            category,
+            mappedData.map(({ __row, ...rest }) => rest)
+          );
           setData(mappedData);
           setPage(0);
-          setErrors([]);
         } catch (error) {
           setErrors([error.message || "Unknown error"]);
         } finally {
@@ -406,7 +433,6 @@ function UploadProductsXlsx() {
                   visibleRows.map((row, index) => {
                     const labelId = `enhanced-table-row-${index}`;
                     const keyValue = row.id ?? row.barcode ?? index;
-
                     return (
                       <TableRow hover key={keyValue} tabIndex={-1}>
                         <TableCell
@@ -524,7 +550,7 @@ function UploadProductsXlsx() {
       <Stack direction="column" spacing={10} justifyContent="space-between">
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <UploadBox
-            label="ประเภทแห้ง"
+            label="สินค้าประเภทแห้ง"
             onFileChange={handleUpload(
               setData1,
               setErrors1,
@@ -565,7 +591,7 @@ function UploadProductsXlsx() {
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <UploadBox
-            label="ประเภทเครื่องดื่ม"
+            label="สินค้าประเภทเครื่องดื่ม"
             onFileChange={handleUpload(
               setData2,
               setErrors2,
@@ -606,7 +632,7 @@ function UploadProductsXlsx() {
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <UploadBox
-            label="ประเภทเครื่องเขียน"
+            label="สินค้าประเภทเครื่องเขียน"
             onFileChange={handleUpload(
               setData3,
               setErrors3,

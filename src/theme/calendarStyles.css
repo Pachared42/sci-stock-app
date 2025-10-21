@@ -16,35 +16,40 @@ body.dark-mode {
 .fc-theme-standard table,
 .fc-theme-standard td,
 .fc-theme-standard th {
-  border-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 .fc-theme-standard .fc-scrollgrid {
-  border-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 .fc-theme-standard .fc-scrollgrid-section > td {
-  border-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 .fc-theme-standard thead th {
-  background-color: rgba(0, 0, 0, 0.3) !important;
-  color: white !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #ffffff !important;
   font-weight: 600;
 }
 
 .fc-theme-standard td.fc-day-sat {
-  background-color: rgba(28, 37, 46, 0.08) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .fc-theme-standard td.fc-day-sun {
-  background-color: rgba(28, 37, 46, 0.10) !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-.fc-theme-standard .fc-col-header-cell.fc-day-sat,
+.fc-theme-standard .fc-col-header-cell.fc-day-sat {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #8e24aa !important;
+  font-weight: 600;
+}
+
 .fc-theme-standard .fc-col-header-cell.fc-day-sun {
-  background-color: rgba(28, 37, 46, 0.15) !important;
-  color: #fff !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #e53935 !important;
   font-weight: 600;
 }
 
@@ -54,31 +59,24 @@ body.dark-mode {
 }
 
 .fc-theme-standard .fc-day-today .fc-daygrid-day-number {
-  background-color: #ff5630 !important;
+  background-color: #e53935 !important;
   border-radius: 50%;
   padding: 0;
   width: 32px;
   height: 32px;
   line-height: 32px;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
   display: inline-block;
   box-sizing: border-box;
   margin: 4px;
 }
 
-.fc-theme-standard .fc-col-header-cell.fc-day-today,
-.fc-theme-standard .fc-col-header-cell.fc-day-today > div {
-  background-color: rgba(255, 0, 0, 0.15) !important;
-  color: white !important;
-  font-weight: 600;
-}
-
 .fc-theme-standard .fc-daygrid-day-number {
   margin: 4px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .fc-theme-standard .fc-col-header-cell-cushion {

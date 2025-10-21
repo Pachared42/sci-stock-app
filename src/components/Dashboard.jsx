@@ -105,7 +105,7 @@ function Dashboard () {
       //   background: theme.palette.background.orangeDark,
       // },
       {
-        label: "สินค้าในสต็อก",
+        label: "สินค้าทั้งหมดในสต็อก",
         value: totalProducts,
         icon: <InventoryIcon sx={{ fontSize: 40 }} />,
         color: theme.palette.primary.contrastText,

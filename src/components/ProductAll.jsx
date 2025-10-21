@@ -78,14 +78,22 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+// const headCells = [
+//   { id: "name", label: "ชื่อสินค้า", width: "15%" },
+//   { id: "img", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "priceSell", label: "ราคาขาย", width: "10%" },
+//   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+//   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+//   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+// ];
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "30%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
-  { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
-  { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
+  { id: "stockQty", label: "จำนวนสต็อก", width: "15%" },
+  { id: "stockMin", label: "สต็อกต่ำสุด", width: "20%" }
 ];
 
 function EnhancedTableHead(props) {

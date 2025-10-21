@@ -4,7 +4,7 @@ import LoginPage from "./auth/LoginPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PrivateRoute from "./components/PrivateRoute";
 import OrderDay from "./components/OrderDay";
-import ProductsFromSheet from "./components/ProductsFromSheet";
+import StockOutFromGoogleSheet from "./components/StockOutFromGoogleSheet";
 import useRouteProgress from "./hooks/useRouteProgress";
 import Dashboard from "./components/Dashboard";
 import CalendarPage from "./components/Calendar";
@@ -19,7 +19,7 @@ import StockOutPage from "./components/StockOutPage";
 import ProductAll from "./components/ProductAll";
 import ProfileSettings from "./components/ProfileSettings";
 import EmpolyeeData from "./components/EmpolyeeData";
-import AdminData from "./components/AdminData";
+import OwnerData from "./components/OwnerData";
 import CalendarPageEmployee from "./components/CalendarEmployee";
 
 function AppRoutes() {
@@ -40,7 +40,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="sales-report" element={<ProductsFromSheet />} />
+        <Route path="stock-out-google-sheets" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />
@@ -53,7 +53,7 @@ function AppRoutes() {
         <Route path="stock-out" element={<StockOutPage />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="empolyee-data" element={<EmpolyeeData />} />
-        <Route path="admin-data" element={<AdminData />} />
+        <Route path="owner-data" element={<OwnerData />} />
       </Route>
 
       {/* สำหรับ Admin */}
@@ -67,7 +67,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="sales-report" element={<ProductsFromSheet />} />
+        <Route path="stock-out-google-sheets" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />

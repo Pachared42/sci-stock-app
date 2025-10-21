@@ -83,12 +83,21 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+// const headCells = [
+//   { id: "name", label: "ชื่อสินค้า", width: "15%" },
+//   { id: "img", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "priceSell", label: "ราคาขาย", width: "10%" },
+//   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+//   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+//   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+//   { id: "manage", label: "จัดการสินค้า", width: "20%" },
+// ];
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "25%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
   { id: "manage", label: "จัดการสินค้า", width: "20%" },
@@ -681,7 +690,7 @@ const handleAddProduct = async () => {
                 },
               }}
             />
-            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+            <Box>
               <Button
                 variant="contained"
                 color="primary"
@@ -691,12 +700,13 @@ const handleAddProduct = async () => {
                   px: 3,
                   py: 1.2,
                   borderRadius: 3,
+                  backgroundColor: theme.palette.background.ButtonDay,
                   color: theme.palette.text.hint,
                   fontSize: "0.9rem",
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มสินค้าใหม่
               </Button>
             </Box>
           </Box>
@@ -847,8 +857,8 @@ const handleAddProduct = async () => {
                           sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -859,9 +869,20 @@ const handleAddProduct = async () => {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -955,7 +976,7 @@ const handleAddProduct = async () => {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          เพิ่มสินค้าใหม่ประเภทแห้ง
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1168,7 +1189,7 @@ const handleAddProduct = async () => {
               },
             }}
           >
-            เพิ่มสินค้า
+            ยืนยันเพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1206,7 +1227,7 @@ const handleAddProduct = async () => {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลสินค้า
+          แก้ไขข้อมูลสินค้าประเภทแห้ง
         </DialogTitle>
         <DialogContent
           sx={{

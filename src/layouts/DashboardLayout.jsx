@@ -104,7 +104,7 @@ const NAVIGATION = [
     group: "main",
   },
   // {
-  //   segment: "sales-report",
+  //   segment: "stock-out-google-sheets",
   //   title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
   //   icon: <InsertPageBreakIcon />,
   //   roles: ["admin", "superadmin"],
@@ -135,7 +135,7 @@ const NAVIGATION = [
   {
     segment: "staff-management",
     title: "อนุมัติพนักงาน",
-    icon: <AssignmentIndIcon />,
+    icon: <RecentActorsIcon />,
     roles: ["admin", "superadmin"],
     group: "management",
   },
@@ -147,9 +147,9 @@ const NAVIGATION = [
   //   group: "management",
   // },
   {
-    segment: "admin-data",
-    title: "ข้อมูลแอดมิน",
-    icon: <RecentActorsIcon />,
+    segment: "owner-data",
+    title: "ข้อมูลเจ้าของร้าน",
+    icon: <AssignmentIndIcon />,
     roles: ["superadmin"],
     group: "management",
   },
@@ -350,7 +350,7 @@ function DashboardLayout() {
                               justifyContent: "center",
                               color: isSelected
                                 ? theme.palette.primary.main
-                                : "inherit",
+                                : "text.secondary",
                             }}
                           >
                             {menuItem.icon}

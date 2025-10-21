@@ -163,7 +163,7 @@ function EnhancedTableToolbar(props) {
           id="tableTitle"
           component="div"
         >
-          ข้อมูลแอดมินทั้งหมด
+          ข้อมูลเจ้าของร้านทั้งหมด
         </Typography>
       )}
     </Toolbar>
@@ -234,7 +234,7 @@ function AdminTable() {
 
         setRows(mappedRows);
       } catch (err) {
-        console.error("โหลดแอดมินล้มเหลว:", err);
+        console.error("โหลดเจ้าของร้านล้มเหลว:", err);
         setRows([]);
       }
     };
@@ -319,7 +319,7 @@ function AdminTable() {
 
       setSnackbar({
         open: true,
-        message: result.message || "เพิ่มแอดมินสำเร็จ!",
+        message: result.message || "เพิ่มเจ้าของร้านสำเร็จ!",
         severity: "success",
       });
 
@@ -328,7 +328,7 @@ function AdminTable() {
       console.error(err);
       setSnackbar({
         open: true,
-        message: err.message || "เกิดข้อผิดพลาดในการเพิ่มแอดมิน",
+        message: err.message || "เกิดข้อผิดพลาดในการเพิ่มเจ้าของร้าน",
         severity: "error",
       });
     }
@@ -349,7 +349,7 @@ function AdminTable() {
       console.log("ยืนยัน OTP สำเร็จ:", result);
       setSnackbar({
         open: true,
-        message: "เพิ่มแอดมินสำเร็จ",
+        message: "เพิ่มเจ้าของร้านสำเร็จ",
         severity: "success",
       });
       setOpenAddDialog(false);
@@ -438,7 +438,7 @@ function AdminTable() {
 
       setSnackbar({
         open: true,
-        message: "อัปเดตข้อมูลแอดมินสำเร็จ",
+        message: "อัปเดตข้อมูลเจ้าของร้านสำเร็จ",
         severity: "success",
       });
 
@@ -474,7 +474,7 @@ function AdminTable() {
 
       setSnackbar({
         open: true,
-        message: "ลบแอดมินสำเร็จ",
+        message: "ลบเจ้าของร้านสำเร็จ",
         severity: "success",
       });
     } catch (error) {
@@ -567,7 +567,7 @@ function AdminTable() {
                   fontWeight: "500",
                 }}
               >
-                เพิ่มแอดมิน
+                เพิ่มเจ้าของร้าน
               </Button>
             </Box>
           </Box>
@@ -613,13 +613,13 @@ function AdminTable() {
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    ยังไม่มีรายการแอดมิน
+                    ยังไม่มีรายการเจ้าของร้าน
                   </TableCell>
                 </TableRow>
               ) : filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    ไม่มีแอดมินตามเงื่อนไขที่เลือก
+                    ไม่มีเจ้าของร้านตามเงื่อนไขที่เลือก
                   </TableCell>
                 </TableRow>
               ) : (
@@ -698,8 +698,8 @@ function AdminTable() {
                           sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -710,9 +710,20 @@ function AdminTable() {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -766,7 +777,7 @@ function AdminTable() {
         </Box>
       </Paper>
 
-      {/* Dialog เพิ่มแอดมินใหม่ */}
+      {/* Dialog เพิ่มเจ้าของร้านใหม่ */}
       <Dialog
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
@@ -801,7 +812,7 @@ function AdminTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มแอดมินใหม่
+          เพิ่มเจ้าของร้านใหม่
         </DialogTitle>
 
         <DialogContent
@@ -949,7 +960,7 @@ function AdminTable() {
             </Box>
           )}
 
-          {/* ฟอร์มเพิ่มแอดมิน */}
+          {/* ฟอร์มเพิ่มเจ้าของร้าน */}
           {!showOtpForm && (
             <Box
               sx={{
@@ -1090,8 +1101,12 @@ function AdminTable() {
               onClick={handleAddAdmin}
               variant="contained"
               color="primary"
+              sx={{
+                backgroundColor: theme.palette.background.ButtonDay,
+                color: theme.palette.text.hint,
+              }}
             >
-              เพิ่มแอดมิน
+              เพิ่มเจ้าของร้าน
             </Button>
           ) : (
             <Button
@@ -1105,7 +1120,7 @@ function AdminTable() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog แก้ไขข้อมูลแอดมิน */}
+      {/* Dialog แก้ไขข้อมูลเจ้าของร้าน */}
       <Dialog
         open={!!editRow}
         onClose={handleDialogClose}
@@ -1139,7 +1154,7 @@ function AdminTable() {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลแอดมิน
+          แก้ไขข้อมูลเจ้าของร้าน
         </DialogTitle>
 
         <DialogContent
@@ -1381,7 +1396,7 @@ function AdminTable() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog ลบแอดมิน */}
+      {/* Dialog ลบเจ้าของร้าน */}
       <Dialog
         open={!!deleteRow}
         onClose={() => setDeleteRow(null)}
@@ -1415,7 +1430,7 @@ function AdminTable() {
               mb: 1,
             }}
           >
-            ยืนยันการลบแอดมิน
+            ยืนยันการลบเจ้าของร้าน
           </DialogTitle>
           <DialogContent
             sx={{
@@ -1423,7 +1438,7 @@ function AdminTable() {
               color: "text.secondary",
             }}
           >
-            คุณต้องการลบแอดมิน <br />
+            คุณต้องการลบเจ้าของร้าน <br />
             <Typography component="span" fontWeight="bold" color="error.main">
               {deleteRow?.gmail}
             </Typography>{" "}

@@ -83,12 +83,21 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+// const headCells = [
+//   { id: "name", label: "ชื่อสินค้า", width: "15%" },
+//   { id: "img", label: "รูปภาพ", width: "15%" },
+//   { id: "barcode", label: "BARCODE", width: "15%" },
+//   { id: "priceSell", label: "ราคาขาย", width: "10%" },
+//   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+//   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+//   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+//   { id: "manage", label: "จัดการสินค้า", width: "20%" },
+// ];
+
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
+  { id: "name", label: "ชื่อสินค้า", width: "25%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  // { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  // { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "barcode", label: "BARCODE", width: "20%" },
   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
   { id: "manage", label: "จัดการสินค้า", width: "20%" },
@@ -477,7 +486,7 @@ function StationeryTable() {
       image_url:
         typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
     };
-  
+
     // ❌ ลบการเช็ก price / cost ออก
     if (!productPayload.product_name || !productPayload.barcode) {
       setSnackbar({
@@ -487,13 +496,13 @@ function StationeryTable() {
       });
       return;
     }
-  
+
     try {
       await createProduct("stationery", [productPayload]);
-  
+
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
-  
+
       setRows((prev) => [
         ...prev,
         {
@@ -507,13 +516,13 @@ function StationeryTable() {
           stockMin: productPayload.reorder_level,
         },
       ]);
-  
+
       setSnackbar({
         open: true,
         message: "เพิ่มสินค้าสำเร็จ",
         severity: "success",
       });
-  
+
       setOpenAddDialog(false);
     } catch (error) {
       console.error(
@@ -556,7 +565,8 @@ function StationeryTable() {
 
   // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
+  const isLowStock = (product) =>
+    product.stockQty > 0 && product.stockQty <= 10;
 
   // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =
@@ -682,7 +692,7 @@ function StationeryTable() {
                 },
               }}
             />
-            <Box sx={{ bgcolor: theme.palette.background.chartBackground }}>
+            <Box>
               <Button
                 variant="contained"
                 color="primary"
@@ -692,12 +702,13 @@ function StationeryTable() {
                   px: 3,
                   py: 1.2,
                   borderRadius: 3,
+                  backgroundColor: theme.palette.background.ButtonDay,
                   color: theme.palette.text.hint,
                   fontSize: "0.9rem",
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มสินค้าใหม่
               </Button>
             </Box>
           </Box>
@@ -795,7 +806,6 @@ function StationeryTable() {
                           scope="row"
                           padding="none"
                           sx={{
-                            width: "20%",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -805,51 +815,47 @@ function StationeryTable() {
                         >
                           {row.name}
                         </TableCell>
-                        <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                        >
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
                           <img
                             src={row.imgUrl}
                             alt={row.name}
                             style={{ width: 75 }}
                           />
                         </TableCell>
-                        <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
-                        >
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
                           {row.barcode}
                         </TableCell>
                         {/* <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceSell} บาท
                         </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceCost} บาท
                         </TableCell> */}
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.stockQty} ชิ้น
                         </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.stockMin} ชิ้น
                         </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -860,9 +866,20 @@ function StationeryTable() {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -956,7 +973,7 @@ function StationeryTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          เพิ่มสินค้าใหม่ประเภทเครื่องเขียน
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1169,7 +1186,7 @@ function StationeryTable() {
               },
             }}
           >
-            เพิ่มสินค้า
+            ยืนยันเพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1207,7 +1224,7 @@ function StationeryTable() {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลสินค้า
+          แก้ไขข้อมูลสินค้าประเภทเครื่องเขียน
         </DialogTitle>
         <DialogContent
           sx={{

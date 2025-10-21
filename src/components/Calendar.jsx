@@ -262,12 +262,12 @@ function CalendarPage() {
           sx={{
             borderRadius: 3,
             minWidth: 0,
-            padding: isMobile ? "4px 10px" : "6px 16px",
+            padding: isMobile ? "6px 12px" : "6px 16px",
             fontSize: isMobile ? "0.9rem" : "1rem",
             fontWeight: 400,
             textTransform: "none",
-            backgroundColor: "#42a5f5",
-            color: "#fff",
+            backgroundColor: theme.palette.background.ButtonDay,
+            color: theme.palette.text.hint,
           }}
         >
           เพิ่มการทำงาน
@@ -292,17 +292,25 @@ function CalendarPage() {
             justifyContent: "space-between",
           }}
         >
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1.5}>
             <Button
               size="small"
-              variant="outlined"
+              variant="contained"
+              sx={{
+                backgroundColor: theme.palette.background.ButtonDay,
+                color: theme.palette.text.hint,
+              }}
               onClick={() => calendarApi()?.changeView("dayGridMonth")}
             >
               เดือน
             </Button>
             <Button
               size="small"
-              variant="outlined"
+              variant="contained"
+              sx={{
+                backgroundColor: theme.palette.background.ButtonDay,
+                color: theme.palette.text.hint,
+              }}
               onClick={() => calendarApi()?.changeView("listWeek")}
             >
               สัปดาห์
@@ -313,7 +321,7 @@ function CalendarPage() {
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "center",
               flexGrow: 1,
               gap: 2,
               maxWidth: "400px",
@@ -364,18 +372,16 @@ function CalendarPage() {
             </Button>
           </Box>
 
-          <Box sx={{ ml: "auto" }}>
+          <Box>
             <Button
               onClick={() => handleNavigate("today")}
               variant="contained"
               sx={{
                 borderRadius: 2,
                 px: "9px",
-                py: "3px",
-                fontSize: "0.9rem",
-                backgroundColor: "#FF5630",
-                color: "#fff",
-                whiteSpace: "nowrap",
+                py: "4px",
+                backgroundColor: theme.palette.background.ButtonDay,
+                color: theme.palette.text.hint,
               }}
             >
               วันนี้
@@ -501,9 +507,6 @@ function CalendarPage() {
               fontSize: isMobile ? "0.9rem" : "1rem",
               backgroundColor: theme.palette.background.ButtonDay,
               color: theme.palette.text.hint,
-              "&:hover": {
-                backgroundColor: theme.palette.background.ButtonDay,
-              },
             }}
           >
             บันทึก

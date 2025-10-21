@@ -435,13 +435,16 @@ function ApproveStaff() {
   const handleReject = async (id) => {
     try {
       if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+
       const result = await rejectStudentApplication(id, token);
+
+      setPendingRows((prev) => prev.filter((row) => row.id !== id));
+
       setSnackbar({
         open: true,
-        message: + result.message,
-        severity: "info",
+        message: `ไม่อนุมัติใบสมัครเรียบร้อยแล้ว`,
+        severity: "success",
       });
-      setRows((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       setSnackbar({
         open: true,
@@ -464,7 +467,7 @@ function ApproveStaff() {
     } catch (err) {
       setSnackbar({
         open: true,
-        message: err.message ,
+        message: err.message,
         severity: "error",
       });
     }
@@ -473,15 +476,15 @@ function ApproveStaff() {
   const handleDeleteStudentAndEmployee = async (gmail) => {
     try {
       if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
-  
+
       const result = await deleteEmployeeByGmail(gmail, token);
-  
+
       setSnackbar({
         open: true,
         message: result.message,
         severity: "success",
       });
-  
+
       setApprovedRows((prev) => prev.filter((a) => a.gmail !== gmail));
     } catch (err) {
       setSnackbar({
@@ -490,7 +493,7 @@ function ApproveStaff() {
         severity: "error",
       });
     }
-  };  
+  };
 
   const [openDialog, setOpenDialog] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState(null);
@@ -543,14 +546,14 @@ function ApproveStaff() {
     const numbers = "0123456789";
     const special = "!@#$%&*-_=+[]<>?";
     const allChars = upper + lower + numbers + special;
-  
+
     let pass = "";
     const length = 10;
-  
+
     for (let i = 0; i < length; i++) {
       pass += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
-  
+
     return pass;
   };
 
@@ -723,8 +726,12 @@ function ApproveStaff() {
                       {/* ตารางสอน */}
                       <TableCell sx={{ px: 2 }}>
                         <Button
-                          variant="outlined"
+                          variant="contained"
                           size="small"
+                          sx={{
+                            backgroundColor: theme.palette.background.ButtonDay,
+                            color: theme.palette.text.hint,
+                          }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenSchedule(row.scheduleImg);
@@ -936,8 +943,12 @@ function ApproveStaff() {
 
                       <TableCell sx={{ px: 2 }}>
                         <Button
-                          variant="outlined"
+                          variant="contained"
                           size="small"
+                          sx={{
+                            backgroundColor: theme.palette.background.ButtonDay,
+                            color: theme.palette.text.hint,
+                          }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenSchedule(row.scheduleImg);
@@ -974,6 +985,17 @@ function ApproveStaff() {
                                 variant="outlined"
                                 color="error"
                                 size="small"
+                                sx={{
+                                  borderRadius: 2,
+                                  borderColor: theme.palette.error.main,
+                                  color: theme.palette.error.main,
+                                  "&:hover": {
+                                    backgroundColor: theme.palette.error.light,
+                                    color: "#fff",
+                                  },
+                                  fontSize: "0.8rem",
+                                  fontWeight: "500",
+                                }}
                                 onClick={() => {
                                   if (
                                     window.confirm(
@@ -990,7 +1012,8 @@ function ApproveStaff() {
                           ) : (
                             <>
                               <Button
-                                variant="outlined"
+                                variant="contained"
+                                color="info"
                                 size="small"
                                 onClick={() => handleOpenEditDialog(row)}
                               >
@@ -1001,6 +1024,17 @@ function ApproveStaff() {
                                 variant="outlined"
                                 color="error"
                                 size="small"
+                                sx={{
+                                  borderRadius: 2,
+                                  borderColor: theme.palette.error.main,
+                                  color: theme.palette.error.main,
+                                  "&:hover": {
+                                    backgroundColor: theme.palette.error.light,
+                                    color: "#fff",
+                                  },
+                                  fontSize: "0.8rem",
+                                  fontWeight: "500",
+                                }}
                                 onClick={() => {
                                   if (
                                     window.confirm(
@@ -1628,6 +1662,10 @@ function ApproveStaff() {
             onClick={handleEditEmployee}
             variant="contained"
             color="primary"
+            sx={{
+              backgroundColor: theme.palette.background.ButtonDay,
+              color: theme.palette.text.hint,
+            }}
           >
             บันทึกการแก้ไข
           </Button>
