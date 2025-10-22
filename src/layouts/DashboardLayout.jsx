@@ -117,13 +117,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
-  {
-    segment: "sales-day",
-    title: "รายงานรายวัน",
-    icon: <AssignmentIcon />,
-    roles: ["admin", "superadmin"],
-    group: "main",
-  },
+  // {
+  //   segment: "sales-day",
+  //   title: "รายงานรายวัน",
+  //   icon: <AssignmentIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "main",
+  // },
   // {
   //   segment: "user-management",
   //   title: "จัดการยูสเซอร์",
