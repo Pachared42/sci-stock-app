@@ -273,3 +273,7 @@ body.dark-mode {
 .fc-scroller::-webkit-scrollbar {
   display: none;
 }
+
+.fc-listWeek-view .fc-list-event-time {
+  display: none !important;
+}

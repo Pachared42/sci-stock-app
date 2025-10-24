@@ -22,6 +22,10 @@ import {
   XAxis,
   Tooltip,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  YAxis,
+  LabelList,
 } from "recharts";
 
 import {
@@ -30,7 +34,7 @@ import {
   fetchOutOfStockProducts,
 } from "../api/dashboardStatsApi";
 
-function Dashboard () {
+function Dashboard() {
   const theme = useTheme();
   const token = localStorage.getItem("token");
 
@@ -383,8 +387,200 @@ function Dashboard () {
           </ResponsiveContainer>
         </Card>
       </Box> */}
+
+      {/* สินค้าทั้งหมดแต่ละประเภท */}
+      <Box mt={2}>
+        <Card
+          sx={{
+            borderRadius: 5,
+            p: 1,
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+          >
+            สินค้าทั้งหมดในสต๊อกแต่ละประเภท
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={[
+                { category: "ประเภทแห้ง", total: 200 },
+                { category: "ประเภทเครื่องดื่ม", total: 409 },
+                { category: "ประเภทเครื่องเขียน", total: 180 },
+                // { category: "ประเภทขนม", total: 20 },
+                // { category: "ประเภทแช่แข็ง", total: 100 },
+              ]}
+              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <XAxis
+                dataKey="category"
+                stroke={theme.palette.text.secondary}
+                tick={{ fontSize: 14 }}
+              />
+              <YAxis stroke={theme.palette.text.secondary} />
+              <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                contentStyle={{
+                  borderRadius: 15,
+                  backgroundColor: theme.palette.background.paper,
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                }}
+                labelStyle={{ fontWeight: "bold" }}
+                formatter={(value) => [`${value} ชิ้น`, "จำนวนสินค้า"]}
+              />
+              <Bar
+                dataKey="total"
+                name="จำนวนสินค้า"
+                fill={theme.palette.primary.main}
+                radius={[10, 10, 0, 0]}
+                barSize={50}
+              >
+                <LabelList
+                  dataKey="total"
+                  position="top"
+                  fill={theme.palette.text.primary}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </Box>
+
+      {/* สินค้าใกล้หมดแต่ละประเภท */}
+      <Box mt={2}>
+        <Card
+          sx={{
+            borderRadius: 5,
+            p: 1,
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+          >
+            สินค้าใกล้หมดในสต๊อกแต่ละประเภท
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={[
+                { category: "ประเภทแห้ง", total: 15 },
+                { category: "ประเภทเครื่องดื่ม", total: 8 },
+                { category: "ประเภทเครื่องเขียน", total: 5 },
+                // { category: "ประเภทขนม", total: 3 },
+                // { category: "ประเภทแช่แข็ง", total: 10 },
+              ]}
+              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <XAxis
+                dataKey="category"
+                stroke={theme.palette.text.secondary}
+                tick={{ fontSize: 14 }}
+              />
+              <YAxis stroke={theme.palette.text.secondary} />
+              <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                contentStyle={{
+                  borderRadius: 15,
+                  backgroundColor: theme.palette.background.paper,
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                }}
+                labelStyle={{ fontWeight: "bold" }}
+                formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าใกล้หมด"]}
+              />
+              <Bar
+                dataKey="total"
+                name="ใกล้หมด"
+                fill={theme.palette.warning.main}
+                radius={[10, 10, 0, 0]}
+                barSize={50}
+              >
+                <LabelList
+                  dataKey="total"
+                  position="top"
+                  fill={theme.palette.text.primary}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </Box>
+
+      {/* สินค้าหมดแต่ละประเภท */}
+      <Box mt={2}>
+        <Card
+          sx={{
+            borderRadius: 5,
+            p: 1,
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+          >
+            สินค้าหมดในสต๊อกแต่ละประเภท
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={[
+                { category: "ประเภทแห้ง", total: 3 },
+                { category: "ประเภทเครื่องดื่ม", total: 5 },
+                { category: "ประเภทเครื่องเขียน", total: 1 },
+                // { category: "ประเภทขนม", total: 2 },
+                // { category: "ประเภทแช่แข็ง", total: 0 },
+              ]}
+              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <XAxis
+                dataKey="category"
+                stroke={theme.palette.text.secondary}
+                tick={{ fontSize: 14 }}
+              />
+              <YAxis stroke={theme.palette.text.secondary} />
+              <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                contentStyle={{
+                  borderRadius: 15,
+                  backgroundColor: theme.palette.background.paper,
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                }}
+                labelStyle={{ fontWeight: "bold" }}
+                formatter={(value) => [`${value} รายการ`, "สินค้าหมด"]}
+              />
+              <Bar
+                dataKey="total"
+                name="หมด"
+                fill={theme.palette.error.main}
+                radius={[10, 10, 0, 0]}
+                barSize={50}
+              >
+                <LabelList
+                  dataKey="total"
+                  position="top"
+                  fill={theme.palette.text.primary}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </Box>
     </Box>
   );
-};
+}
 
 export default Dashboard;
