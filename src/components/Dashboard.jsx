@@ -409,7 +409,7 @@ function Dashboard() {
               data={[
                 { category: "ประเภทแห้ง", total: 200 },
                 { category: "ประเภทเครื่องดื่ม", total: 409 },
-                { category: "ประเภทเครื่องเขียน", total: 180 },
+                { category: "ประเภทเครื่องเขียน", total: 100 },
                 // { category: "ประเภทขนม", total: 20 },
                 // { category: "ประเภทแช่แข็ง", total: 100 },
               ]}
@@ -473,7 +473,7 @@ function Dashboard() {
               data={[
                 { category: "ประเภทแห้ง", total: 15 },
                 { category: "ประเภทเครื่องดื่ม", total: 8 },
-                { category: "ประเภทเครื่องเขียน", total: 5 },
+                { category: "ประเภทเครื่องเขียน", total: 20 },
                 // { category: "ประเภทขนม", total: 3 },
                 // { category: "ประเภทแช่แข็ง", total: 10 },
               ]}
@@ -537,7 +537,7 @@ function Dashboard() {
               data={[
                 { category: "ประเภทแห้ง", total: 3 },
                 { category: "ประเภทเครื่องดื่ม", total: 5 },
-                { category: "ประเภทเครื่องเขียน", total: 1 },
+                { category: "ประเภทเครื่องเขียน", total: 10 },
                 // { category: "ประเภทขนม", total: 2 },
                 // { category: "ประเภทแช่แข็ง", total: 0 },
               ]}
