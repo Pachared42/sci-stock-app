@@ -141,11 +141,11 @@ function Dashboard() {
 
   const salesData = useMemo(
     () => [
-      { month: "ม.ค.", sales: 0 },
+      { month: "ม.ค.", sales: 10 },
       { month: "ก.พ.", sales: 50 },
-      { month: "มี.ค.", sales: 0 },
+      { month: "มี.ค.", sales: 9 },
       { month: "เม.ย.", sales: 250 },
-      { month: "พ.ค.", sales: 300 },
+      { month: "พ.ค.", sales: 1026 },
       { month: "มิ.ย.", sales: 222 },
       { month: "ก.ค.", sales: 350 },
       { month: "ส.ค.", sales: 90 },
@@ -153,24 +153,6 @@ function Dashboard() {
       { month: "ต.ค.", sales: 290 },
       { month: "พ.ย.", sales: 310 },
       { month: "ธ.ค.", sales: 370 },
-    ],
-    []
-  );
-
-  const sales = useMemo(
-    () => [
-      { month: "ม.ค.", inbound: 50, outbound: 30 },
-      { month: "ก.พ.", inbound: 70, outbound: 45 },
-      { month: "มี.ค.", inbound: 60, outbound: 40 },
-      { month: "เม.ย.", inbound: 90, outbound: 65 },
-      { month: "พ.ค.", inbound: 80, outbound: 70 },
-      { month: "มิ.ย.", inbound: 95, outbound: 85 },
-      { month: "ก.ค.", inbound: 70, outbound: 60 },
-      { month: "ส.ค.", inbound: 85, outbound: 75 },
-      { month: "ก.ย.", inbound: 90, outbound: 80 },
-      { month: "ต.ค.", inbound: 75, outbound: 70 },
-      { month: "พ.ย.", inbound: 80, outbound: 75 },
-      { month: "ธ.ค.", inbound: 10, outbound: 90 },
     ],
     []
   );
@@ -260,7 +242,7 @@ function Dashboard() {
                   >
                     {card.value}{" "}
                     {card.label === "สินค้ากำลังจะหมด" ||
-                    card.label === "สินค้าหมดสต็อก"
+                      card.label === "สินค้าหมดสต็อก"
                       ? "รายการ"
                       : "ชิ้น"}
                   </Typography>
@@ -271,36 +253,43 @@ function Dashboard() {
         ))}
       </Grid>
 
-      {/* <Box mt={2}>
+      <Box mt={2}>
         <Card
           sx={{
             borderRadius: 5,
-            p: 4,
+            p: 1,
             backgroundColor: theme.palette.background.chartBackground,
           }}
         >
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "500", mb: 4, textAlign: "center" }}
+            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
           >
             ยอดขายรายเดือน
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={salesData}
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
               <CartesianGrid
+                strokeDasharray="2.5"
                 vertical={false}
-                horizontal={true}
-                stroke="#333333"
-                strokeDasharray={3}
+                stroke={theme.palette.text.secondary}
+                strokeOpacity={0.2}
               />
               <XAxis
                 dataKey="month"
                 stroke={theme.palette.text.secondary}
-                padding={{ left: 10, right: 5 }}
+                tick={{ fontSize: 14 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                axisLine={false}
+                tickLine={false}
               />
               <Tooltip
                 contentStyle={{
@@ -312,81 +301,17 @@ function Dashboard() {
                 }}
               />
               <Line
-                type="monotone"
+                type="monode"
                 dataKey="sales"
                 name="ยอดขาย"
-                stroke="#C2185B"
-                strokeWidth={5}
+                stroke="#FFD700"
+                strokeWidth={3}
                 dot={false}
-                activeDot={false}
               />
             </LineChart>
           </ResponsiveContainer>
         </Card>
       </Box>
-
-      <Box mt={2}>
-        <Card
-          sx={{
-            borderRadius: 5,
-            p: 4,
-            backgroundColor: theme.palette.background.chartBackground,
-          }}
-        >
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ fontWeight: "500", mb: 4, textAlign: "center" }}
-          >
-            สินค้าเข้า-ออกรายเดือน
-          </Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={sales}
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-            >
-              <CartesianGrid
-                vertical={false}
-                horizontal={true}
-                stroke="#333333"
-                strokeDasharray="3"
-              />
-              <XAxis
-                dataKey="month"
-                stroke={theme.palette.text.secondary}
-                padding={{ left: 10, right: 5 }}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="inbound"
-                name="สินค้าเข้า"
-                stroke="#1976d2"
-                strokeWidth={5}
-                dot={false}
-                activeDot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="outbound"
-                name="สินค้าออก"
-                stroke={theme.palette.error.main}
-                strokeWidth={5}
-                dot={false}
-                activeDot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-      </Box> */}
 
       {/* สินค้าทั้งหมดแต่ละประเภท */}
       <Box mt={2}>
@@ -415,15 +340,26 @@ function Dashboard() {
               ]}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="2.5"
+                vertical={false}
+                stroke={theme.palette.text.secondary}
+                strokeOpacity={0.2}
+              />
               <XAxis
                 dataKey="category"
                 stroke={theme.palette.text.secondary}
                 tick={{ fontSize: 14 }}
+                axisLine={false}
+                tickLine={false}
               />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.1)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
@@ -479,15 +415,25 @@ function Dashboard() {
               ]}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="2.5"
+                vertical={false}
+                stroke={theme.palette.text.secondary}
+                strokeOpacity={0.2} />
               <XAxis
                 dataKey="category"
                 stroke={theme.palette.text.secondary}
                 tick={{ fontSize: 14 }}
+                axisLine={false}
+                tickLine={false}
               />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.1)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
@@ -537,21 +483,31 @@ function Dashboard() {
               data={[
                 { category: "ประเภทแห้ง", total: 3 },
                 { category: "ประเภทเครื่องดื่ม", total: 5 },
-                { category: "ประเภทเครื่องเขียน", total: 10 },
+                { category: "ประเภทเครื่องเขียน", total: 110 },
                 // { category: "ประเภทขนม", total: 2 },
                 // { category: "ประเภทแช่แข็ง", total: 0 },
               ]}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="2.5"
+                vertical={false}
+                stroke={theme.palette.text.secondary}
+                strokeOpacity={0.2} />
               <XAxis
                 dataKey="category"
                 stroke={theme.palette.text.secondary}
                 tick={{ fontSize: 14 }}
+                axisLine={false}
+                tickLine={false}
               />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.1)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
