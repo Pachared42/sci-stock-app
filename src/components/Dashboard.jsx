@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Grid,
   Card,
@@ -7,14 +7,11 @@ import {
   Box,
   useTheme,
 } from "@mui/material";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import PeopleIcon from "@mui/icons-material/People";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import shapeSquare from "../assets/shape-square.svg";
+import dayjs from "dayjs";
 import {
   LineChart,
   Line,
@@ -27,11 +24,11 @@ import {
   YAxis,
   LabelList,
 } from "recharts";
-
 import {
   fetchTotalProducts,
   fetchLowStockProducts,
   fetchOutOfStockProducts,
+  fetchMonthlySalesSummary,
 } from "../api/dashboardStatsApi";
 
 function Dashboard() {
@@ -41,37 +38,83 @@ function Dashboard() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [outOfStockCount, setOutOfStockCount] = useState(0);
+  const [categoryData, setCategoryData] = useState([]);
+  const [lowStockCategoryData, setLowStockCategoryData] = useState([]);
+  const [outOfStockCategoryData, setOutOfStockCategoryData] = useState([]);
+  const [salesSummaryData, setSalesSummaryData] = useState([]);
+  const [monthlySalesTotal, setMonthlySalesTotal] = useState(0);
+
+  const dashboardRef = useRef(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // จำนวนสินค้าทั้งหมด
+        // สินค้าทั้งหมด
         const totalData = await fetchTotalProducts(token);
         setTotalProducts(totalData?.["จำนวนสินค้าทั้งหมด"] ?? 0);
 
-        // สินค้าใกล้หมดสต๊อก
-        const lowData = await fetchLowStockProducts(token);
-        const lowStockObj = lowData?.["สินค้าใกล้หมดสต๊อก"] ?? {};
-        let lowCount = 0;
-        Object.values(lowStockObj).forEach((arr) => {
-          if (Array.isArray(arr)) {
-            lowCount += arr.length;
-          }
-        });
-        setLowStockCount(lowCount);
+        // สินค้าทั้งหมด - แยกตามประเภท
+        const catObj = totalData?.["จำนวนสินค้าตามประเภท"] ?? {};
+        const catArray = Object.entries(catObj).map(([key, value]) => ({
+          category: key,
+          total: value,
+        }));
+        setCategoryData(catArray);
 
-        // สินค้าหมดสต๊อก
-        const outData = await fetchOutOfStockProducts(token);
-        const outStockObj = outData?.["สินค้าหมดสต๊อก"] ?? {};
-        let outCount = 0;
-        Object.values(outStockObj).forEach((arr) => {
-          if (Array.isArray(arr)) {
-            outCount += arr.length;
-          }
+        // สินค้าใกล้หมดสต๊อก - แบบรวม
+        const lowDataA = await fetchLowStockProducts(token);
+        const lowStockObjA = lowDataA?.["สินค้าใกล้หมดสต๊อก"] ?? {};
+        let lowCountA = 0;
+        Object.values(lowStockObjA).forEach((arr) => {
+          if (Array.isArray(arr)) lowCountA += arr.length;
         });
-        setOutOfStockCount(outCount);
+        setLowStockCount(lowCountA);
+
+        // สินค้าใกล้หมดสต๊อก - แยกตามประเภท
+        const lowDataB = await fetchLowStockProducts(token);
+        const lowStockObjB = lowDataB?.["สินค้าใกล้หมดสต๊อก"] ?? {};
+        let lowCountB = 0;
+        const lowCategoryArray = Object.entries(lowStockObjB).map(
+          ([key, arr]) => {
+            const count = Array.isArray(arr) ? arr.length : 0;
+            lowCountB += count;
+            return { category: key, total: count };
+          }
+        );
+        setLowStockCount(lowCountB);
+        setLowStockCategoryData(lowCategoryArray);
+
+        // สินค้าหมดสต๊อก - แบบรวม
+        const outDataA = await fetchOutOfStockProducts(token);
+        const outStockObjA = outDataA?.["สินค้าหมดสต๊อก"] ?? {};
+        let outCountA = 0;
+        Object.values(outStockObjA).forEach((arr) => {
+          if (Array.isArray(arr)) outCountA += arr.length;
+        });
+        setOutOfStockCount(outCountA);
+
+        // สินค้าหมดสต๊อก - แยกตามประเภท
+        const outDataB = await fetchOutOfStockProducts(token);
+        const outStockObjB = outDataB?.["สินค้าหมดสต๊อก"] ?? {};
+        let outCountB = 0;
+        const outCategoryArray = Object.entries(outStockObjB).map(
+          ([key, arr]) => {
+            const count = Array.isArray(arr) ? arr.length : 0;
+            outCountB += count;
+            return { category: key, total: count };
+          }
+        );
+        setOutOfStockCount(outCountB);
+        setOutOfStockCategoryData(outCategoryArray);
+
+        const salesRes = await fetchMonthlySalesSummary(token);
+        const month1ySales = salesRes?.["ยอดขายรายเดือนทั้งหมด"] ?? [];
+        const totalSales = salesRes?.["ยอดขายรวมทั้งหมด"] ?? 0;
+
+        setSalesSummaryData(month1ySales);
+        setMonthlySalesTotal(totalSales);
       } catch (err) {
-        console.error("❌ โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
+        console.error("โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
       }
     };
 
@@ -80,34 +123,6 @@ function Dashboard() {
 
   const statCards = useMemo(
     () => [
-      // {
-      //   label: "ออเดอร์วันนี้",
-      //   value: "0",
-      //   icon: <ShoppingCartIcon sx={{ fontSize: 40 }} />,
-      //   color: theme.palette.primary.contrastText,
-      //   background: theme.palette.background.redDark,
-      // },
-      // {
-      //   label: "รายได้ต่อวัน",
-      //   value: "0",
-      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      //   color: theme.palette.primary.contrastText,
-      //   background: theme.palette.background.purpleDark,
-      // },
-      // {
-      //   label: "รายได้ต่อเดือน",
-      //   value: "0",
-      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      //   color: theme.palette.primary.contrastText,
-      //   background: theme.palette.background.goldDark,
-      // },
-      // {
-      //   label: "รายได้ต่อปี",
-      //   value: "0",
-      //   icon: <MonetizationOnIcon sx={{ fontSize: 40 }} />,
-      //   color: theme.palette.primary.contrastText,
-      //   background: theme.palette.background.orangeDark,
-      // },
       {
         label: "สินค้าทั้งหมดในสต็อก",
         value: totalProducts,
@@ -139,26 +154,20 @@ function Dashboard() {
     ]
   );
 
-  const salesData = useMemo(
-    () => [
-      { month: "ม.ค.", sales: 10 },
-      { month: "ก.พ.", sales: 50 },
-      { month: "มี.ค.", sales: 9 },
-      { month: "เม.ย.", sales: 250 },
-      { month: "พ.ค.", sales: 1026 },
-      { month: "มิ.ย.", sales: 222 },
-      { month: "ก.ค.", sales: 350 },
-      { month: "ส.ค.", sales: 90 },
-      { month: "ก.ย.", sales: 320 },
-      { month: "ต.ค.", sales: 290 },
-      { month: "พ.ย.", sales: 310 },
-      { month: "ธ.ค.", sales: 370 },
-    ],
-    []
-  );
+  const salesData = useMemo(() => {
+    if (!salesSummaryData || salesSummaryData.length === 0) return [];
+
+    return salesSummaryData.map((item) => ({
+      month: item.month,
+      sales: item.total_sales,
+    }));
+  }, [salesSummaryData]);
 
   return (
-    <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
+    <Box
+      ref={dashboardRef}
+      sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}
+    >
       <Grid
         container
         spacing={2}
@@ -201,7 +210,6 @@ function Dashboard() {
                   WebkitMask: `url(${shapeSquare}) center center / cover no-repeat`,
                 }}
               />
-
               <CardContent sx={{ zIndex: 1 }}>
                 <Box
                   display="flex"
@@ -212,13 +220,12 @@ function Dashboard() {
                   <Box
                     sx={{
                       bgcolor: card.color,
-                      color: "#ffffff",
+                      color: "#fff",
                       p: 2,
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      boxShadow: "none",
                       mb: 2,
                     }}
                   >
@@ -234,15 +241,15 @@ function Dashboard() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontWeight: "600",
+                      fontWeight: 600,
                       mt: 0.5,
                       letterSpacing: 0.5,
-                      color: "#ffffff",
+                      color: "#fff",
                     }}
                   >
                     {card.value}{" "}
                     {card.label === "สินค้ากำลังจะหมด" ||
-                      card.label === "สินค้าหมดสต็อก"
+                    card.label === "สินค้าหมดสต็อก"
                       ? "รายการ"
                       : "ชิ้น"}
                   </Typography>
@@ -253,7 +260,8 @@ function Dashboard() {
         ))}
       </Grid>
 
-      <Box mt={2}>
+      {/* ยอดขายรายเดือน */}
+      {/* <Box mt={2}>
         <Card
           sx={{
             borderRadius: 5,
@@ -264,10 +272,16 @@ function Dashboard() {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+            sx={{
+              fontWeight: 500,
+              mb: 4,
+              mt: 4,
+              textAlign: "center",
+            }}
           >
             ยอดขายรายเดือน
           </Typography>
+
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={salesData}
@@ -299,19 +313,24 @@ function Dashboard() {
                   boxShadow: "none",
                   textAlign: "center",
                 }}
+                labelFormatter={(label) => `เดือน ${label}`}
+                formatter={(value) => [
+                  `฿${Number(value).toLocaleString()}`,
+                  "ยอดขาย",
+                ]}
               />
               <Line
-                type="monode"
+                type="monomial"
                 dataKey="sales"
                 name="ยอดขาย"
-                stroke="#FFD700"
-                strokeWidth={3}
+                stroke={theme.palette.background.goldDark}
+                strokeWidth={5}
                 dot={false}
               />
             </LineChart>
           </ResponsiveContainer>
         </Card>
-      </Box>
+      </Box> */}
 
       {/* สินค้าทั้งหมดแต่ละประเภท */}
       <Box mt={2}>
@@ -325,19 +344,13 @@ function Dashboard() {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+            sx={{ fontWeight: 500, mb: 4, mt: 4, textAlign: "center" }}
           >
             สินค้าทั้งหมดในสต๊อกแต่ละประเภท
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
-              data={[
-                { category: "ประเภทแห้ง", total: 200 },
-                { category: "ประเภทเครื่องดื่ม", total: 409 },
-                { category: "ประเภทเครื่องเขียน", total: 100 },
-                // { category: "ประเภทขนม", total: 20 },
-                // { category: "ประเภทแช่แข็ง", total: 100 },
-              ]}
+              data={categoryData}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
               <CartesianGrid
@@ -359,7 +372,7 @@ function Dashboard() {
                 tickLine={false}
               />
               <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.08)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
@@ -367,13 +380,12 @@ function Dashboard() {
                   boxShadow: "none",
                   textAlign: "center",
                 }}
-                labelStyle={{ fontWeight: "bold" }}
                 formatter={(value) => [`${value} ชิ้น`, "จำนวนสินค้า"]}
               />
               <Bar
                 dataKey="total"
                 name="จำนวนสินค้า"
-                fill={theme.palette.primary.main}
+                fill={theme.palette.background.tealDark}
                 radius={[10, 10, 0, 0]}
                 barSize={50}
               >
@@ -400,26 +412,21 @@ function Dashboard() {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+            sx={{ fontWeight: 500, mb: 4, mt: 4, textAlign: "center" }}
           >
             สินค้าใกล้หมดในสต๊อกแต่ละประเภท
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
-              data={[
-                { category: "ประเภทแห้ง", total: 15 },
-                { category: "ประเภทเครื่องดื่ม", total: 8 },
-                { category: "ประเภทเครื่องเขียน", total: 20 },
-                // { category: "ประเภทขนม", total: 3 },
-                // { category: "ประเภทแช่แข็ง", total: 10 },
-              ]}
+              data={lowStockCategoryData}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
               <CartesianGrid
                 strokeDasharray="2.5"
                 vertical={false}
                 stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2} />
+                strokeOpacity={0.2}
+              />
               <XAxis
                 dataKey="category"
                 stroke={theme.palette.text.secondary}
@@ -433,7 +440,7 @@ function Dashboard() {
                 tickLine={false}
               />
               <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.08)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
@@ -441,13 +448,12 @@ function Dashboard() {
                   boxShadow: "none",
                   textAlign: "center",
                 }}
-                labelStyle={{ fontWeight: "bold" }}
                 formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าใกล้หมด"]}
               />
               <Bar
                 dataKey="total"
                 name="ใกล้หมด"
-                fill={theme.palette.warning.main}
+                fill={theme.palette.background.blueDark}
                 radius={[10, 10, 0, 0]}
                 barSize={50}
               >
@@ -474,26 +480,21 @@ function Dashboard() {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "500", mb: 4, mt: 4, textAlign: "center" }}
+            sx={{ fontWeight: 500, mb: 4, mt: 4, textAlign: "center" }}
           >
             สินค้าหมดในสต๊อกแต่ละประเภท
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
-              data={[
-                { category: "ประเภทแห้ง", total: 3 },
-                { category: "ประเภทเครื่องดื่ม", total: 5 },
-                { category: "ประเภทเครื่องเขียน", total: 110 },
-                // { category: "ประเภทขนม", total: 2 },
-                // { category: "ประเภทแช่แข็ง", total: 0 },
-              ]}
+              data={outOfStockCategoryData}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
               <CartesianGrid
                 strokeDasharray="2.5"
                 vertical={false}
                 stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2} />
+                strokeOpacity={0.2}
+              />
               <XAxis
                 dataKey="category"
                 stroke={theme.palette.text.secondary}
@@ -507,7 +508,7 @@ function Dashboard() {
                 tickLine={false}
               />
               <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                cursor={{ fill: "rgba(0,0,0,0.08)" }}
                 contentStyle={{
                   borderRadius: 15,
                   backgroundColor: theme.palette.background.paper,
@@ -515,13 +516,12 @@ function Dashboard() {
                   boxShadow: "none",
                   textAlign: "center",
                 }}
-                labelStyle={{ fontWeight: "bold" }}
-                formatter={(value) => [`${value} รายการ`, "สินค้าหมด"]}
+                formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าหมด"]}
               />
               <Bar
                 dataKey="total"
                 name="หมด"
-                fill={theme.palette.error.main}
+                fill={theme.palette.background.deepPinkDark}
                 radius={[10, 10, 0, 0]}
                 barSize={50}
               >

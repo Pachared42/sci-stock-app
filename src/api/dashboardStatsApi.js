@@ -9,7 +9,7 @@ export const fetchTotalProducts = async (token) => {
     });
     return res.data;
   } catch (error) {
-    console.error("❌ ดึงจำนวนสินค้าทั้งหมดไม่สำเร็จ:", error);
+    console.error("ดึงจำนวนสินค้าทั้งหมดไม่สำเร็จ:", error);
     throw error;
   }
 };
@@ -21,7 +21,7 @@ export const fetchLowStockProducts = async (token) => {
     });
     return res.data;
   } catch (error) {
-    console.error("❌ ดึงสินค้าที่ใกล้หมดไม่สำเร็จ:", error);
+    console.error("ดึงสินค้าที่ใกล้หมดไม่สำเร็จ:", error);
     throw error;
   }
 };
@@ -33,7 +33,19 @@ export const fetchOutOfStockProducts = async (token) => {
     });
     return res.data;
   } catch (error) {
-    console.error("❌ ดึงสินค้าที่หมดสต๊อกไม่สำเร็จ:", error);
+    console.error("ดึงสินค้าที่หมดสต๊อกไม่สำเร็จ:", error);
+    throw error;
+  }
+};
+
+export const fetchMonthlySalesSummary = async (token) => {
+  try {
+    const res = await axios.get(`${API_URL}/api/dashboard/sales-summary`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("ดึงข้อมูลยอดขายรายวันไม่สำเร็จ:", error);
     throw error;
   }
 };
