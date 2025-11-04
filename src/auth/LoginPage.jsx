@@ -171,7 +171,7 @@ function LoginPage() {
 
         setSnackbar({
           open: true,
-          message: "สมัครนักศึกษาขอเป็นพนักงานสำเร็จ!",
+          message: "สมัครนักศึกษาขอเป็นพนักงานสำเร็จ",
           severity: "success",
         });
 

@@ -27,7 +27,7 @@ function UserProfileSettings() {
     gmail: "",
     firstName: "",
     lastName: "",
-    password: "",
+    new_password: "",
     photo: null,
   });
 
@@ -284,7 +284,7 @@ function UserProfileSettings() {
             <TextField
               fullWidth
               label="รหัสผ่านใหม่ *เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน*"
-              name="new_password"
+              name="password"
               type="password"
               onChange={handleChange}
               value={formData.password}

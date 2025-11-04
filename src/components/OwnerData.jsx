@@ -26,6 +26,7 @@ import {
   Alert,
   InputAdornment,
   Fade,
+  Skeleton,
 } from "@mui/material";
 
 import { useAuth } from "../context/AuthProvider";
@@ -204,6 +205,7 @@ function AdminTable() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const token = user?.token;
   const [showOtpForm, setShowOtpForm] = useState(false);
@@ -214,6 +216,7 @@ function AdminTable() {
     let isMounted = true;
 
     const loadData = async () => {
+      setLoading(true);
       try {
         const data = await fetchUsers(token);
         if (!isMounted) return;
@@ -236,6 +239,8 @@ function AdminTable() {
       } catch (err) {
         console.error("โหลดเจ้าของร้านล้มเหลว:", err);
         setRows([]);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
 
@@ -446,7 +451,7 @@ function AdminTable() {
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
     } catch (error) {
-      console.error("❌ Error updating user:", error);
+      console.error("Error updating user:", error);
       setSnackbar({
         open: true,
         message: "ไม่สามารถอัปเดตผู้ใช้ได้",
@@ -479,7 +484,7 @@ function AdminTable() {
       });
     } catch (error) {
       console.error(
-        "❌ Error deleting user:",
+        "Error deleting user:",
         error.response?.data || error.message
       );
 
@@ -610,7 +615,15 @@ function AdminTable() {
                 },
               }}
             >
-              {rows.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 1 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={7} align="center">
+                      <Skeleton variant="text" width="100%" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : !loading && rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     ยังไม่มีรายการเจ้าของร้าน
@@ -765,10 +778,10 @@ function AdminTable() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

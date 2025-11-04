@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {
@@ -24,6 +25,7 @@ import {
   IconButton,
   InputAdornment,
   Avatar,
+  Skeleton,
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
@@ -48,13 +50,13 @@ import {
 import { updateUser } from "../api/personsApi";
 
 const headCells = [
-  { id: "firstName", label: "ชื่อ", width: "15%" },
-  { id: "lastName", label: "นามสกุล", width: "15%" },
-  { id: "gmail", label: "Gmail", width: "20%" },
+  { id: "firstName", label: "ชื่อ", width: "12%" },
+  { id: "lastName", label: "นามสกุล", width: "12%" },
+  { id: "gmail", label: "Gmail", width: "21%" },
   { id: "studentId", label: "เลขประจำตัวนักศึกษา", width: "20%" },
   { id: "schedule", label: "ตารางสอน", width: "15%" },
   { id: "contactInfo", label: "ช่องทางติดต่อ", width: "15%" },
-  { id: "manage", label: "จัดการ", width: "20%" },
+  { id: "manage", label: "จัดการ", width: "25%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -152,6 +154,10 @@ function ApproveStaff() {
   const { user } = useAuth();
   const token = user?.token;
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [reload, setReload] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -169,6 +175,57 @@ function ApproveStaff() {
     profileimage: "/AvatarUser.png",
     profileimageFile: null,
   });
+
+  useEffect(() => {
+    async function load() {
+      try {
+        if (!token) return;
+
+        setLoading(true);
+        const data = await getStudentApplications(token);
+
+        const pending = (data || [])
+          .filter((item) => item.status === "รออนุมัติ")
+          .map((item) => ({
+            id: item.id,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            gmail: item.gmail,
+            studentId: item.studentId,
+            scheduleImg: item.schedule || null,
+            contactInfo: item.contactInfo,
+            status: item.status,
+            isEmployee: item.isEmployee || false,
+          }));
+        const approved = (data || [])
+          .filter((item) => item.status === "อนุมัติ")
+          .map((item) => ({
+            id: item.id,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            gmail: item.gmail,
+            studentId: item.studentId,
+            scheduleImg: item.schedule || null,
+            contactInfo: item.contactInfo,
+            status: item.status,
+            isEmployee: item.isEmployee || false,
+          }));
+
+        setPendingRows(pending);
+        setApprovedRows(approved);
+      } catch (err) {
+        setSnackbar({
+          open: true,
+          message: err.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, [token, reload]);
 
   const handleOpenEditDialog = (employee) => {
     setSelectedEmployee({
@@ -344,61 +401,12 @@ function ApproveStaff() {
     }
   };
 
-  useEffect(() => {
-    async function load() {
-      try {
-        if (!token) return;
-
-        const data = await getStudentApplications(token);
-
-        const pending = (data || [])
-          .filter((item) => item.status === "รออนุมัติ")
-          .map((item) => ({
-            id: item.id,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            gmail: item.gmail,
-            studentId: item.studentId,
-            scheduleImg: item.schedule || null,
-            contactInfo: item.contactInfo,
-            status: item.status,
-            isEmployee: item.isEmployee || false,
-          }));
-
-        const approved = (data || [])
-          .filter((item) => item.status === "อนุมัติ")
-          .map((item) => ({
-            id: item.id,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            gmail: item.gmail,
-            studentId: item.studentId,
-            scheduleImg: item.schedule || null,
-            contactInfo: item.contactInfo,
-            status: item.status,
-            isEmployee: item.isEmployee || false,
-          }));
-
-        setPendingRows(pending);
-        setApprovedRows(approved);
-      } catch (err) {
-        setSnackbar({
-          open: true,
-          message: err.message || "เกิดข้อผิดพลาดในการโหลดข้อมูล",
-          severity: "error",
-        });
-      }
-    }
-
-    load();
-  }, [token]);
-
   const handleApprove = async (id) => {
     try {
       if (!token) {
         setSnackbar({
           open: true,
-          message: "Token ไม่พบ กรุณา login ใหม่",
+          message: "กรุณาเข้าสู่ระบบก่อนดำเนินการ",
           severity: "error",
         });
         return;
@@ -416,13 +424,16 @@ function ApproveStaff() {
         prev.map((row) =>
           row.id === id
             ? {
-                ...row,
-                status: "อนุมัติ",
-                isEmployee: result.student?.isEmployee || row.isEmployee,
-              }
+              ...row,
+              status: "อนุมัติ",
+              isEmployee: result.student?.isEmployee || row.isEmployee,
+            }
             : row
         )
       );
+      setPendingRows((prev) => prev.filter((row) => row.id !== id));
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
     } catch (err) {
       setSnackbar({
         open: true,
@@ -434,15 +445,23 @@ function ApproveStaff() {
 
   const handleReject = async (id) => {
     try {
-      if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: "กรุณาเข้าสู่ระบบก่อนดำเนินการ",
+          severity: "error",
+        });
+        return;
+      }
 
       const result = await rejectStudentApplication(id, token);
 
       setPendingRows((prev) => prev.filter((row) => row.id !== id));
-
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
       setSnackbar({
         open: true,
-        message: `ไม่อนุมัติใบสมัครเรียบร้อยแล้ว`,
+        message: `ไม่อนุมัติใบสมัครเรียบร้อย`,
         severity: "success",
       });
     } catch (err) {
@@ -456,7 +475,15 @@ function ApproveStaff() {
 
   const handleDeleteApproved = async (id) => {
     try {
-      if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: "กรุณาเข้าสู่ระบบก่อนดำเนินการ",
+          severity: "error",
+        });
+        return;
+      }
+
       const result = await deleteApprovedApplication(id, token);
       setSnackbar({
         open: true,
@@ -475,7 +502,14 @@ function ApproveStaff() {
 
   const handleDeleteStudentAndEmployee = async (gmail) => {
     try {
-      if (!token) return alert("Token ไม่พบ กรุณา login ใหม่");
+      if (!token) {
+        setSnackbar({
+          open: true,
+          message: "กรุณาเข้าสู่ระบบก่อนดำเนินการ",
+          severity: "error",
+        });
+        return;
+      }
 
       const result = await deleteEmployeeByGmail(gmail, token);
 
@@ -658,7 +692,15 @@ function ApproveStaff() {
                 },
               }}
             >
-              {pendingRows.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 1 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={7} align="center">
+                      <Skeleton variant="text" width="100%" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : pendingRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
                     ยังไม่มีรายการนักศึกษาที่รออนุมัติ
@@ -737,7 +779,7 @@ function ApproveStaff() {
                             handleOpenSchedule(row.scheduleImg);
                           }}
                         >
-                          ดูตารางสอน
+                          ตารางสอน
                         </Button>
                       </TableCell>
 
@@ -759,7 +801,10 @@ function ApproveStaff() {
                           color="success"
                           variant="contained"
                           size="small"
-                          sx={{ mr: 1 }}
+                          sx={{
+                            mr: 1, fontSize: "0.8rem",
+                            fontWeight: "500",
+                          }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleApprove(row.id);
@@ -793,7 +838,8 @@ function ApproveStaff() {
                     </TableRow>
                   );
                 })
-              )}
+              )
+              }
 
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
@@ -830,10 +876,10 @@ function ApproveStaff() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,
@@ -881,7 +927,15 @@ function ApproveStaff() {
                 },
               }}
             >
-              {approvedRows.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 1 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={7} align="center">
+                      <Skeleton variant="text" width="100%" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : approvedRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
                     ยังไม่มีรายการนักศึกษาอนุมัติ
@@ -948,13 +1002,15 @@ function ApproveStaff() {
                           sx={{
                             backgroundColor: theme.palette.background.ButtonDay,
                             color: theme.palette.text.hint,
+                            fontSize: "0.8rem",
+                            fontWeight: "500",
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenSchedule(row.scheduleImg);
                           }}
                         >
-                          ดูตารางสอน
+                          ตารางสอน
                         </Button>
                       </TableCell>
 
@@ -980,6 +1036,8 @@ function ApproveStaff() {
                                 sx={{
                                   backgroundColor: theme.palette.background.ButtonDay,
                                   color: theme.palette.text.hint,
+                                  fontSize: "0.9em",
+                                  fontWeight: "500",
                                 }}
                               >
                                 เพิ่มพนักงาน
@@ -997,7 +1055,7 @@ function ApproveStaff() {
                                     backgroundColor: theme.palette.error.light,
                                     color: "#fff",
                                   },
-                                  fontSize: "0.8rem",
+                                  fontSize: "0.9em",
                                   fontWeight: "500",
                                 }}
                                 onClick={() => {
@@ -1020,6 +1078,10 @@ function ApproveStaff() {
                                 color="info"
                                 size="small"
                                 onClick={() => handleOpenEditDialog(row)}
+                                sx={{
+                                  fontSize: "0.8rem",
+                                  fontWeight: "500",
+                                }}
                               >
                                 แก้ไข
                               </Button>
@@ -1094,10 +1156,10 @@ function ApproveStaff() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

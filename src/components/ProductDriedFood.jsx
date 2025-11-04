@@ -209,7 +209,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 function DriedFoodTable() {
-  // ตัวแปร state ต่าง ๆ
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
@@ -218,7 +217,6 @@ function DriedFoodTable() {
   const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // สถานะ Dialog ต่าง ๆ
   const [editRow, setEditRow] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
@@ -233,28 +231,23 @@ function DriedFoodTable() {
     stockMin: "",
   });
 
-  // ตัวแปรสำหรับการกรองและค้นหา
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const filterOpen = Boolean(filterAnchorEl);
   const [filter, setFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
 
-  // Snackbar สำหรับแจ้งเตือนสถานะ
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  // ตัวแปรสถานะอื่น ๆ
   const [reload, setReload] = useState(false);
 
-  // Hooks ต่าง ๆ
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // --- โหลดข้อมูลสินค้า ---
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -279,7 +272,6 @@ function DriedFoodTable() {
     loadData();
   }, [reload]);
 
-  // --- ฟังก์ชันจัดการการเลือกทั้งหมด ---
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelected = rows.map((n) => n.id);
@@ -289,7 +281,6 @@ function DriedFoodTable() {
     setSelected([]);
   };
 
-  // --- ฟังก์ชันจัดการเลือกแถวเดียว ---
   const handleClick = (event, id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -310,25 +301,21 @@ function DriedFoodTable() {
     setSelected(newSelected);
   };
 
-  // --- ฟังก์ชันจัดการการเรียงลำดับ ---
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  // --- ฟังก์ชันจัดการเปลี่ยนหน้า ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  // --- ฟังก์ชันจัดการเปลี่ยนจำนวนแถวต่อหน้า ---
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  // --- ฟังก์ชันจัดการ Dialog แก้ไข ---
   const handleEdit = (row) => {
     setEditRow(row);
     setEditValues(row);
@@ -363,7 +350,7 @@ function DriedFoodTable() {
       navigate(location.pathname, { replace: true });
     } catch (error) {
       console.error(
-        "❌ Error updating product:",
+        "Error updating product:",
         error.response?.data || error.message
       );
       setSnackbar({
@@ -378,7 +365,6 @@ function DriedFoodTable() {
     setEditRow(null);
   };
 
-  // --- ฟังก์ชันจัดการลบสินค้า ---
   const handleDeleteConfirm = async () => {
     try {
       await deleteProduct("dried_food", deleteRow.barcode);
@@ -394,7 +380,7 @@ function DriedFoodTable() {
       });
     } catch (error) {
       console.error(
-        "❌ Error deleting product:",
+        "Error deleting product:",
         error.response?.data || error.message
       );
 
@@ -473,7 +459,7 @@ function DriedFoodTable() {
   //     });
   //   }
   // };
-  // --- ฟังก์ชันเพิ่มสินค้าใหม่ ---
+
 const handleAddProduct = async () => {
   const productPayload = {
     product_name: newProduct.name.trim(),
@@ -486,7 +472,6 @@ const handleAddProduct = async () => {
       typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
   };
 
-  // ❌ ลบการเช็ก price / cost ออก
   if (!productPayload.product_name || !productPayload.barcode) {
     setSnackbar({
       open: true,
@@ -536,7 +521,6 @@ const handleAddProduct = async () => {
   }
 };
 
-  // --- ฟังก์ชันกรองและค้นหาข้อมูล ---
   const filteredRows = useMemo(() => {
     const search = searchText.trim().toLowerCase();
 
@@ -562,15 +546,12 @@ const handleAddProduct = async () => {
     });
   }, [rows, filter, searchText]);
 
-  // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
   const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
 
-  // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  // --- แถวที่แสดงตามหน้าปัจจุบัน (คำนวณ sort + pagination) ---
   const visibleRows = useMemo(
     () =>
       [...rows]
@@ -602,7 +583,6 @@ const handleAddProduct = async () => {
             borderTopRightRadius: 20,
           }}
         >
-          {/* ซ้าย: Filter Dropdown */}
           <Box
             sx={{
               display: "flex",
@@ -655,8 +635,6 @@ const handleAddProduct = async () => {
               </MenuItem>
             </Menu>
           </Box>
-
-          {/* ขวา: Search + Add Button (แนวนอนบน desktop, แนวตั้งบน mobile) */}
           <Box
             sx={{
               display: "flex",
@@ -711,7 +689,6 @@ const handleAddProduct = async () => {
             </Box>
           </Box>
         </Box>
-
         <TableContainer
           sx={{
             borderBottomLeftRadius: 0,
@@ -749,14 +726,13 @@ const handleAddProduct = async () => {
                 },
               }}
             >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
                     ยังไม่มีรายการสินค้า
                   </TableCell>
                 </TableRow>
-              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
+              ) :
               filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -764,7 +740,6 @@ const handleAddProduct = async () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                // แสดงแถวสินค้า filtered + sort + pagination
                 filteredRows
                   .sort(getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -895,8 +870,6 @@ const handleAddProduct = async () => {
                     );
                   })
               )}
-
-              {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={9} />
@@ -943,7 +916,7 @@ const handleAddProduct = async () => {
         </Box>
       </Paper>
 
-      {/* Dialog เพิ่มสินค้าใหม่ */}
+      {/* เพิ่มสินค้าใหม่ */}
       <Dialog
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
@@ -1194,14 +1167,14 @@ const handleAddProduct = async () => {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog แก้ไขสินค้า */}
+      {/* แก้ไขสินค้า */}
       <Dialog
         open={!!editRow}
         onClose={handleDialogClose}
         maxWidth="md"
         fullWidth
         TransitionComponent={Fade}
-        transitionDuration={300} // ทำให้ทั้ง backdrop และ dialog ใช้เวลาเท่ากัน
+        transitionDuration={300}
         slotProps={{
           backdrop: {
             sx: {
