@@ -26,7 +26,7 @@ export const submitStudentApplication = async (formData) => {
 
     return response.data;
   } catch (error) {
-    console.error("Submit Student Application Error:", error);
-    throw error.response?.data || { message: "เกิดข้อผิดพลาด" };
+    console.error("ส่งฟอร์มสมัครไม่สำเร็จ:", error);
+    throw error;
   }
 };

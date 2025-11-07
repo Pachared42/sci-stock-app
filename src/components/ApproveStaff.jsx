@@ -36,6 +36,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import TextField from "@mui/material/TextField";
 import EnhancedEncryptionIcon from "@mui/icons-material/EnhancedEncryption";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 import { useAuth } from "../context/AuthProvider";
 import {
@@ -175,6 +176,8 @@ function ApproveStaff() {
     profileimage: "/AvatarUser.png",
     profileimageFile: null,
   });
+  const [deleteRowEmployee, setDeleteEmployee] = useState(null);
+  const [deleteRowApproveStudent, setDeleteApproveStudent] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -515,7 +518,7 @@ function ApproveStaff() {
 
       setSnackbar({
         open: true,
-        message: result.message,
+        message: result.message || "ลบข้อมูลสำเร็จ",
         severity: "success",
       });
 
@@ -693,10 +696,34 @@ function ApproveStaff() {
               }}
             >
               {loading ? (
-                Array.from({ length: 1 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={7} align="center">
-                      <Skeleton variant="text" width="100%" />
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="rounded" width={100} height={30} />
                     </TableCell>
                   </TableRow>
                 ))
@@ -928,10 +955,34 @@ function ApproveStaff() {
               }}
             >
               {loading ? (
-                Array.from({ length: 1 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={7} align="center">
-                      <Skeleton variant="text" width="100%" />
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="rounded" width={100} height={30} />
                     </TableCell>
                   </TableRow>
                 ))
@@ -1058,14 +1109,9 @@ function ApproveStaff() {
                                   fontSize: "0.9em",
                                   fontWeight: "500",
                                 }}
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `ยืนยันการลบข้อมูลของ ${row.firstName}?`
-                                    )
-                                  ) {
-                                    handleDeleteApproved(row.id);
-                                  }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteApproveStudent(row);
                                 }}
                               >
                                 ลบข้อมูล
@@ -1101,14 +1147,9 @@ function ApproveStaff() {
                                   fontSize: "0.8rem",
                                   fontWeight: "500",
                                 }}
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `ยืนยันการลบข้อมูลของ ${row.firstName}?`
-                                    )
-                                  ) {
-                                    handleDeleteStudentAndEmployee(row.gmail);
-                                  }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteEmployee(row);
                                 }}
                               >
                                 ลบพนักงาน
@@ -1738,6 +1779,170 @@ function ApproveStaff() {
             }}
           >
             บันทึกการแก้ไข
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={!!deleteRowEmployee}
+        onClose={() => setDeleteEmployee(null)}
+        maxWidth="xs"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <Box sx={{ textAlign: "center", pb: 1 }}>
+          <WarningAmberIcon color="error" sx={{ fontSize: 50, mb: 1 }} />
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.4rem",
+              color: "error.main",
+              mb: 1,
+            }}
+          >
+            ยืนยันการลบพนักงาน
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              fontSize: "1rem",
+              color: "text.secondary",
+            }}
+          >
+            คุณต้องการลบพนักงาน <br />
+            <Typography component="span" fontWeight="bold" color="error.main">
+              {deleteRowEmployee?.gmail}
+            </Typography>{" "}
+            ใช่หรือไม่?
+          </DialogContent>
+        </Box>
+
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            gap: 0.5,
+            mt: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="medium"
+            onClick={() => setDeleteEmployee(null)}
+          >
+            ยกเลิก
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="medium"
+            onClick={() => {
+              handleDeleteStudentAndEmployee(deleteRowEmployee?.gmail);
+              setDeleteEmployee(null);
+            }}
+            sx={{
+              boxShadow: "none",
+              textTransform: "none",
+            }}
+          >
+            ลบข้อมูล
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={!!deleteRowApproveStudent}
+        onClose={() => setDeleteApproveStudent(null)}
+        maxWidth="xs"
+        fullWidth
+        TransitionComponent={Fade}
+        transitionDuration={300}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: 6,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <Box sx={{ textAlign: "center", pb: 1 }}>
+          <WarningAmberIcon color="error" sx={{ fontSize: 50, mb: 1 }} />
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.4rem",
+              color: "error.main",
+              mb: 1,
+            }}
+          >
+            ยืนยันการลบนักศึกษา *อนุมัติ*
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              fontSize: "1rem",
+              color: "text.secondary",
+            }}
+          >
+            คุณต้องการลบนักศึกษา <br />
+            <Typography component="span" fontWeight="bold" color="error.main">
+              {deleteRowApproveStudent?.firstName}
+            </Typography>{" "}
+            ใช่หรือไม่?
+          </DialogContent>
+        </Box>
+
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            gap: 0.5,
+            mt: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="medium"
+            onClick={() => setDeleteApproveStudent(null)}
+          >
+            ยกเลิก
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="medium"
+            onClick={() => {
+              handleDeleteApproved(deleteRowApproveStudent?.id);
+              setDeleteApproveStudent(null);
+            }}
+            sx={{
+              boxShadow: "none",
+              textTransform: "none",
+            }}
+          >
+            ลบข้อมูล
           </Button>
         </DialogActions>
       </Dialog>

@@ -31,12 +31,14 @@ import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import Fade from '@mui/material/Fade';
+import Skeleton from '@mui/material/Skeleton';
 
 import {
   fetchProductsByCategory,
   updateProduct,
   deleteProduct,
 } from "../api/productApi";
+import { set } from "nprogress";
 
 function createData(
   id,
@@ -222,6 +224,7 @@ function ProductAll() {
   const filterOpen = Boolean(filterAnchorEl);
   const [filter, setFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const Alert = forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -232,6 +235,7 @@ function ProductAll() {
 
     const loadAllData = async () => {
       try {
+        setLoading(true);
         const allData = await Promise.all(
           categories.map((category) => fetchProductsByCategory(category))
         );
@@ -252,7 +256,13 @@ function ProductAll() {
         );
         setRows(formatted);
       } catch (err) {
-        console.error("โหลดสินค้าทั้งหมดล้มเหลว:", err);
+        setSnackbar({
+          open: true,
+          message: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -580,15 +590,52 @@ function ProductAll() {
                   borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
-            >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
-              {rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ยังไม่มีรายการสินค้า
+            > {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell
+                    padding="checkbox"
+                    sx={{
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    <Skeleton animation="wave"
+                      variant="rounded"
+                      width={24}
+                      height={24}
+                      sx={{ mx: "auto" }}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="rounded" width={100} height={50} />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
                   </TableCell>
                 </TableRow>
-              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
+              ))
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center">
+                  ยังไม่มีรายการสินค้า
+                </TableCell>
+              </TableRow>
+            ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
               filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -617,8 +664,8 @@ function ProductAll() {
                           bgcolor: isOutOfStock(row)
                             ? "rgba(255, 0, 0, 0.30)"
                             : isLowStock(row)
-                            ? "rgba(255, 165, 0, 0.30)"
-                            : "inherit",
+                              ? "rgba(255, 165, 0, 0.30)"
+                              : "inherit",
                         }}
                       >
                         <TableCell padding="checkbox" sx={{ width: 48 }}>
@@ -724,10 +771,10 @@ function ProductAll() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

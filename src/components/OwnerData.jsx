@@ -86,24 +86,13 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox" sx={{ width: 48 }}>
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all products",
-            }}
-          />
-        </TableCell>
         {headCellsAdmin.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
-            sx={{ width: headCell.width, whiteSpace: "nowrap", px: 1 }}
+            sx={{ width: headCell.width, whiteSpace: "nowrap", px: 2 }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -519,7 +508,6 @@ function AdminTable() {
             borderTopRightRadius: 20,
           }}
         >
-          {/* ขวา: Search + Add Button (แนวนอนบน desktop, แนวตั้งบน mobile) */}
           <Box
             sx={{
               display: "flex",
@@ -616,10 +604,26 @@ function AdminTable() {
               }}
             >
               {loading ? (
-                Array.from({ length: 1 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={7} align="center">
-                      <Skeleton variant="text" width="100%" />
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="circular" width={60} height={60} />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="rounded" width={100} height={30} />
                     </TableCell>
                   </TableRow>
                 ))
@@ -653,17 +657,6 @@ function AdminTable() {
                         key={row.id}
                         selected={isItemSelected}
                       >
-                        {/* Checkbox */}
-                        <TableCell padding="checkbox" sx={{ width: 48 }}>
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            inputProps={{ "aria-labelledby": labelId }}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(event) => handleClick(event, row.id)}
-                          />
-                        </TableCell>
-
                         {/* ชื่อ */}
                         <TableCell
                           component="th"
@@ -674,7 +667,7 @@ function AdminTable() {
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            px: 1,
+                            px: 2,
                           }}
                           title={row.firstName}
                         >
@@ -682,17 +675,17 @@ function AdminTable() {
                         </TableCell>
 
                         {/* นามสกุล */}
-                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
                           {row.lastName}
                         </TableCell>
 
                         {/* อีเมล */}
-                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
                           {row.gmail}
                         </TableCell>
 
                         {/* รูปโปรไฟล์ */}
-                        <TableCell sx={{ whiteSpace: "nowrap", px: 1 }}>
+                        <TableCell sx={{ whiteSpace: "nowrap", px: 2 }}>
                           <img
                             src={row.profileImage || "/AvatarAdmin.png"}
                             alt={row.firstName}
@@ -708,7 +701,7 @@ function AdminTable() {
                         {/* จัดการข้อมูล */}
                         <TableCell
                           align="left"
-                          sx={{ whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 2 }}
                         >
                           <Button
                             variant="contained"

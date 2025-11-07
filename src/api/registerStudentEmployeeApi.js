@@ -8,17 +8,20 @@ export async function getStudentApplications(token, status) {
     url += `?status=${encodeURIComponent(status)}`;
   }
 
+
   try {
     const res = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "โหลดข้อมูลไม่สำเร็จ");
+    console.error("ดึงข้อมูลคำขอพนักงานนักศึกษาล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function approveStudentApplication(id, token) {
+
   try {
     const res = await axios.put(
       `${API_URL}/api/employees/applications/${id}?action=approve`,
@@ -27,11 +30,13 @@ export async function approveStudentApplication(id, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถอนุมัติได้");
+    console.error("อนุมัติคำขอพนักงานนักศึกษาล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function rejectStudentApplication(id, token) {
+
   try {
     const res = await axios.put(
       `${API_URL}/api/employees/applications/${id}?action=reject`,
@@ -40,11 +45,13 @@ export async function rejectStudentApplication(id, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถไม่อนุมัติได้");
+    console.error("ปฏิเสธคำขอพนักงานนักศึกษาล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function deleteApprovedApplication(id, token) {
+
   try {
     const res = await axios.delete(
       `${API_URL}/api/employees/applications/approved/${id}`,
@@ -52,11 +59,13 @@ export async function deleteApprovedApplication(id, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถลบข้อมูลได้");
+    console.error("ลบคำขอพนักงานนักศึกษาที่อนุมัติแล้วล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function checkOrAddEmployee(data, token) {
+
   try {
     const res = await axios.post(
       `${API_URL}/api/employees/check-or-add`,
@@ -65,11 +74,13 @@ export async function checkOrAddEmployee(data, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถเพิ่มพนักงานได้");
+    console.error("ตรวจสอบหรือเพิ่มพนักงานล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function deleteEmployeeByGmail(gmail, token) {
+
   try {
     const res = await axios.delete(
       `${API_URL}/api/employees/${encodeURIComponent(gmail)}`,
@@ -77,6 +88,7 @@ export async function deleteEmployeeByGmail(gmail, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถลบพนักงานได้");
+    console.error("ลบพนักงานล้มเหลว:", error);
+    throw error;
   }
 }

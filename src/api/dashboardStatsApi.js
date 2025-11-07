@@ -3,6 +3,7 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const fetchTotalProducts = async (token) => {
+
   try {
     const res = await axios.get(`${API_URL}/api/dashboard/total`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -15,6 +16,7 @@ export const fetchTotalProducts = async (token) => {
 };
 
 export const fetchLowStockProducts = async (token) => {
+
   try {
     const res = await axios.get(`${API_URL}/api/dashboard/low-stock`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -27,6 +29,7 @@ export const fetchLowStockProducts = async (token) => {
 };
 
 export const fetchOutOfStockProducts = async (token) => {
+
   try {
     const res = await axios.get(`${API_URL}/api/dashboard/out-of-stock`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -39,6 +42,7 @@ export const fetchOutOfStockProducts = async (token) => {
 };
 
 export const fetchMonthlySalesSummary = async (token) => {
+
   try {
     const res = await axios.get(`${API_URL}/api/dashboard/sales-summary`, {
       headers: { Authorization: `Bearer ${token}` },

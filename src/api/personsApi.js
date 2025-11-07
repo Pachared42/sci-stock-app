@@ -15,6 +15,7 @@ const API_URL = import.meta.env.VITE_API_URL;
  */
 
 export async function createUserRequest(details, token) {
+
   try {
     const formData = new FormData();
     formData.append("gmail", details.gmail);
@@ -36,13 +37,13 @@ export async function createUserRequest(details, token) {
 
     return res.data;
   } catch (error) {
-    throw new Error(
-      error.response?.data?.error || "ไม่สามารถสร้างคำขอผู้ใช้ได้"
-    );
+    console.error("สร้างคำขอผู้ใช้ล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function verifyUserRequest(gmail, otp, token) {
+
   try {
     const res = await axios.post(
       `${API_URL}/api/users/requests/verify`,
@@ -55,11 +56,13 @@ export async function verifyUserRequest(gmail, otp, token) {
     );
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถยืนยัน OTP ได้");
+    console.error("การยืนยันคำขอผู้ใช้ล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function fetchUsers(token) {
+
   try {
     const res = await axios.get(`${API_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -67,13 +70,13 @@ export async function fetchUsers(token) {
 
     return res.data?.users || [];
   } catch (error) {
-    const message =
-      error.response?.data?.error || "ไม่สามารถดึงรายชื่อพนักงานได้";
-    throw new Error(message);
+    console.error("ดึงข้อมูลผู้ใช้ล้มเหลว:", error);
+    throw error;
   }
 }
 
 export async function updateUser(gmail, details, token) {
+
   const formData = new FormData();
 
   if (details.password) formData.append("password", details.password);
@@ -102,6 +105,7 @@ export async function updateUser(gmail, details, token) {
 }
 
 export async function deleteUser(gmail, token) {
+
   try {
     const gmailEncoded = encodeURIComponent(gmail);
     const res = await axios.delete(`${API_URL}/api/users/gmail/${gmailEncoded}`, {
@@ -109,6 +113,7 @@ export async function deleteUser(gmail, token) {
     });
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || "ไม่สามารถลบผู้ใช้ได้");
+    console.error("ลบผู้ใช้ล้มเหลว:", error);
+    throw error;
   }
 }

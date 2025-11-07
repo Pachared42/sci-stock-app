@@ -28,6 +28,7 @@ import {
   Alert,
   InputAdornment,
   Fade,
+  Skeleton,
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
@@ -43,6 +44,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../api/productApi";
+import { set } from "nprogress";
 
 function createData(
   id,
@@ -238,6 +240,7 @@ function SoftDrinkTable() {
     severity: "success",
   });
   const [reload, setReload] = useState(false);
+  const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -245,6 +248,7 @@ function SoftDrinkTable() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const data = await fetchProductsByCategory("soft_drink");
         const formatted = data.map((item, index) =>
           createData(
@@ -260,7 +264,13 @@ function SoftDrinkTable() {
         );
         setRows(formatted);
       } catch (err) {
-        console.error("โหลดสินค้าล้มเหลว:", err);
+        setSnackbar({
+          open: true,
+          message: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -465,7 +475,7 @@ function SoftDrinkTable() {
       image_url:
         typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
     };
-  
+
     // ❌ ลบการเช็ก price / cost ออก
     if (!productPayload.product_name || !productPayload.barcode) {
       setSnackbar({
@@ -475,13 +485,13 @@ function SoftDrinkTable() {
       });
       return;
     }
-  
+
     try {
       await createProduct("soft_drink", [productPayload]);
-  
+
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
-  
+
       setRows((prev) => [
         ...prev,
         {
@@ -495,13 +505,13 @@ function SoftDrinkTable() {
           stockMin: productPayload.reorder_level,
         },
       ]);
-  
+
       setSnackbar({
         open: true,
         message: "เพิ่มสินค้าสำเร็จ",
         severity: "success",
       });
-  
+
       setOpenAddDialog(false);
     } catch (error) {
       console.error(
@@ -722,15 +732,56 @@ function SoftDrinkTable() {
                   borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
-            >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
-              {rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ยังไม่มีรายการสินค้า
+            > {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell
+                    padding="checkbox"
+                    sx={{
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    <Skeleton animation="wave"
+                      variant="rounded"
+                      width={24}
+                      height={24}
+                      sx={{ mx: "auto" }}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="rounded" width={100} height={50} />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="rounded" width={100} height={30} />
                   </TableCell>
                 </TableRow>
-              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
+              ))
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center">
+                  ยังไม่มีรายการสินค้า
+                </TableCell>
+              </TableRow>
+            ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
               filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -759,8 +810,8 @@ function SoftDrinkTable() {
                           bgcolor: isOutOfStock(row)
                             ? "rgba(255, 0, 0, 0.30)"
                             : isLowStock(row)
-                            ? "rgba(255, 165, 0, 0.30)"
-                            : "inherit",
+                              ? "rgba(255, 165, 0, 0.30)"
+                              : "inherit",
                         }}
                       >
                         <TableCell padding="checkbox" sx={{ width: 48 }}>
@@ -905,10 +956,10 @@ function SoftDrinkTable() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

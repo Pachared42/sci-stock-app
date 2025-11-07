@@ -28,6 +28,7 @@ import {
   Alert,
   InputAdornment,
   Fade,
+  Skeleton,
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
@@ -243,6 +244,7 @@ function DriedFoodTable() {
   });
 
   const [reload, setReload] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -251,6 +253,7 @@ function DriedFoodTable() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const data = await fetchProductsByCategory("dried_food");
         const formatted = data.map((item, index) =>
           createData(
@@ -266,7 +269,13 @@ function DriedFoodTable() {
         );
         setRows(formatted);
       } catch (err) {
-        console.error("โหลดสินค้าล้มเหลว:", err);
+        setSnackbar({
+          open: true,
+          message: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -392,7 +401,7 @@ function DriedFoodTable() {
     }
   };
 
-    // const handleAddProduct = async () => {
+  // const handleAddProduct = async () => {
   //   const productPayload = {
   //     product_name: newProduct.name.trim(),
   //     barcode: newProduct.barcode.trim(),
@@ -460,66 +469,66 @@ function DriedFoodTable() {
   //   }
   // };
 
-const handleAddProduct = async () => {
-  const productPayload = {
-    product_name: newProduct.name.trim(),
-    barcode: newProduct.barcode.trim(),
-    // price: parseFloat(newProduct.priceSell),
-    // cost: parseFloat(newProduct.priceCost),
-    stock: parseInt(newProduct.stockQty, 10) || 0,
-    reorder_level: parseInt(newProduct.stockMin, 10) || 0,
-    image_url:
-      typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
+  const handleAddProduct = async () => {
+    const productPayload = {
+      product_name: newProduct.name.trim(),
+      barcode: newProduct.barcode.trim(),
+      // price: parseFloat(newProduct.priceSell),
+      // cost: parseFloat(newProduct.priceCost),
+      stock: parseInt(newProduct.stockQty, 10) || 0,
+      reorder_level: parseInt(newProduct.stockMin, 10) || 0,
+      image_url:
+        typeof newProduct.imgUrl === "string" ? newProduct.imgUrl.trim() : "",
+    };
+
+    if (!productPayload.product_name || !productPayload.barcode) {
+      setSnackbar({
+        open: true,
+        message: "กรุณากรอกชื่อสินค้าและ barcode ให้ครบ",
+        severity: "warning",
+      });
+      return;
+    }
+
+    try {
+      await createProduct("dried_food", [productPayload]);
+
+      setReload((r) => !r);
+      navigate(location.pathname, { replace: true });
+
+      setRows((prev) => [
+        ...prev,
+        {
+          id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
+          name: productPayload.product_name,
+          barcode: productPayload.barcode,
+          imgUrl: productPayload.image_url,
+          // priceSell: productPayload.price,
+          // priceCost: productPayload.cost,
+          stockQty: productPayload.stock,
+          stockMin: productPayload.reorder_level,
+        },
+      ]);
+
+      setSnackbar({
+        open: true,
+        message: "เพิ่มสินค้าสำเร็จ",
+        severity: "success",
+      });
+
+      setOpenAddDialog(false);
+    } catch (error) {
+      console.error(
+        "Error adding product:",
+        error.response?.data || error.message
+      );
+      setSnackbar({
+        open: true,
+        message: "ไม่สามารถเพิ่มสินค้าได้",
+        severity: "error",
+      });
+    }
   };
-
-  if (!productPayload.product_name || !productPayload.barcode) {
-    setSnackbar({
-      open: true,
-      message: "กรุณากรอกชื่อสินค้าและ barcode ให้ครบ",
-      severity: "warning",
-    });
-    return;
-  }
-
-  try {
-    await createProduct("dried_food", [productPayload]);
-
-    setReload((r) => !r);
-    navigate(location.pathname, { replace: true });
-
-    setRows((prev) => [
-      ...prev,
-      {
-        id: prev.length > 0 ? Math.max(...prev.map((r) => r.id)) + 1 : 1,
-        name: productPayload.product_name,
-        barcode: productPayload.barcode,
-        imgUrl: productPayload.image_url,
-        // priceSell: productPayload.price,
-        // priceCost: productPayload.cost,
-        stockQty: productPayload.stock,
-        stockMin: productPayload.reorder_level,
-      },
-    ]);
-
-    setSnackbar({
-      open: true,
-      message: "เพิ่มสินค้าสำเร็จ",
-      severity: "success",
-    });
-
-    setOpenAddDialog(false);
-  } catch (error) {
-    console.error(
-      "Error adding product:",
-      error.response?.data || error.message
-    );
-    setSnackbar({
-      open: true,
-      message: "ไม่สามารถเพิ่มสินค้าได้",
-      severity: "error",
-    });
-  }
-};
 
   const filteredRows = useMemo(() => {
     const search = searchText.trim().toLowerCase();
@@ -725,14 +734,56 @@ const handleAddProduct = async () => {
                   borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
-            >
-              {rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ยังไม่มีรายการสินค้า
+            > {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell
+                    padding="checkbox"
+                    sx={{
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    <Skeleton animation="wave"
+                      variant="rounded"
+                      width={24}
+                      height={24}
+                      sx={{ mx: "auto" }}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="rounded" width={100} height={50} />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="rounded" width={100} height={30} />
                   </TableCell>
                 </TableRow>
-              ) :
+              ))
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center">
+                  ยังไม่มีรายการสินค้า
+                </TableCell>
+              </TableRow>
+            ) :
               filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -760,8 +811,8 @@ const handleAddProduct = async () => {
                           bgcolor: isOutOfStock(row)
                             ? "rgba(255, 0, 0, 0.30)"
                             : isLowStock(row)
-                            ? "rgba(255, 165, 0, 0.30)"
-                            : "inherit",
+                              ? "rgba(255, 165, 0, 0.30)"
+                              : "inherit",
                         }}
                       >
                         <TableCell padding="checkbox" sx={{ width: 48 }}>
@@ -904,10 +955,10 @@ const handleAddProduct = async () => {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

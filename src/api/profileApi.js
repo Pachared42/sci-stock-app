@@ -9,6 +9,7 @@ export async function fetchUserProfile() {
     });
     return response.data;
   } catch (error) {
+    console.error("ดึงข้อมูลโปรไฟล์ล้มเหลว:", error);
     throw error;
   }
 }
@@ -31,6 +32,7 @@ export async function updateUserProfile(profileData) {
     });
     return response.data;
   } catch (error) {
+    console.error("อัปเดตโปรไฟล์ล้มเหลว:", error);
     throw error;
   }
 }
