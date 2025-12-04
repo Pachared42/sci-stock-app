@@ -261,7 +261,7 @@ function Dashboard() {
       </Grid>
 
       {/* ยอดขายรายเดือน */}
-      {/* <Box mt={2}>
+      <Box mt={2}>
         <Card
           sx={{
             borderRadius: 5,
@@ -330,7 +330,7 @@ function Dashboard() {
             </LineChart>
           </ResponsiveContainer>
         </Card>
-      </Box> */}
+      </Box>
 
       {/* สินค้าทั้งหมดแต่ละประเภท */}
       <Box mt={2}>

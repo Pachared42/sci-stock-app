@@ -189,7 +189,7 @@ EnhancedTableToolbar.propTypes = {
   loading: PropTypes.bool.isRequired,
 };
 
-function ProductsFromSheet() {
+function StockOutFromGoogleSheet() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
@@ -611,4 +611,4 @@ function ProductsFromSheet() {
   );
 }
 
-export default ProductsFromSheet;
+export default StockOutFromGoogleSheet;

@@ -103,13 +103,13 @@ const NAVIGATION = [
     roles: ["employee"],
     group: "main",
   },
-  // {
-  //   segment: "stock-out-google-sheets",
-  //   title: "ตัดสต๊อกสินค้า เวอร์ชัน 2",
-  //   icon: <InsertPageBreakIcon />,
-  //   roles: ["admin", "superadmin"],
-  //   group: "main",
-  // },
+  {
+    segment: "google-sheets-stockout",
+    title: "ตัดสต๊อกสินค้า V.2",
+    icon: <InsertPageBreakIcon />,
+    roles: ["admin", "superadmin"],
+    group: "main",
+  },
   {
     segment: "stock-out",
     title: "ตัดสต๊อกสินค้า",
@@ -117,21 +117,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
-  // {
-  //   segment: "sales-day",
-  //   title: "รายงานรายวัน",
-  //   icon: <AssignmentIcon />,
-  //   roles: ["admin", "superadmin"],
-  //   group: "main",
-  // },
-  // {
-  //   segment: "user-management",
-  //   title: "จัดการยูสเซอร์",
-  //   icon: <ManageAccountsIcon />,
-  //   roles: ["admin", "superadmin"],
-  //   group: "management",
-  //   children: [],
-  // },
+  {
+    segment: "sales-day",
+    title: "รายงานรายวัน",
+    icon: <AssignmentIcon />,
+    roles: ["admin", "superadmin"],
+    group: "main",
+  },
   {
     segment: "staff-management",
     title: "อนุมัติพนักงาน",
@@ -139,13 +131,6 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "management",
   },
-  // {
-  //   segment: "empolyee-data",
-  //   title: "ข้อมูลพนักงาน",
-  //   icon: <RecentActorsIcon />,
-  //   roles: ["admin", "superadmin"],
-  //   group: "management",
-  // },
   {
     segment: "owner-data",
     title: "ข้อมูลเจ้าของร้าน",

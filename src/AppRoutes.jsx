@@ -40,7 +40,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="stock-out-google-sheets" element={<StockOutFromGoogleSheet />} />
+        <Route path="google-sheets-stockout" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />
@@ -67,7 +67,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="stock-out-google-sheets" element={<StockOutFromGoogleSheet />} />
+        <Route path="google-sheets-stockout" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />

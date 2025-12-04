@@ -28,6 +28,7 @@ import {
   getProductByBarcode,
   createDailyPayment,
 } from "../api/sellStockOutApi";
+import { set } from "nprogress";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -49,21 +50,21 @@ function stableSort(array, comparator) {
   return stabilized.map((el) => el[0]);
 }
 
-// const headCellsStockOut = [
-//   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
-//   { id: "image_url", label: "รูปภาพ", width: "15%" },
-//   { id: "barcode", label: "BARCODE", width: "15%" },
-//   { id: "cost", label: "ราคาทุน", width: "10%" },
-//   { id: "price", label: "ราคาขาย", width: "10%" },
-//   { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
-// ];
-
 const headCellsStockOut = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
-  { id: "image_url", label: "รูปภาพ", width: "20%" },
-  { id: "barcode", label: "BARCODE", width: "20%" },
-  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "35%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "image_url", label: "รูปภาพ", width: "15%" },
+  { id: "barcode", label: "BARCODE", width: "15%" },
+  { id: "cost", label: "ราคาทุน", width: "10%" },
+  { id: "price", label: "ราคาขาย", width: "10%" },
+  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
 ];
+
+// const headCellsStockOut = [
+//   { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
+//   { id: "image_url", label: "รูปภาพ", width: "20%" },
+//   { id: "barcode", label: "BARCODE", width: "20%" },
+//   { id: "manage", label: "ตัดสต๊อกสินค้า", width: "35%" },
+// ];
 
 const headCellsDailyPayment = [
   { id: "item_name", label: "รายการ", width: "60%" },
@@ -205,7 +206,11 @@ function StockOutPage() {
   const handleAddDailyRow = (name, price) => {
     const numPrice = Number(price);
     if (!name || isNaN(numPrice) || numPrice < 0) {
-      showSnackbar("กรุณากรอกชื่อและจำนวนเงินที่ถูกต้อง", "error");
+      setSnackbar({
+        open: true,
+        message: "กรุณากรอกชื่อรายการและราคาที่ถูกต้อง",
+        severity: "error",
+      });
       return;
     }
 
@@ -221,7 +226,11 @@ function StockOutPage() {
       return updated;
     });
 
-    showSnackbar(`เพิ่มรายการ "${name}" จำนวน ${numPrice} บาท แล้ว`, "success");
+    setSnackbar({
+      open: true,
+      message: `เพิ่มรายการ "${name}" ราคา ${numPrice} บาท สำเร็จ`,
+      severity: "success",
+    });
 
     if (name === "เงินค่าจ้างรายวันพนักงาน") setDailyPayment("");
     else if (name === "ค่าน้ำแข็ง") setIcePrice("");
@@ -230,14 +239,28 @@ function StockOutPage() {
   };
 
   const handleConfirm = async (id) => {
-    if (!token) return showSnackbar("กรุณาเข้าสู่ระบบ", "error");
+    if (!token) return;
+    setSnackbar({
+      open: true,
+      message: "กรุณาเข้าสู่ระบบ",
+      severity: "warning",
+    });
 
     const row = dailyRows.find((r) => r.id === id);
-    if (!row) return showSnackbar("ไม่พบข้อมูลรายการ", "error");
+    if (!row) return;
+    setSnackbar({
+      open: true,
+      message: "ไม่พบรายการที่เลือก",
+      severity: "error",
+    });
 
     const amount = Number(row.item_price);
-    if (isNaN(amount) || amount <= 0)
-      return showSnackbar("จำนวนเงินไม่ถูกต้อง", "error");
+    if (isNaN(amount) || amount <= 0) return;
+    setSnackbar({
+      open: true,
+      message: "ราคาของรายการไม่ถูกต้อง",
+      severity: "error",
+    });
 
     try {
       const data = await createDailyPayment(token, {
@@ -254,10 +277,18 @@ function StockOutPage() {
         return updated;
       });
 
-      showSnackbar(data.message || "ยืนยันรายการสำเร็จ!", "success");
+      setSnackbar({
+        open: true,
+        message: `ยืนยันรายการ "${row.item_name}" ราคา ${amount} บาท สำเร็จ`,
+        severity: "success",
+      });
     } catch (err) {
       console.error(err);
-      showSnackbar(err.message, "error");
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการยืนยัน",
+        severity: "error",
+      });
     }
   };
 
@@ -268,16 +299,28 @@ function StockOutPage() {
       return updated;
     });
 
-    showSnackbar("ลบรายการเรียบร้อยแล้ว", "success");
+    setSnackbar({
+      open: true,
+      message: "ลบรายการเรียบร้อยแล้ว",
+      severity: "success",
+    });
   };
 
   const handleStockOut = async () => {
     if (!barcode) {
-      showSnackbar("กรุณากรอก barcode", "warning");
+      setSnackbar({
+        open: true,
+        message: "กรุณากรอกบาร์โค้ด",
+        severity: "warning",
+      });
       return;
     }
     if (!token) {
-      showSnackbar("กรุณาเข้าสู่ระบบ", "warning");
+      setSnackbar({
+        open: true,
+        message: "กรุณาเข้าสู่ระบบ",
+        severity: "warning",
+      });
       return;
     }
 
@@ -302,14 +345,19 @@ function StockOutPage() {
         return updated;
       });
 
-      showSnackbar(
-        `เพิ่มสินค้าตัดจำนวน ${product.product_name} เรียบร้อยแล้ว`,
-        "success"
-      );
+      setSnackbar({
+        open: true,
+        message: `เพิ่มสินค้า "${product.product_name}" สำเร็จ`,
+        severity: "success",
+      });
       setBarcode("");
     } catch (err) {
       console.error(err);
-      showSnackbar(err.message, "error");
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการค้นหาสินค้า",
+        severity: "error",
+      });
     }
   };
 
@@ -330,23 +378,39 @@ function StockOutPage() {
       return updated;
     });
 
-    showSnackbar("ลบรายการเรียบร้อยแล้ว", "info");
+    setSnackbar({
+      open: true,
+      message: "ลบรายการสินค้าเรียบร้อยแล้ว",
+      severity: "success",
+    });
   };
 
   const handleDeductStock = async (id) => {
     if (!token) {
-      showSnackbar("กรุณาเข้าสู่ระบบ", "warning");
+      setSnackbar({
+        open: true,
+        message: "กรุณาเข้าสู่ระบบ",
+        severity: "warning",
+      });
       return;
     }
 
     const product = stockRows.find((row) => row.id === id);
     if (!product) {
-      showSnackbar("ไม่พบสินค้าในรายการ", "error");
+      setSnackbar({
+        open: true,
+        message: "ไม่พบสินค้าที่เลือก",
+        severity: "error",
+      });
       return;
     }
 
     if (!product.quantity || product.quantity <= 0) {
-      showSnackbar("กรุณาใส่จำนวนที่จะตัดสต๊อก", "warning");
+      setSnackbar({
+        open: true,
+        message: "กรุณากรอกจำนวนสินค้าที่ต้องการตัดสต๊อก",
+        severity: "warning",
+      });
       return;
     }
 
@@ -367,10 +431,18 @@ function StockOutPage() {
         return updated;
       });
 
-      showSnackbar(result.message || "ตัดสต๊อกสำเร็จ", "success");
+      setSnackbar({
+        open: true,
+        message: `ตัดสต๊อกสินค้า "${product.product_name}" จำนวน ${product.quantity} ชิ้น สำเร็จ`,
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error จาก API:", err);
-      showSnackbar(err.message || "เกิดข้อผิดพลาด", "error");
+      setSnackbar({
+        open: true,
+        message: err.message || "เกิดข้อผิดพลาดในการตัดสต๊อกสินค้า",
+        severity: "error",
+      });
     }
   };
 
@@ -426,7 +498,7 @@ function StockOutPage() {
         }}
       >
         {/* กล่องค่าจ้างรายวัน */}
-        {/* <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -478,10 +550,10 @@ function StockOutPage() {
               เพิ่ม
             </Button>
           </Paper>
-        </Grid> */}
+        </Grid>
 
         {/* กล่องค่าน้ำแข็ง */}
-        {/* <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -531,10 +603,10 @@ function StockOutPage() {
               เพิ่ม
             </Button>
           </Paper>
-        </Grid> */}
+        </Grid>
 
         {/* กล่องอื่นๆ */}
-        {/* <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={4}>
           <Paper
             sx={{
               p: 4,
@@ -599,10 +671,10 @@ function StockOutPage() {
               </Button>
             </Box>
           </Paper>
-        </Grid> */}
+        </Grid>
       </Grid>
 
-      {/* <Paper sx={{ width: "100%", mb: 10 }}>
+      <Paper sx={{ width: "100%", mb: 10 }}>
         <Box
           sx={{
             display: "flex",
@@ -735,7 +807,7 @@ function StockOutPage() {
             }}
           />
         </Box>
-      </Paper> */}
+      </Paper>
 
       <Stack spacing={2}>
         <Box sx={{ position: "relative", width: "100%" }}>
@@ -845,8 +917,8 @@ function StockOutPage() {
                       )}
                     </TableCell>
                     <TableCell>{row.barcode}</TableCell>
-                    {/* <TableCell>{row.cost} บาท</TableCell>
-                    <TableCell>{row.price} บาท</TableCell> */}
+                    <TableCell>{row.cost} บาท</TableCell>
+                    <TableCell>{row.price} บาท</TableCell>
                     <TableCell>
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}

@@ -102,7 +102,7 @@ function ProfilePanel() {
               height: "100%",
               borderRadius: "50%",
               border: "1px solid transparent",
-              borderTop: "3px solid #f50057",
+              borderTop: "3px solid #26A69A",
               animation: "spin-ring 10s linear infinite",
               zIndex: 1,
             },
