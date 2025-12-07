@@ -124,7 +124,8 @@ function UserProfileSettings() {
         fontWeight="500"
         color="text.primary"
         textAlign="left"
-        mb={3}
+        mb={2}
+        mx={2}
       >
         ตั้งค่าโปรไฟล์ส่วนตัว
       </Typography>
@@ -142,8 +143,8 @@ function UserProfileSettings() {
             flex: "1",
             bgcolor: theme.palette.background.chartBackground,
             borderRadius: 4,
-            pt: 10,
-            pb: 10,
+            pt: 5,
+            pb: 5,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

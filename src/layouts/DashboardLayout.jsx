@@ -44,6 +44,7 @@ import {
   InsertPageBreak as InsertPageBreakIcon,
   UploadFileRounded as UploadFileRoundedIcon,
   Warehouse as WarehouseIcon,
+  ReceiptLong as ReceiptLongIcon
 } from "@mui/icons-material";
 import {
   LocalDrink as LocalDrinkIcon,
@@ -103,10 +104,17 @@ const NAVIGATION = [
     roles: ["employee"],
     group: "main",
   },
+  // {
+  //   segment: "google-sheets-stockout",
+  //   title: "ตัดสต๊อกสินค้า V.2",
+  //   icon: <InsertPageBreakIcon />,
+  //   roles: ["admin", "superadmin"],
+  //   group: "main",
+  // },
   {
-    segment: "google-sheets-stockout",
-    title: "ตัดสต๊อกสินค้า V.2",
-    icon: <InsertPageBreakIcon />,
+    segment: "flex-cost",
+    title: "ค่าใช้จ่ายรายวัน",
+    icon: <ReceiptLongIcon />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
@@ -114,7 +122,7 @@ const NAVIGATION = [
     segment: "stock-out",
     title: "ตัดสต๊อกสินค้า",
     icon: <InsertPageBreakIcon />,
-    roles: ["admin", "superadmin"],
+    roles: ["admin", "superadmin", "employee"],
     group: "main",
   },
   {
@@ -191,7 +199,7 @@ const NAVIGATION = [
     segment: "profile-settings",
     title: "ตั้งค่าโปรไฟล์",
     icon: spinningIcon,
-    roles: ["admin", "superadmin"],
+    roles: ["admin", "superadmin", "employee"],
     group: "profile",
   },
 ];
