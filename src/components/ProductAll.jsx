@@ -21,7 +21,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { visuallyHidden } from "@mui/utils";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { forwardRef } from "react";
@@ -30,15 +29,11 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
-import Fade from '@mui/material/Fade';
 import Skeleton from '@mui/material/Skeleton';
 
 import {
   fetchProductsByCategory,
-  updateProduct,
-  deleteProduct,
 } from "../api/productApi";
-import { set } from "nprogress";
 
 function createData(
   id,
@@ -80,22 +75,14 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// const headCells = [
-//   { id: "name", label: "ชื่อสินค้า", width: "15%" },
-//   { id: "img", label: "รูปภาพ", width: "15%" },
-//   { id: "barcode", label: "BARCODE", width: "15%" },
-//   { id: "priceSell", label: "ราคาขาย", width: "10%" },
-//   { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
-//   { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
-//   { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
-// ];
-
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "30%" },
+  { id: "name", label: "ชื่อสินค้า", width: "15%" },
   { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "20%" },
-  { id: "stockQty", label: "จำนวนสต็อก", width: "15%" },
-  { id: "stockMin", label: "สต็อกต่ำสุด", width: "20%" }
+  { id: "barcode", label: "BARCODE", width: "15%" },
+  { id: "priceSell", label: "ราคาขาย", width: "10%" },
+  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
+  { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -211,9 +198,6 @@ function ProductAll() {
   const [page, setPage] = useState(0);
   const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [editRow, setEditRow] = useState(null);
-  const [editValues, setEditValues] = useState({});
-  const [deleteRow, setDeleteRow] = useState(null);
   const theme = useTheme();
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -315,87 +299,6 @@ function ProductAll() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  // Edit dialog
-  const handleEdit = (row) => {
-    setEditRow(row);
-    setEditValues(row);
-  };
-
-  const handleDialogChange = (field, value) => {
-    setEditValues((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleDialogSave = async () => {
-    try {
-      const updatedPayload = {
-        product_name: editValues.name,
-        barcode: editValues.barcode,
-        price: parseFloat(editValues.priceSell),
-        cost: parseFloat(editValues.priceCost),
-        stock: parseInt(editValues.stockQty, 10),
-        reorder_level: parseInt(editValues.stockMin, 10),
-        image_url: editValues.imgUrl,
-      };
-
-      await updateProduct(
-        editValues.category,
-        editValues.barcode,
-        updatedPayload
-      );
-
-      setSnackbar({
-        open: true,
-        message: "แก้ไขสินค้าสำเร็จ",
-        severity: "success",
-      });
-
-      setEditRow(null);
-      setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
-    } catch (error) {
-      console.error(
-        "❌ Error updating product:",
-        error.response?.data || error.message
-      );
-      setSnackbar({
-        open: true,
-        message: "ไม่สามารถแก้ไขสินค้าได้",
-        severity: "error",
-      });
-    }
-  };
-
-  const handleDialogClose = () => {
-    setEditRow(null);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteProduct(deleteRow.category, deleteRow.barcode);
-
-      setDeleteRow(null);
-      setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
-
-      setSnackbar({
-        open: true,
-        message: "ลบสินค้าสำเร็จ",
-        severity: "success",
-      });
-    } catch (error) {
-      console.error(
-        "❌ Error deleting product:",
-        error.response?.data || error.message
-      );
-
-      setSnackbar({
-        open: true,
-        message: "ไม่สามารถลบสินค้าได้",
-        severity: "error",
-      });
-    }
   };
 
   const filteredRows = useMemo(() => {
@@ -591,7 +494,7 @@ function ProductAll() {
                 },
               }}
             > {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={`skeleton-${i}`}>
                   <TableCell
                     padding="checkbox"
@@ -604,7 +507,7 @@ function ProductAll() {
                       variant="rounded"
                       width={24}
                       height={24}
-                      sx={{ mx: "auto" }}
+                      sx={{ m: 1.5 }}
                     />
                   </TableCell>
 
@@ -623,6 +526,14 @@ function ProductAll() {
                   <TableCell sx={{ textAlign: "left" }}>
                     <Skeleton animation="wave" variant="text" width="100%" />
                   </TableCell>
+                  
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
 
                   <TableCell sx={{ textAlign: "left" }}>
                     <Skeleton animation="wave" variant="text" width="100%" />
@@ -631,14 +542,14 @@ function ProductAll() {
               ))
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center">
+                <TableCell colSpan={8} align="center">
                   ยังไม่มีรายการสินค้า
                 </TableCell>
               </TableRow>
             ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
               filteredRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
+                  <TableCell colSpan={8} align="center">
                     ไม่มีสินค้าตามเงื่อนไขที่เลือก
                   </TableCell>
                 </TableRow>
@@ -683,7 +594,6 @@ function ProductAll() {
                           scope="row"
                           padding="none"
                           sx={{
-                            width: "20%",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -694,7 +604,7 @@ function ProductAll() {
                           {row.name}
                         </TableCell>
                         <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           <img
                             src={row.imgUrl}
@@ -703,31 +613,31 @@ function ProductAll() {
                           />
                         </TableCell>
                         <TableCell
-                          sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.barcode}
                         </TableCell>
-                        {/* <TableCell
+                        <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceSell} บาท
                         </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.priceCost} บาท
-                        </TableCell> */}
+                        </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.stockQty} ชิ้น
                         </TableCell>
                         <TableCell
                           align="left"
-                          sx={{ width: "10%", whiteSpace: "nowrap", px: 1 }}
+                          sx={{ whiteSpace: "nowrap", px: 1 }}
                         >
                           {row.stockMin} ชิ้น
                         </TableCell>
@@ -736,7 +646,6 @@ function ProductAll() {
                   })
               )}
 
-              {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={8} />
@@ -782,294 +691,6 @@ function ProductAll() {
           />
         </Box>
       </Paper>
-
-      {/* Dialog แก้ไขสินค้า */}
-      <Dialog
-        open={!!editRow}
-        onClose={handleDialogClose}
-        maxWidth="md"
-        fullWidth
-        TransitionComponent={Fade}
-        transitionDuration={300} // ทำให้ทั้ง backdrop และ dialog ใช้เวลาเท่ากัน
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: 6,
-              p: { xs: 2, md: 3 },
-              bgcolor: "background.paper",
-            },
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            fontWeight: "500",
-            fontSize: { xs: "1.5rem", md: "1.8rem" },
-            pb: 2,
-            textAlign: "center",
-            color: "primary.main",
-          }}
-        >
-          แก้ไขข้อมูลสินค้า
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: { xs: 3, md: 4 },
-            alignItems: { xs: "center", md: "flex-start" },
-            pt: "24px !important",
-            px: { xs: 2, md: 3 },
-            pb: { xs: 2, md: 3 },
-          }}
-        >
-          <Box
-            sx={{
-              flexShrink: 0,
-              width: { xs: "100%", md: 320 },
-              overflow: "hidden",
-              borderRadius: 6,
-              mb: { xs: 3, md: 0 },
-            }}
-          >
-            <Box
-              component="img"
-              src={editValues.imgUrl || ""}
-              alt={editValues.name}
-              sx={{
-                width: "100%",
-                height: "auto",
-                objectFit: "contain",
-                borderRadius: 6,
-              }}
-            />
-          </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              width: "100%",
-              minWidth: 0,
-            }}
-          >
-            <TextField
-              label="URL รูปภาพ"
-              fullWidth
-              value={editValues.imgUrl || ""}
-              onChange={(e) => handleDialogChange("imgUrl", e.target.value)}
-              placeholder="วาง URL รูปภาพที่นี่"
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ชื่อสินค้า"
-              fullWidth
-              value={editValues.name || ""}
-              onChange={(e) => handleDialogChange("name", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="BARCODE"
-              fullWidth
-              value={editValues.barcode || ""}
-              onChange={(e) => handleDialogChange("barcode", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ราคาขาย"
-              fullWidth
-              type="number"
-              value={editValues.priceSell || ""}
-              onChange={(e) => handleDialogChange("priceSell", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="ราคาต้นทุน"
-              fullWidth
-              type="number"
-              value={editValues.priceCost || ""}
-              onChange={(e) => handleDialogChange("priceCost", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="จำนวนสต็อก"
-              fullWidth
-              type="number"
-              value={editValues.stockQty || ""}
-              onChange={(e) => handleDialogChange("stockQty", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-            <TextField
-              label="สต็อกต่ำสุด"
-              fullWidth
-              type="number"
-              value={editValues.stockMin || ""}
-              onChange={(e) => handleDialogChange("stockMin", e.target.value)}
-              variant="outlined"
-              size="medium"
-              InputProps={{
-                sx: {
-                  borderRadius: 4,
-                },
-              }}
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            justifyContent: { xs: "center", md: "flex-end" },
-            gap: 0.5,
-            py: 2,
-            px: { xs: 2, md: 3 },
-          }}
-        >
-          <Button
-            onClick={handleDialogClose}
-            color="inherit"
-            variant="outlined"
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            onClick={handleDialogSave}
-            variant="contained"
-            color="primary"
-            sx={{
-              backgroundColor: theme.palette.background.ButtonDay,
-              color: theme.palette.text.hint,
-              "&:hover": {
-                backgroundColor: theme.palette.background.ButtonDay,
-              },
-            }}
-          >
-            บันทึกการแก้ไข
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={!!deleteRow}
-        onClose={() => setDeleteRow(null)}
-        maxWidth="xs"
-        fullWidth
-        TransitionComponent={Fade}
-        transitionDuration={300}
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: 6,
-              p: { xs: 2, md: 3 },
-              bgcolor: "background.paper",
-            },
-          },
-        }}
-      >
-        <Box sx={{ textAlign: "center", pb: 1 }}>
-          <WarningAmberIcon color="error" sx={{ fontSize: 50, mb: 1 }} />
-          <DialogTitle
-            sx={{
-              fontWeight: 600,
-              fontSize: "1.4rem",
-              color: "error.main",
-              mb: 1,
-            }}
-          >
-            ยืนยันการลบสินค้า
-          </DialogTitle>
-          <DialogContent
-            sx={{
-              fontSize: "1rem",
-              color: "text.secondary",
-            }}
-          >
-            คุณต้องการลบสินค้า <br />
-            <Typography component="span" fontWeight="bold" color="error.main">
-              {deleteRow?.name}
-            </Typography>{" "}
-            ใช่หรือไม่?
-          </DialogContent>
-        </Box>
-
-        <DialogActions
-          sx={{
-            justifyContent: "center",
-            gap: 0.5,
-            mt: 2,
-          }}
-        >
-          <Button
-            variant="outlined"
-            color="inherit"
-            size="medium"
-            onClick={() => setDeleteRow(null)}
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            size="medium"
-            onClick={handleDeleteConfirm}
-            sx={{
-              boxShadow: "none",
-              textTransform: "none",
-            }}
-          >
-            ลบสินค้า
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar
         open={snackbar.open}

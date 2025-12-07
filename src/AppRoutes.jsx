@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -21,6 +20,7 @@ import ProfileSettings from "./components/ProfileSettings";
 import EmpolyeeData from "./components/EmpolyeeData";
 import OwnerData from "./components/OwnerData";
 import CalendarPageEmployee from "./components/CalendarEmployee";
+import FlexCost from "./components/FlexCost";
 
 function AppRoutes() {
   useRouteProgress();
@@ -51,6 +51,7 @@ function AppRoutes() {
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="empolyee-data" element={<EmpolyeeData />} />
         <Route path="owner-data" element={<OwnerData />} />
@@ -78,6 +79,7 @@ function AppRoutes() {
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="empolyee-data" element={<EmpolyeeData />} />
       </Route>
@@ -91,7 +93,9 @@ function AppRoutes() {
           </PrivateRoute>
         }
       >
+        <Route path="stock-out" element={<StockOutPage />} />
         <Route path="calendar-employee" element={<CalendarPageEmployee />} />
+        <Route path="profile-settings" element={<ProfileSettings />} />
       </Route>
     </Routes>
   );
