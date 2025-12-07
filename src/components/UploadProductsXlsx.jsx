@@ -1,10 +1,7 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
-
-import { uploadProducts } from "../api/productApi";
-
 import {
   Box,
   Typography,
@@ -25,6 +22,8 @@ import {
 import { visuallyHidden } from "@mui/utils";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
+import { uploadProducts } from "../api/productApi";
+
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
@@ -36,22 +35,14 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// const headCells = [
-//   { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
-//   { id: "image_url", label: "รูปภาพ", width: "15%" },
-//   { id: "barcode", label: "BARCODE", width: "15%" },
-//   { id: "price", label: "ราคาขาย", width: "10%" },
-//   { id: "cost", label: "ราคาต้นทุน", width: "10%" },
-//   { id: "stock", label: "จำนวนสต็อก", width: "10%" },
-//   { id: "reorder_level", label: "สต็อกต่ำสุด", width: "10%" },
-// ];
-
 const headCells = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "30%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
   { id: "image_url", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "20%" },
-  { id: "stock", label: "จำนวนสต็อก", width: "15%" },
-  { id: "reorder_level", label: "สต็อกต่ำสุด", width: "20%" },
+  { id: "barcode", label: "BARCODE", width: "15%" },
+  { id: "price", label: "ราคาขาย", width: "10%" },
+  { id: "cost", label: "ราคาต้นทุน", width: "10%" },
+  { id: "stock", label: "จำนวนสต็อก", width: "10%" },
+  { id: "reorder_level", label: "สต็อกต่ำสุด", width: "10%" },
 ];
 
 function EnhancedTableHead(props) {
@@ -469,12 +460,12 @@ function UploadProductsXlsx() {
                         <TableCell sx={{ width: "15%", px: 1 }}>
                           {row.barcode}
                         </TableCell>
-                        {/* <TableCell sx={{ width: "10%", px: 1 }}>
+                        <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.price} บาท
                         </TableCell>
                         <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.cost} บาท
-                        </TableCell> */}
+                        </TableCell>
                         <TableCell sx={{ width: "10%", px: 1 }}>
                           {row.stock} ชิ้น
                         </TableCell>
