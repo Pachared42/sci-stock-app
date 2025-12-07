@@ -42,7 +42,7 @@ function LoginPage() {
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
     if (isLoading) return;
-  
+
     if (isLocked) {
       setSnackbar({
         open: true,
@@ -53,21 +53,21 @@ function LoginPage() {
       });
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const data = await apiLogin(email, password);
       login(data);
-  
+
       setLoginAttempts(0);
       localStorage.removeItem("loginAttempts");
       localStorage.removeItem("isLocked");
       localStorage.removeItem("lockedUntil");
-  
+
       if (data.role === "superadmin") navigate("/superadmin/dashboard");
       else if (data.role === "admin") navigate("/admin/dashboard");
       else if (data.role === "employee")
-        navigate("/employee/calendar-employee");
+        navigate("/employee/stock-out");
       else {
         setSnackbar({
           open: true,
@@ -79,14 +79,14 @@ function LoginPage() {
       const newAttempts = loginAttempts + 1;
       setLoginAttempts(newAttempts);
       localStorage.setItem("loginAttempts", newAttempts);
-  
+
       if (newAttempts >= 5) {
         setIsLocked(true);
         const lockUntil = Date.now() + 10 * 60 * 1000;
         localStorage.setItem("isLocked", "true");
         localStorage.setItem("lockedUntil", lockUntil);
         setRemainingTime(600);
-  
+
         setSnackbar({
           open: true,
           message: "คุณพยายามเข้าสู่ระบบเกิน 5 ครั้ง กรุณาลองใหม่ในภายหลัง",
@@ -95,9 +95,8 @@ function LoginPage() {
       } else {
         setSnackbar({
           open: true,
-          message: `อีเมลหรือรหัสผ่านไม่ถูกต้อง (เหลืออีก ${
-            5 - newAttempts
-          } ครั้ง)`,
+          message: `อีเมลหรือรหัสผ่านไม่ถูกต้อง (เหลืออีก ${5 - newAttempts
+            } ครั้ง)`,
           severity: "error",
         });
       }
@@ -116,11 +115,11 @@ function LoginPage() {
 
   useEffect(() => {
     const lockedUntil = parseInt(localStorage.getItem("lockedUntil"));
-  
+
     if (lockedUntil && Date.now() < lockedUntil) {
       setIsLocked(true);
       setRemainingTime(Math.floor((lockedUntil - Date.now()) / 1000));
-  
+
       const timer = setInterval(() => {
         const timeLeft = Math.floor((lockedUntil - Date.now()) / 1000);
         if (timeLeft <= 0) {
@@ -135,7 +134,7 @@ function LoginPage() {
           setRemainingTime(timeLeft);
         }
       }, 1000);
-  
+
       return () => clearInterval(timer);
     }
   }, []);
@@ -278,6 +277,7 @@ function LoginPage() {
                 variant="h4"
                 fontWeight={600}
                 className="text-[#fff] text-center"
+                sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "2rem", xl: "2.5rem" } }}
               >
                 {isRegister ? "ลงทะเบียนพนักงาน" : "ระบบบริหารร้านค้า"}
               </Typography>
