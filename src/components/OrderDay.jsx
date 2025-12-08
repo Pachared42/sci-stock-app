@@ -1,23 +1,29 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
+import {
+  Box,
+  Paper,
+  Toolbar,
+  Typography,
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  TextField,
+} from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
-import { TextField } from "@mui/material";
+
+import {
+  LocalizationProvider,
+  DatePicker,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
 import { fetchSalesToday, fetchDailyExpenses } from "../api/orderSalesDay";
@@ -32,12 +38,6 @@ const headCells = [
   { id: "total_profit", label: "รวมกำไร", width: "12%" },
   { id: "totalPrice", label: "ราคาขายรวม", width: "12%" },
 ];
-
-// const headCells = [
-//   { id: "name", label: "ชื่อสินค้า", width: "50%" },
-//   { id: "img", label: "รูปภาพ", width: "25%" },
-//   { id: "quantity", label: "จำนวน", width: "25%" },
-// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -240,7 +240,6 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
   return (
     <Paper sx={{ width: "100%", p: 2 }}>
       <EnhancedTableToolbar numSelected={selected.length} date={date} />
-      {/* --- Grid บนหัวตาราง --- */}
       <Box
         sx={{
           display: "flex",
@@ -251,7 +250,7 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
         }}
       >
         {/* Top 3 Products */}
-        {/* <Paper
+        <Paper
           sx={{
             p: 2,
             backgroundColor: theme.palette.background.chartBackground,
@@ -277,10 +276,10 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           ) : (
             <Typography>ไม่มีข้อมูลสินค้า</Typography>
           )}
-        </Paper> */}
+        </Paper>
 
         {/* Daily Expenses */}
-        {/* <Paper
+        <Paper
           sx={{
             p: 2,
             backgroundColor: theme.palette.background.chartBackground,
@@ -311,10 +310,9 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           ) : (
             <Typography>ไม่มีข้อมูลรายจ่ายวันนี้</Typography>
           )}
-        </Paper> */}
+        </Paper>
       </Box>
 
-      {/* --- ตารางเดิม --- */}
       <TableContainer
         sx={{
           borderTopLeftRadius: 20,
@@ -660,108 +658,6 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
           }}
         />
       </Box>
-      {/* <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          mt: 2,
-          width: "100%",
-          flexWrap: "wrap",
-        }}
-      >
-        <Paper
-          sx={{
-            p: 2,
-            textAlign: "center",
-            backgroundColor: theme.palette.background.chartBackground,
-            flex: "1 1 15%",
-            minWidth: "220px",
-            borderRadius: 5,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight={500}
-            mb={1}
-            sx={{ fontSize: "1.25rem" }}
-          >
-            ยอดขายรวม
-          </Typography>
-          <Typography fontWeight={500}>{totalSales.toFixed(2)} บาท</Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            textAlign: "center",
-            backgroundColor: theme.palette.background.chartBackground,
-            flex: "1 1 15%",
-            minWidth: "220px",
-            borderRadius: 5,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight={500}
-            mb={1}
-            sx={{ fontSize: "1.25rem" }}
-          >
-            รายจ่ายรวม
-          </Typography>
-          <Typography fontWeight={500}>
-            {(() => {
-              const totalDailyPayments = dailyExpenses
-                .filter(
-                  (e) => e.payment_date.split("T")[0] === formattedSelectedDate
-                )
-                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-
-              return totalDailyPayments.toFixed(2) + " บาท";
-            })()}
-          </Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            textAlign: "center",
-            backgroundColor: theme.palette.background.chartBackground,
-            flex: "1 1 15%",
-            minWidth: "220px",
-            borderRadius: 5,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight={500}
-            mb={1}
-            sx={{ fontSize: "1.25rem" }}
-          >
-            กำไรสุทธิ
-          </Typography>
-          <Typography fontWeight={500}>
-            {(() => {
-              const totalRevenue = rows.reduce(
-                (sum, row) =>
-                  sum +
-                  ((Number(row.price) || 0) - (Number(row.cost_price) || 0)) *
-                    (Number(row.quantity) || 0),
-                0
-              );
-
-              const totalExpenses = dailyExpenses
-                .filter(
-                  (e) => e.payment_date.split("T")[0] === formattedSelectedDate
-                )
-                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-
-              const totalProfit = totalRevenue - totalExpenses;
-
-              return totalProfit.toFixed(2) + " บาท";
-            })()}
-          </Typography>
-        </Paper>
-      </Box> */}
     </Paper>
   );
 }
