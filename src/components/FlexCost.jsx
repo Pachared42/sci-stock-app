@@ -110,10 +110,10 @@ function FlexCost() {
     const { user } = useAuth();
     const token = user?.token;
 
-    const [icePrice, setIcePrice] = useState("10");
+    const [icePrice, setIcePrice] = useState("40");
     const [otherName, setOtherName] = useState("");
     const [otherPrice, setOtherPrice] = useState("");
-    const [dailyPayment, setDailyPayment] = useState("50");
+    const [dailyPayment, setDailyPayment] = useState("80");
 
     const [dailyRows, setDailyRows] = useState(() => {
         const stored = localStorage.getItem("dailyPayments");

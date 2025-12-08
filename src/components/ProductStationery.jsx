@@ -793,9 +793,9 @@ function StationeryTable() {
                           scope="row"
                           padding="none"
                           sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            whiteSpace: "normal",
+                            overflow: "visible",
+                            textOverflow: "break-word",
                             px: 1,
                           }}
                           title={row.name}

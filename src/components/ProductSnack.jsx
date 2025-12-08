@@ -28,6 +28,7 @@ import {
   Alert,
   InputAdornment,
   Fade,
+  Skeleton,
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
@@ -239,6 +240,7 @@ function SnackTable() {
 
   // ตัวแปรสถานะอื่น ๆ
   const [reload, setReload] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Hooks ต่าง ๆ
   const theme = useTheme();
@@ -249,6 +251,7 @@ function SnackTable() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const data = await fetchProductsByCategory("snack");
         const formatted = data.map((item, index) =>
           createData(
@@ -265,6 +268,8 @@ function SnackTable() {
         setRows(formatted);
       } catch (err) {
         console.error("โหลดสินค้าล้มเหลว:", err);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -494,7 +499,8 @@ function SnackTable() {
 
   // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
+  const isLowStock = (product) =>
+    product.stockQty > 0 && product.stockQty <= 10;
 
   // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =
@@ -635,7 +641,7 @@ function SnackTable() {
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มสินค้าใหม่
               </Button>
             </Box>
           </Box>
@@ -733,10 +739,9 @@ function SnackTable() {
                           scope="row"
                           padding="none"
                           sx={{
-                            width: "20%",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            whiteSpace: "normal",
+                            overflow: "visible",
+                            textOverflow: "break-word",
                             px: 1,
                           }}
                           title={row.name}
@@ -786,8 +791,8 @@ function SnackTable() {
                           sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -798,9 +803,20 @@ function SnackTable() {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -894,7 +910,7 @@ function SnackTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          เพิ่มสินค้าใหม่ประเภทขนม
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1107,7 +1123,7 @@ function SnackTable() {
               },
             }}
           >
-            เพิ่มสินค้า
+            ยืนยันการเพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1145,7 +1161,7 @@ function SnackTable() {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลสินค้า
+          แก้ไขข้อมูลสินค้าประเภทขนม
         </DialogTitle>
         <DialogContent
           sx={{

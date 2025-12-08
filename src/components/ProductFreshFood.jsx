@@ -28,6 +28,7 @@ import {
   Alert,
   InputAdornment,
   Fade,
+  Skeleton,
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
@@ -200,7 +201,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 function FreshFoodTable() {
-  // ตัวแปร state ต่าง ๆ
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
@@ -209,7 +209,6 @@ function FreshFoodTable() {
   const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // สถานะ Dialog ต่าง ๆ
   const [editRow, setEditRow] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
@@ -224,23 +223,20 @@ function FreshFoodTable() {
     stockMin: "",
   });
 
-  // ตัวแปรสำหรับการกรองและค้นหา
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const filterOpen = Boolean(filterAnchorEl);
   const [filter, setFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
 
-  // Snackbar สำหรับแจ้งเตือนสถานะ
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  // ตัวแปรสถานะอื่น ๆ
   const [reload, setReload] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Hooks ต่าง ๆ
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -249,6 +245,7 @@ function FreshFoodTable() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const data = await fetchProductsByCategory("fresh_food");
         const formatted = data.map((item, index) =>
           createData(
@@ -264,7 +261,13 @@ function FreshFoodTable() {
         );
         setRows(formatted);
       } catch (err) {
-        console.error("โหลดสินค้าล้มเหลว:", err);
+        setSnackbar({
+          open: true,
+          message: "ไม่สามารถโหลดข้อมูลสินค้าได้",
+          severity: "error",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -494,7 +497,8 @@ function FreshFoodTable() {
 
   // --- ฟังก์ชันช่วยตรวจสอบสต็อกต่ำและหมด ---
   const isOutOfStock = (product) => product.stockQty === 0;
-  const isLowStock = (product) => product.stockQty > 0 && product.stockQty <= 10;
+  const isLowStock = (product) =>
+    product.stockQty > 0 && product.stockQty <= 10;
 
   // --- การคำนวณแถวว่างสำหรับ pagination ---
   const emptyRows =
@@ -635,7 +639,7 @@ function FreshFoodTable() {
                   fontWeight: "500",
                 }}
               >
-                เพิ่มสินค้า
+                เพิ่มสินค้าใหม่
               </Button>
             </Box>
           </Box>
@@ -678,8 +682,70 @@ function FreshFoodTable() {
                 },
               }}
             >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
-              {rows.length === 0 ? (
+              {" "}
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell
+                      padding="checkbox"
+                      sx={{
+                        textAlign: "center",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      <Skeleton
+                        animation="wave"
+                        variant="rounded"
+                        width={24}
+                        height={24}
+                        sx={{ mx: "auto" }}
+                      />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton
+                        animation="wave"
+                        variant="rounded"
+                        width={100}
+                        height={50}
+                      />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton animation="wave" variant="text" width="100%" />
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "left" }}>
+                      <Skeleton
+                        animation="wave"
+                        variant="rounded"
+                        width={100}
+                        height={30}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
                     ยังไม่มีรายการสินค้า
@@ -733,10 +799,9 @@ function FreshFoodTable() {
                           scope="row"
                           padding="none"
                           sx={{
-                            width: "20%",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            whiteSpace: "normal",
+                            overflow: "visible",
+                            textOverflow: "break-word",
                             px: 1,
                           }}
                           title={row.name}
@@ -786,8 +851,8 @@ function FreshFoodTable() {
                           sx={{ width: "15%", whiteSpace: "nowrap", px: 1 }}
                         >
                           <Button
-                            variant="outlined"
-                            color="primary"
+                            variant="contained"
+                            color="info"
                             size="small"
                             sx={{ mr: 1 }}
                             onClick={(e) => {
@@ -798,9 +863,20 @@ function FreshFoodTable() {
                             แก้ไข
                           </Button>
                           <Button
-                            variant="contained"
+                            variant="outlined"
                             color="error"
                             size="small"
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                              "&:hover": {
+                                backgroundColor: theme.palette.error.light,
+                                color: "#fff",
+                              },
+                              fontSize: "0.8rem",
+                              fontWeight: "500",
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteRow(row);
@@ -813,7 +889,6 @@ function FreshFoodTable() {
                     );
                   })
               )}
-
               {/* แถวว่างเพิ่มความสูง เพื่อให้ความสูงตารางคงที่ */}
               {emptyRows > 0 && rows.length > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
@@ -894,7 +969,7 @@ function FreshFoodTable() {
             color: "primary.main",
           }}
         >
-          เพิ่มสินค้าใหม่
+          เพิ่มสินค้าใหม่ประเภทแช่แข็ง
         </DialogTitle>
         <DialogContent
           sx={{
@@ -1107,7 +1182,7 @@ function FreshFoodTable() {
               },
             }}
           >
-            เพิ่มสินค้า
+            ยืนยันเพิ่มสินค้า
           </Button>
         </DialogActions>
       </Dialog>
@@ -1145,7 +1220,7 @@ function FreshFoodTable() {
             color: "primary.main",
           }}
         >
-          แก้ไขข้อมูลสินค้า
+          แก้ไขข้อมูลสินค้าประเภทแช่แข็ง
         </DialogTitle>
         <DialogContent
           sx={{
