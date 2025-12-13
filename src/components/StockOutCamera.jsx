@@ -133,7 +133,7 @@ function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
-  const scannedRef = useRef(false);
+  const [scannedCode, setScannedCode] = useState(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -328,6 +328,13 @@ function StockOutPage() {
     }
   };
 
+  useEffect(() => {
+    if (!scannedCode) return;
+
+    handleStockOut(scannedCode); // 🔥 ค้นหาชัวร์
+    setScannedCode(null);
+  }, [scannedCode]);
+
   const playBeep = () => {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioCtx.createOscillator();
@@ -505,15 +512,14 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog open={openCamera} fullScreen onClose={() => setOpenCamera(false)}>
+      <Dialog open={openCamera} fullScreen>
         <BarcodeScanner
-          openCamera={openCamera}   // ✅ ต้องส่ง
-          onClose={() => setOpenCamera(false)}
+          openCamera={openCamera}
           onDetected={(code) => {
             playBeep();
             vibrate();
-            setBarcode(code);
-            handleStockOut(code);
+            setScannedCode(code);  // เก็บค่าไว้ก่อน
+            setOpenCamera(false);  // ปิด Dialog หลังกล้องหยุดแล้ว
           }}
         />
       </Dialog>
