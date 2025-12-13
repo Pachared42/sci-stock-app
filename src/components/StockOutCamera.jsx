@@ -134,6 +134,7 @@ function StockOutPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
   const audioCtxRef = useRef(null);
+  const lastScanRef = useRef(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -257,10 +258,9 @@ function StockOutPage() {
     const finalBarcode = barcodeValue ?? barcode;
     if (!finalBarcode || !token) return;
 
-    // กันยิงซ้ำ
     if (lastScanRef.current === finalBarcode) return;
     lastScanRef.current = finalBarcode;
-    setTimeout(() => (lastScanRef.current = null), 500);
+    setTimeout(() => (lastScanRef.current = null), 800);
 
     try {
       const product = await getProductByBarcode(token, finalBarcode);
@@ -495,7 +495,9 @@ function StockOutPage() {
           onDetected={(code) => {
             playBeep();
             vibrate();
-            handleStockOut(code); // เพิ่มสินค้า
+
+            setBarcode(code);
+            handleStockOut(code); // 🔥 ค้นหาทันที
           }}
           onClose={() => setOpenCamera(false)}
         />

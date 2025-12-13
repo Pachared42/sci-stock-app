@@ -5,13 +5,12 @@ import { Box, Button } from "@mui/material";
 function BarcodeScanner({ onDetected, onClose }) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
-    const lockRef = useRef(false);
+    const scanningRef = useRef(true);
 
     useEffect(() => {
-        if (readerRef.current) return; // ❗ กัน StrictMode
-
         const reader = new BrowserMultiFormatReader();
         readerRef.current = reader;
+        scanningRef.current = true;
 
         reader.decodeFromConstraints(
             {
@@ -23,32 +22,31 @@ function BarcodeScanner({ onDetected, onClose }) {
             },
             videoRef.current,
             (result) => {
-                if (result && !lockRef.current) {
-                    lockRef.current = true;
-
+                if (result && scanningRef.current) {
+                    scanningRef.current = false; // กันยิงซ้ำ
                     onDetected(result.getText());
 
-                    // debounce ยิงซ้ำ
+                    // 🔑 restart scanner หลัง 700ms (ไม่ปิดกล้อง)
                     setTimeout(() => {
-                        lockRef.current = false;
-                    }, 800);
+                        scanningRef.current = true;
+                    }, 700);
                 }
             }
         );
 
         return () => {
-            // ❌ อย่า reset ที่นี่
+            reader.reset(); // 🔥 สำคัญมาก
         };
     }, [onDetected]);
 
     const handleClose = () => {
-        readerRef.current?.reset(); // ✅ reset เฉพาะตอนกดปิด
-        readerRef.current = null;
+        scanningRef.current = false;
+        readerRef.current?.reset(); // ปิด stream จริง
         onClose();
     };
 
     return (
-        <Box sx={{ position: "relative", width: "100%", height: "100%", bgcolor: "black" }}>
+        <Box sx={{ width: "100%", height: "100%", bgcolor: "black" }}>
             <video
                 ref={videoRef}
                 autoPlay
@@ -57,21 +55,8 @@ function BarcodeScanner({ onDetected, onClose }) {
             />
 
             {/* ปุ่มปิดกล้อง */}
-            <Box
-                sx={{
-                    position: "absolute",
-                    bottom: 24,
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                }}
-            >
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={handleClose}
-                    sx={{ px: 4, py: 1.5, borderRadius: 3 }}
-                >
+            <Box sx={{ position: "absolute", bottom: 20, width: "100%", textAlign: "center" }}>
+                <Button variant="contained" color="error" onClick={handleClose}>
                     ปิดกล้อง
                 </Button>
             </Box>
