@@ -505,29 +505,19 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog
-        open={openCamera}
-        onClose={() => {
-          scannedRef.current = false;
-          setOpenCamera(false);
-        }}
-        fullScreen
-      >
+      <Dialog open={openCamera} fullScreen onClose={() => setOpenCamera(false)}>
         <BarcodeScanner
+          openCamera={openCamera}   // ✅ ต้องส่ง
+          onClose={() => setOpenCamera(false)}
           onDetected={(code) => {
-            if (scannedRef.current) return;
-
-            scannedRef.current = true;
-
-            playBeep();       // 🔊 เสียง
-            vibrate();        // 📳 สั่น (มือถือ)
-
-            setBarcode(code); // แสดงในช่อง
-            setOpenCamera(false);
-            handleStockOut(code); // 🔥 รวมจำนวน / เพิ่มสินค้า
+            playBeep();
+            vibrate();
+            setBarcode(code);
+            handleStockOut(code);
           }}
         />
       </Dialog>
+
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
