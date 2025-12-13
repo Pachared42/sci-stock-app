@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -133,7 +133,7 @@ function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
-  const [pendingBarcode, setPendingBarcode] = useState(null);
+  const scannedRef = useRef(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -328,26 +328,26 @@ function StockOutPage() {
     }
   };
 
-  useEffect(() => {
-    if (!pendingBarcode) return;
-
-    handleStockOut(pendingBarcode);
-    setPendingBarcode(null);
-  }, [pendingBarcode]);
-
   const playBeep = () => {
-    try {
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      osc.frequency.value = 1200;
-      osc.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.08);
-    } catch { }
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Hz
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.12);
   };
 
   const vibrate = () => {
-    if (navigator.vibrate) navigator.vibrate(120);
+    if (navigator.vibrate) {
+      navigator.vibrate(100);
+    }
   };
 
   const handleQuantityChange = (barcodeVal, value) => {
@@ -505,19 +505,23 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog open={openCamera} fullScreen>
+      <Dialog
+        open={openCamera}
+        onClose={() => {
+          scannedRef.current = false;
+          setOpenCamera(false);
+        }}
+        fullScreen
+      >
         <BarcodeScanner
-          active={openCamera}
           onDetected={(code) => {
-            // 🔊 เสียงต้องมาก่อน
-            playBeep();
-            vibrate();
+            if (scannedRef.current) return;
 
-            // เก็บ barcode
-            setPendingBarcode(code);
+            scannedRef.current = true;
 
-            // ค่อยปิด Dialog
-            setOpenCamera(false);
+            setBarcode(code);          // แสดงใน TextField
+            setOpenCamera(false);      // ปิดกล้อง
+            handleStockOut(code);      // 🔥 ค้นหาทันที
           }}
         />
       </Dialog>
