@@ -5,6 +5,7 @@ import { Box, Button } from "@mui/material";
 function BarcodeScanner({ onDetected, onClose }) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
+    const streamRef = useRef(null);
     const scanningRef = useRef(true);
 
     useEffect(() => {
@@ -12,41 +13,47 @@ function BarcodeScanner({ onDetected, onClose }) {
         readerRef.current = reader;
         scanningRef.current = true;
 
-        reader.decodeFromConstraints(
-            {
-                video: {
-                    facingMode: { ideal: "environment" },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                },
-            },
+        reader.decodeFromVideoDevice(
+            null,
             videoRef.current,
             (result) => {
                 if (result && scanningRef.current) {
-                    scanningRef.current = false; // กันยิงซ้ำ
+                    scanningRef.current = false;
                     onDetected(result.getText());
 
-                    // 🔑 restart scanner หลัง 700ms (ไม่ปิดกล้อง)
+                    // 🔁 เปิดสแกนต่อหลัง 800ms
                     setTimeout(() => {
                         scanningRef.current = true;
-                    }, 700);
+                    }, 800);
                 }
             }
         );
 
-        return () => {
-            reader.reset(); // 🔥 สำคัญมาก
-        };
+        return stopCamera;
     }, [onDetected]);
 
-    const handleClose = () => {
+    const stopCamera = () => {
         scanningRef.current = false;
-        readerRef.current?.reset(); // ปิด stream จริง
+
+        if (readerRef.current) {
+            readerRef.current.reset();
+            readerRef.current = null;
+        }
+
+        if (videoRef.current?.srcObject) {
+            const tracks = videoRef.current.srcObject.getTracks();
+            tracks.forEach((track) => track.stop());
+            videoRef.current.srcObject = null;
+        }
+    };
+
+    const handleClose = () => {
+        stopCamera();
         onClose();
     };
 
     return (
-        <Box sx={{ width: "100%", height: "100%", bgcolor: "black" }}>
+        <Box sx={{ width: "100%", height: "100%", bgcolor: "black", position: "relative" }}>
             <video
                 ref={videoRef}
                 autoPlay
@@ -54,7 +61,6 @@ function BarcodeScanner({ onDetected, onClose }) {
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
 
-            {/* ปุ่มปิดกล้อง */}
             <Box sx={{ position: "absolute", bottom: 20, width: "100%", textAlign: "center" }}>
                 <Button variant="contained" color="error" onClick={handleClose}>
                     ปิดกล้อง

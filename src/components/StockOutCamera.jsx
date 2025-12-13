@@ -134,7 +134,7 @@ function StockOutPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
   const audioCtxRef = useRef(null);
-  const lastScanRef = useRef(null);
+  const lastScanRef = useRef("");
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -255,15 +255,13 @@ function StockOutPage() {
   };
 
   const handleStockOut = async (barcodeValue) => {
-    const finalBarcode = barcodeValue ?? barcode;
-    if (!finalBarcode || !token) return;
+    if (!barcodeValue || barcodeValue === lastScanRef.current) return;
+    lastScanRef.current = barcodeValue;
 
-    if (lastScanRef.current === finalBarcode) return;
-    lastScanRef.current = finalBarcode;
-    setTimeout(() => (lastScanRef.current = null), 800);
+    setTimeout(() => (lastScanRef.current = ""), 800);
 
     try {
-      const product = await getProductByBarcode(token, finalBarcode);
+      const product = await getProductByBarcode(token, barcodeValue);
 
       setStockRows((prev) => {
         const index = prev.findIndex(
@@ -471,7 +469,7 @@ function StockOutPage() {
           </Button>
           <Button
             variant="contained"
-            onClick={handleStockOut}
+            onClick={() => handleStockOut(barcode)}
             disabled={!barcode}
             sx={{
               position: "absolute",
@@ -490,14 +488,17 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog open={openCamera} fullScreen>
+      <Dialog
+        open={openCamera}
+        fullScreen
+        onClose={() => setOpenCamera(false)}
+      >
         <BarcodeScanner
           onDetected={(code) => {
             playBeep();
             vibrate();
-
             setBarcode(code);
-            handleStockOut(code); // 🔥 ค้นหาทันที
+            handleStockOut(code); // 🔥 ต้องทำงานแน่นอน
           }}
           onClose={() => setOpenCamera(false)}
         />
