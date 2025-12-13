@@ -134,7 +134,6 @@ function StockOutPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
   const audioCtxRef = useRef(null);
-  const lastScanRef = useRef("");
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -255,38 +254,58 @@ function StockOutPage() {
   };
 
   const handleStockOut = async (barcodeValue) => {
-    if (!barcodeValue || barcodeValue === lastScanRef.current) return;
-    lastScanRef.current = barcodeValue;
+    const finalBarcode = barcodeValue ?? barcode;
 
-    setTimeout(() => (lastScanRef.current = ""), 800);
+    if (!finalBarcode) {
+      setSnackbar({
+        open: true,
+        message: "กรุณากรอกบาร์โค้ด",
+        severity: "warning",
+      });
+      return;
+    }
+
+    if (!token) {
+      setSnackbar({
+        open: true,
+        message: "กรุณาเข้าสู่ระบบ",
+        severity: "warning",
+      });
+      return;
+    }
 
     try {
-      const product = await getProductByBarcode(token, barcodeValue);
+      const product = await getProductByBarcode(token, finalBarcode);
 
       setStockRows((prev) => {
         const index = prev.findIndex(
           (item) => item.barcode === product.barcode
         );
 
-        const updated =
-          index !== -1
-            ? prev.map((item, i) =>
-              i === index
-                ? { ...item, quantity: item.quantity + 1 }
-                : item
-            )
-            : [
-              ...prev,
-              {
-                id: product.id,
-                product_name: product.product_name,
-                barcode: product.barcode,
-                cost: product.cost,
-                price: product.price,
-                image_url: product.image_url,
-                quantity: 1,
-              },
-            ];
+        let updated;
+
+        if (index !== -1) {
+          // ✅ มีอยู่แล้ว → เพิ่มจำนวน
+          updated = prev.map((item, i) =>
+            i === index
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          // ✅ ยังไม่มี → เพิ่มแถวใหม่
+          updated = [
+            ...prev,
+            {
+              id: product.id,
+              product_name: product.product_name,
+              barcode: product.barcode,
+              cost: product.cost,
+              price: product.price,
+              image_url: product.image_url,
+              quantity: 1,
+            },
+          ];
+        }
 
         localStorage.setItem("stockOutItems", JSON.stringify(updated));
         return updated;
@@ -297,7 +316,10 @@ function StockOutPage() {
         message: `เพิ่มสินค้า "${product.product_name}" สำเร็จ`,
         severity: "success",
       });
+
+      setBarcode("");
     } catch (err) {
+      console.error(err);
       setSnackbar({
         open: true,
         message: err.message || "เกิดข้อผิดพลาดในการค้นหาสินค้า",
@@ -305,7 +327,6 @@ function StockOutPage() {
       });
     }
   };
-
 
   const playBeep = () => {
     if (!audioCtxRef.current) {
@@ -469,7 +490,7 @@ function StockOutPage() {
           </Button>
           <Button
             variant="contained"
-            onClick={() => handleStockOut(barcode)}
+            onClick={handleStockOut}
             disabled={!barcode}
             sx={{
               position: "absolute",
@@ -488,19 +509,16 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog
-        open={openCamera}
-        fullScreen
-        onClose={() => setOpenCamera(false)}
-      >
+      <Dialog open={openCamera} fullScreen>
         <BarcodeScanner
           onDetected={(code) => {
             playBeep();
             vibrate();
-            setBarcode(code);
-            handleStockOut(code); // 🔥 ต้องทำงานแน่นอน
+            handleStockOut(code); // 🔥 ยิงซ้ำได้เรื่อย ๆ
           }}
-          onClose={() => setOpenCamera(false)}
+          onClose={() => {
+            setOpenCamera(false);
+          }}
         />
       </Dialog>
 
