@@ -133,7 +133,7 @@ function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
-  const [scannedCode, setScannedCode] = useState(null);
+  const [pendingBarcode, setPendingBarcode] = useState(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -329,32 +329,25 @@ function StockOutPage() {
   };
 
   useEffect(() => {
-    if (!scannedCode) return;
+    if (!pendingBarcode) return;
 
-    handleStockOut(scannedCode); // 🔥 ค้นหาชัวร์
-    setScannedCode(null);
-  }, [scannedCode]);
+    handleStockOut(pendingBarcode);
+    setPendingBarcode(null);
+  }, [pendingBarcode]);
 
   const playBeep = () => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Hz
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.12);
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      osc.frequency.value = 1200;
+      osc.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } catch { }
   };
 
   const vibrate = () => {
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
+    if (navigator.vibrate) navigator.vibrate(120);
   };
 
   const handleQuantityChange = (barcodeVal, value) => {
@@ -514,16 +507,20 @@ function StockOutPage() {
 
       <Dialog open={openCamera} fullScreen>
         <BarcodeScanner
-          openCamera={openCamera}
+          active={openCamera}
           onDetected={(code) => {
+            // 🔊 เสียงต้องมาก่อน
             playBeep();
             vibrate();
-            setScannedCode(code);  // เก็บค่าไว้ก่อน
-            setOpenCamera(false);  // ปิด Dialog หลังกล้องหยุดแล้ว
+
+            // เก็บ barcode
+            setPendingBarcode(code);
+
+            // ค่อยปิด Dialog
+            setOpenCamera(false);
           }}
         />
       </Dialog>
-
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>

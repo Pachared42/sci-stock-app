@@ -3,16 +3,24 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box } from "@mui/material";
 
-function BarcodeScanner({ openCamera, onDetected }) {
+function BarcodeScanner({ active, onDetected }) {
     const videoRef = useRef(null);
+    const readerRef = useRef(null);
     const scannedRef = useRef(false);
 
     useEffect(() => {
-        if (!openCamera) return;
+        if (!active) return;
 
         scannedRef.current = false;
 
-        const reader = new BrowserMultiFormatReader();
+        const hints = new Map();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.CODE_128,
+        ]);
+
+        const reader = new BrowserMultiFormatReader(hints);
+        readerRef.current = reader;
 
         reader.decodeFromConstraints(
             {
@@ -26,14 +34,20 @@ function BarcodeScanner({ openCamera, onDetected }) {
             (result) => {
                 if (result && !scannedRef.current) {
                     scannedRef.current = true;
-                    reader.reset();              // ✅ หยุดกล้องก่อน
-                    onDetected(result.getText()); // ✅ แค่ส่งค่า
+
+                    // ❗ หยุดกล้องก่อน
+                    reader.reset();
+
+                    // ส่งค่าอย่างเดียว
+                    onDetected(result.getText());
                 }
             }
         );
 
-        return () => reader.reset();
-    }, [openCamera, onDetected]);
+        return () => {
+            reader.reset();
+        };
+    }, [active, onDetected]);
 
     return (
         <Box sx={{ width: "100%", height: "100%", bgcolor: "black" }}>
@@ -46,6 +60,5 @@ function BarcodeScanner({ openCamera, onDetected }) {
         </Box>
     );
 }
-
 
 export default BarcodeScanner;
