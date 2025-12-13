@@ -1,55 +1,77 @@
 import { useEffect, useRef } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import {
-    BarcodeFormat,
-    DecodeHintType,
-} from "@zxing/library";
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 
 function BarcodeScanner({ onDetected, onClose }) {
     const videoRef = useRef(null);
-    const hints = new Map();
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.CODE_128,
-    ]);
-
-    const reader = new BrowserMultiFormatReader(hints);
+    const readerRef = useRef(null);
+    const scanningRef = useRef(true);
 
     useEffect(() => {
         const reader = new BrowserMultiFormatReader();
+        readerRef.current = reader;
+        scanningRef.current = true;
 
         reader.decodeFromConstraints(
             {
                 video: {
-                    facingMode: { ideal: "environment" }, // กล้องหลัง
-                    focusMode: "continuous",               // autofocus
+                    facingMode: { ideal: "environment" },
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                 },
             },
             videoRef.current,
             (result) => {
-                if (result) {
+                if (result && scanningRef.current) {
+                    scanningRef.current = false;
+
                     onDetected(result.getText());
-                    reader.reset();
+
+                    // ⏱ debounce กันยิงซ้ำ
+                    setTimeout(() => {
+                        scanningRef.current = true;
+                    }, 800);
                 }
             }
         );
 
-        return () => reader.reset();
-    }, []);
+        return () => {
+            reader.reset();
+        };
+    }, [onDetected]);
 
     return (
-        <Box sx={{ width: "100%", p: 2 }}>
+        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
             <video
                 ref={videoRef}
+                autoPlay
+                playsInline
                 style={{
                     width: "100%",
+                    height: "100%",
                     objectFit: "cover",
-                    clipPath: "inset(25% 10% 25% 10%)",
                 }}
             />
+
+            {/* ปุ่มปิดกล้อง */}
+            <Box
+                sx={{
+                    position: "absolute",
+                    bottom: 24,
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                }}
+            >
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={onClose}
+                    sx={{ px: 4, py: 1.5, borderRadius: 3 }}
+                >
+                    ปิดกล้อง
+                </Button>
+            </Box>
         </Box>
     );
 }

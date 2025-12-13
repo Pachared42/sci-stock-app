@@ -133,7 +133,7 @@ function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
-  const scannedRef = useRef(false);
+  const audioCtxRef = useRef(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -329,19 +329,23 @@ function StockOutPage() {
   };
 
   const playBeep = () => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    if (!audioCtxRef.current) {
+      audioCtxRef.current =
+        new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Hz
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    const ctx = audioCtxRef.current;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    osc.frequency.value = 1000;
+    gain.gain.value = 0.1;
 
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
   };
 
   const vibrate = () => {
@@ -505,23 +509,15 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog
-        open={openCamera}
-        onClose={() => {
-          scannedRef.current = false;
-          setOpenCamera(false);
-        }}
-        fullScreen
-      >
+      <Dialog open={openCamera} fullScreen>
         <BarcodeScanner
           onDetected={(code) => {
-            if (scannedRef.current) return;
-
-            scannedRef.current = true;
-
-            setBarcode(code);          // แสดงใน TextField
-            setOpenCamera(false);      // ปิดกล้อง
-            handleStockOut(code);      // 🔥 ค้นหาทันที
+            playBeep();
+            vibrate();
+            handleStockOut(code); // 🔥 ยิงซ้ำได้เรื่อย ๆ
+          }}
+          onClose={() => {
+            setOpenCamera(false);
           }}
         />
       </Dialog>
