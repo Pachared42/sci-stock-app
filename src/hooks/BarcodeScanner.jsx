@@ -1,17 +1,35 @@
 import { useEffect, useRef } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
+import {
+    BrowserMultiFormatReader,
+    BarcodeFormat,
+    DecodeHintType,
+} from "@zxing/browser";
 import { Box } from "@mui/material";
 
 function BarcodeScanner({ onDetected, onClose }) {
     const videoRef = useRef(null);
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.CODE_128,
+    ]);
+
+    const reader = new BrowserMultiFormatReader(hints);
 
     useEffect(() => {
         const reader = new BrowserMultiFormatReader();
 
-        reader.decodeFromVideoDevice(
-            null,
+        reader.decodeFromConstraints(
+            {
+                video: {
+                    facingMode: { ideal: "environment" }, // กล้องหลัง
+                    focusMode: "continuous",               // autofocus
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
+            },
             videoRef.current,
-            (result, err) => {
+            (result) => {
                 if (result) {
                     onDetected(result.getText());
                     reader.reset();
@@ -26,7 +44,11 @@ function BarcodeScanner({ onDetected, onClose }) {
         <Box sx={{ width: "100%", p: 2 }}>
             <video
                 ref={videoRef}
-                style={{ width: "100%", borderRadius: 8 }}
+                style={{
+                    width: "100%",
+                    objectFit: "cover",
+                    clipPath: "inset(25% 10% 25% 10%)",
+                }}
             />
         </Box>
     );

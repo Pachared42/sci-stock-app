@@ -278,18 +278,35 @@ function StockOutPage() {
       const product = await getProductByBarcode(token, finalBarcode);
 
       setStockRows((prev) => {
-        const updated = [
-          ...prev,
-          {
-            id: product.id,
-            product_name: product.product_name,
-            barcode: product.barcode,
-            cost: product.cost,
-            price: product.price,
-            image_url: product.image_url,
-            quantity: 0,
-          },
-        ];
+        const index = prev.findIndex(
+          (item) => item.barcode === product.barcode
+        );
+
+        let updated;
+
+        if (index !== -1) {
+          // ✅ มีอยู่แล้ว → เพิ่มจำนวน
+          updated = prev.map((item, i) =>
+            i === index
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        } else {
+          // ✅ ยังไม่มี → เพิ่มแถวใหม่
+          updated = [
+            ...prev,
+            {
+              id: product.id,
+              product_name: product.product_name,
+              barcode: product.barcode,
+              cost: product.cost,
+              price: product.price,
+              image_url: product.image_url,
+              quantity: 1,
+            },
+          ];
+        }
+
         localStorage.setItem("stockOutItems", JSON.stringify(updated));
         return updated;
       });
@@ -311,6 +328,27 @@ function StockOutPage() {
     }
   };
 
+  const playBeep = () => {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Hz
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.12);
+  };
+
+  const vibrate = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate(100);
+    }
+  };
 
   const handleQuantityChange = (barcodeVal, value) => {
     setStockRows((prevRows) =>
@@ -481,9 +519,12 @@ function StockOutPage() {
 
             scannedRef.current = true;
 
-            setBarcode(code);          // แสดงใน TextField
-            setOpenCamera(false);      // ปิดกล้อง
-            handleStockOut(code);      // 🔥 ค้นหาทันที
+            playBeep();       // 🔊 เสียง
+            vibrate();        // 📳 สั่น (มือถือ)
+
+            setBarcode(code); // แสดงในช่อง
+            setOpenCamera(false);
+            handleStockOut(code); // 🔥 รวมจำนวน / เพิ่มสินค้า
           }}
         />
       </Dialog>
