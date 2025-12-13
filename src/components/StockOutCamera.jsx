@@ -16,6 +16,7 @@ import {
   TablePagination,
   Paper,
   Snackbar,
+  Dialog,
 } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { useTheme } from "@mui/material/styles";
@@ -25,6 +26,7 @@ import {
   getProductByBarcode,
   createDailyPayment,
 } from "../api/sellStockOutApi";
+import BarcodeScanner from "../hooks/BarcodeScanner";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -459,6 +461,20 @@ function StockOutPage() {
           </Button>
         </Box>
       </Box>
+
+      <Dialog
+        open={openCamera}
+        onClose={() => setOpenCamera(false)}
+        fullScreen
+      >
+        <BarcodeScanner
+          onDetected={(code) => {
+            setBarcode(code);
+            setOpenCamera(false);
+          }}
+          onClose={() => setOpenCamera(false)}
+        />
+      </Dialog>
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
