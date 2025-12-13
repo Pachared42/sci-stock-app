@@ -490,7 +490,7 @@ function StockOutPage() {
           </Button>
           <Button
             variant="contained"
-            onClick={handleStockOut}
+            onClick={() => handleStockOut(barcode)}
             disabled={!barcode}
             sx={{
               position: "absolute",
@@ -509,7 +509,11 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog open={openCamera} fullScreen>
+      <Dialog
+        open={openCamera}
+        fullScreen
+        onClose={() => setOpenCamera(false)}
+      >
         <BarcodeScanner
           onDetected={(code) => {
             playBeep();
