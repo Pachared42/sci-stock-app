@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 import {
-    BrowserMultiFormatReader,
     BarcodeFormat,
     DecodeHintType,
-} from "@zxing/browser";
+} from "@zxing/library";
 import { Box } from "@mui/material";
 
 function BarcodeScanner({ onDetected, onClose }) {
