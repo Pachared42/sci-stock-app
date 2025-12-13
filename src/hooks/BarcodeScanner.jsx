@@ -5,12 +5,13 @@ import { Box, Button } from "@mui/material";
 function BarcodeScanner({ onDetected, onClose }) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
-    const scanningRef = useRef(true);
+    const lockRef = useRef(false);
 
     useEffect(() => {
+        if (readerRef.current) return; // ❗ กัน StrictMode
+
         const reader = new BrowserMultiFormatReader();
         readerRef.current = reader;
-        scanningRef.current = true;
 
         reader.decodeFromConstraints(
             {
@@ -22,35 +23,37 @@ function BarcodeScanner({ onDetected, onClose }) {
             },
             videoRef.current,
             (result) => {
-                if (result && scanningRef.current) {
-                    scanningRef.current = false;
+                if (result && !lockRef.current) {
+                    lockRef.current = true;
 
                     onDetected(result.getText());
 
-                    // ⏱ debounce กันยิงซ้ำ
+                    // debounce ยิงซ้ำ
                     setTimeout(() => {
-                        scanningRef.current = true;
+                        lockRef.current = false;
                     }, 800);
                 }
             }
         );
 
         return () => {
-            reader.reset();
+            // ❌ อย่า reset ที่นี่
         };
     }, [onDetected]);
 
+    const handleClose = () => {
+        readerRef.current?.reset(); // ✅ reset เฉพาะตอนกดปิด
+        readerRef.current = null;
+        onClose();
+    };
+
     return (
-        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+        <Box sx={{ position: "relative", width: "100%", height: "100%", bgcolor: "black" }}>
             <video
                 ref={videoRef}
                 autoPlay
                 playsInline
-                style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                }}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
 
             {/* ปุ่มปิดกล้อง */}
@@ -66,7 +69,7 @@ function BarcodeScanner({ onDetected, onClose }) {
                 <Button
                     variant="contained"
                     color="error"
-                    onClick={onClose}
+                    onClick={handleClose}
                     sx={{ px: 4, py: 1.5, borderRadius: 3 }}
                 >
                     ปิดกล้อง

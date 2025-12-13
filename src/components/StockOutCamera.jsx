@@ -255,24 +255,12 @@ function StockOutPage() {
 
   const handleStockOut = async (barcodeValue) => {
     const finalBarcode = barcodeValue ?? barcode;
+    if (!finalBarcode || !token) return;
 
-    if (!finalBarcode) {
-      setSnackbar({
-        open: true,
-        message: "กรุณากรอกบาร์โค้ด",
-        severity: "warning",
-      });
-      return;
-    }
-
-    if (!token) {
-      setSnackbar({
-        open: true,
-        message: "กรุณาเข้าสู่ระบบ",
-        severity: "warning",
-      });
-      return;
-    }
+    // กันยิงซ้ำ
+    if (lastScanRef.current === finalBarcode) return;
+    lastScanRef.current = finalBarcode;
+    setTimeout(() => (lastScanRef.current = null), 500);
 
     try {
       const product = await getProductByBarcode(token, finalBarcode);
@@ -282,30 +270,25 @@ function StockOutPage() {
           (item) => item.barcode === product.barcode
         );
 
-        let updated;
-
-        if (index !== -1) {
-          // ✅ มีอยู่แล้ว → เพิ่มจำนวน
-          updated = prev.map((item, i) =>
-            i === index
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-        } else {
-          // ✅ ยังไม่มี → เพิ่มแถวใหม่
-          updated = [
-            ...prev,
-            {
-              id: product.id,
-              product_name: product.product_name,
-              barcode: product.barcode,
-              cost: product.cost,
-              price: product.price,
-              image_url: product.image_url,
-              quantity: 1,
-            },
-          ];
-        }
+        const updated =
+          index !== -1
+            ? prev.map((item, i) =>
+              i === index
+                ? { ...item, quantity: item.quantity + 1 }
+                : item
+            )
+            : [
+              ...prev,
+              {
+                id: product.id,
+                product_name: product.product_name,
+                barcode: product.barcode,
+                cost: product.cost,
+                price: product.price,
+                image_url: product.image_url,
+                quantity: 1,
+              },
+            ];
 
         localStorage.setItem("stockOutItems", JSON.stringify(updated));
         return updated;
@@ -316,10 +299,7 @@ function StockOutPage() {
         message: `เพิ่มสินค้า "${product.product_name}" สำเร็จ`,
         severity: "success",
       });
-
-      setBarcode("");
     } catch (err) {
-      console.error(err);
       setSnackbar({
         open: true,
         message: err.message || "เกิดข้อผิดพลาดในการค้นหาสินค้า",
@@ -327,6 +307,7 @@ function StockOutPage() {
       });
     }
   };
+
 
   const playBeep = () => {
     if (!audioCtxRef.current) {
@@ -514,11 +495,9 @@ function StockOutPage() {
           onDetected={(code) => {
             playBeep();
             vibrate();
-            handleStockOut(code); // 🔥 ยิงซ้ำได้เรื่อย ๆ
+            handleStockOut(code); // เพิ่มสินค้า
           }}
-          onClose={() => {
-            setOpenCamera(false);
-          }}
+          onClose={() => setOpenCamera(false)}
         />
       </Dialog>
 
