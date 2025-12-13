@@ -126,6 +126,13 @@ const NAVIGATION = [
     group: "main",
   },
   {
+    segment: "camera-stockout",
+    title: "ตัดสต๊อกสินค้า",
+    icon: <InsertPageBreakIcon />,
+    roles: ["admin", "superadmin", "employee"],
+    group: "main",
+  },
+  {
     segment: "sales-day",
     title: "รายงานรายวัน",
     icon: <AssignmentIcon />,

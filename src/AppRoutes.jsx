@@ -21,6 +21,7 @@ import EmpolyeeData from "./components/EmpolyeeData";
 import OwnerData from "./components/OwnerData";
 import CalendarPageEmployee from "./components/CalendarEmployee";
 import FlexCost from "./components/FlexCost";
+import StockOutCamera from "./components/StockOutCamera";
 
 function AppRoutes() {
   useRouteProgress();
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="empolyee-data" element={<EmpolyeeData />} />
@@ -79,6 +81,7 @@ function AppRoutes() {
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="empolyee-data" element={<EmpolyeeData />} />
@@ -94,6 +97,7 @@ function AppRoutes() {
         }
       >
         <Route path="stock-out" element={<StockOutPage />} />
+        <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="calendar-employee" element={<CalendarPageEmployee />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
       </Route>
