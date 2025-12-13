@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -133,6 +133,7 @@ function StockOutPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
+  const scannedRef = useRef(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -252,8 +253,10 @@ function StockOutPage() {
     });
   };
 
-  const handleStockOut = async () => {
-    if (!barcode) {
+  const handleStockOut = async (barcodeValue) => {
+    const finalBarcode = barcodeValue ?? barcode;
+
+    if (!finalBarcode) {
       setSnackbar({
         open: true,
         message: "กรุณากรอกบาร์โค้ด",
@@ -261,6 +264,7 @@ function StockOutPage() {
       });
       return;
     }
+
     if (!token) {
       setSnackbar({
         open: true,
@@ -271,8 +275,7 @@ function StockOutPage() {
     }
 
     try {
-      const product = await getProductByBarcode(token, barcode);
-      console.log(product.product_name);
+      const product = await getProductByBarcode(token, finalBarcode);
 
       setStockRows((prev) => {
         const updated = [
@@ -296,6 +299,7 @@ function StockOutPage() {
         message: `เพิ่มสินค้า "${product.product_name}" สำเร็จ`,
         severity: "success",
       });
+
       setBarcode("");
     } catch (err) {
       console.error(err);
@@ -306,6 +310,7 @@ function StockOutPage() {
       });
     }
   };
+
 
   const handleQuantityChange = (barcodeVal, value) => {
     setStockRows((prevRows) =>
@@ -464,15 +469,22 @@ function StockOutPage() {
 
       <Dialog
         open={openCamera}
-        onClose={() => setOpenCamera(false)}
+        onClose={() => {
+          scannedRef.current = false;
+          setOpenCamera(false);
+        }}
         fullScreen
       >
         <BarcodeScanner
           onDetected={(code) => {
-            setBarcode(code);
-            setOpenCamera(false);
+            if (scannedRef.current) return;
+
+            scannedRef.current = true;
+
+            setBarcode(code);          // แสดงใน TextField
+            setOpenCamera(false);      // ปิดกล้อง
+            handleStockOut(code);      // 🔥 ค้นหาทันที
           }}
-          onClose={() => setOpenCamera(false)}
         />
       </Dialog>
 
