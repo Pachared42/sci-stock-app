@@ -12,7 +12,7 @@ function BarcodeScanner({
     const readerRef = useRef(null);
     const lockRef = useRef(false);
     const timeoutRef = useRef(null);
-    const activeRef = useRef(true); // 🔥 ตัวตัดวงจร
+    const activeRef = useRef(true);
 
     useEffect(() => {
         activeRef.current = true;

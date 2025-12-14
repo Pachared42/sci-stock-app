@@ -513,14 +513,15 @@ function StockOutPage() {
       </Box>
 
       {openCamera && (
-        <Dialog
-          key="barcode-dialog"   // 🔥 บังคับ lifecycle ใหม่
-          open
-          fullScreen
-          onClose={() => setOpenCamera(false)}
-          TransitionComponent={undefined}
-          PaperProps={{ sx: { bgcolor: "black" } }}
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1300,
+            bgcolor: "black",
+          }}
         >
+          {/* Header */}
           <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
             <Toolbar>
               <IconButton
@@ -533,7 +534,8 @@ function StockOutPage() {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ pt: 8, width: "100%", height: "100vh", bgcolor: "black" }}>
+          {/* Body */}
+          <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
             <BarcodeScanner
               continuous
               onDetected={async (code) => {
@@ -543,8 +545,9 @@ function StockOutPage() {
               }}
             />
           </Box>
-        </Dialog>
+        </Box>
       )}
+
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
