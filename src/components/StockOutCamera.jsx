@@ -115,7 +115,7 @@ function EnhancedTableToolbar({ title }) {
   );
 }
 
-function StockOutPage() {
+function StockOutCamera({ openCamera }) {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
@@ -360,17 +360,23 @@ function StockOutPage() {
   useEffect(() => {
     if (openCamera) {
       document.body.style.overflow = "hidden";
-      document.documentElement.style.height = "100%";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
     } else {
       document.body.style.overflow = "";
-      document.documentElement.style.height = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
     }
 
     return () => {
       document.body.style.overflow = "";
-      document.documentElement.style.height = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
     };
   }, [openCamera]);
+
+  // 🔥 สำคัญมาก — ปิด = unmount ทันที
+  if (!openCamera) return null;
 
   const handleQuantityChange = (barcodeVal, value) => {
     setStockRows((prevRows) =>
@@ -530,16 +536,15 @@ function StockOutPage() {
       {openCamera && (
         <Box
           sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
+            position: "fixed",     // ✅ สำคัญมาก
+            inset: 0,
+            width: "100vw",
             height: "100vh",
             bgcolor: "black",
-            zIndex: 1300,
+            zIndex: 9999,
           }}
         >
-          <AppBar position="absolute" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
+          <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
             <Toolbar>
               <IconButton
                 edge="start"
@@ -551,7 +556,7 @@ function StockOutPage() {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ pt: 8, height: "100%" }}>
+          <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
             <BarcodeScanner
               continuous
               onDetected={async (code) => {
@@ -762,4 +767,4 @@ function StockOutPage() {
   );
 }
 
-export default StockOutPage;
+export default StockOutCamera;
