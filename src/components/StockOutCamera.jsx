@@ -357,6 +357,21 @@ function StockOutPage() {
     }
   };
 
+  useEffect(() => {
+    if (openCamera) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.height = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.height = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.height = "";
+    };
+  }, [openCamera]);
+
   const handleQuantityChange = (barcodeVal, value) => {
     setStockRows((prevRows) =>
       prevRows.map((row) =>
@@ -515,14 +530,16 @@ function StockOutPage() {
       {openCamera && (
         <Box
           sx={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1300,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100vh",
             bgcolor: "black",
+            zIndex: 1300,
           }}
         >
-          {/* Header */}
-          <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
+          <AppBar position="absolute" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
             <Toolbar>
               <IconButton
                 edge="start"
@@ -534,8 +551,7 @@ function StockOutPage() {
             </Toolbar>
           </AppBar>
 
-          {/* Body */}
-          <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
+          <Box sx={{ pt: 8, height: "100%" }}>
             <BarcodeScanner
               continuous
               onDetected={async (code) => {
@@ -547,7 +563,6 @@ function StockOutPage() {
           </Box>
         </Box>
       )}
-
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
