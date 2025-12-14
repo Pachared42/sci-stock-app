@@ -26,7 +26,6 @@ function BarcodeScanner({ onDetected, onClose }) {
             {
                 video: {
                     facingMode: { ideal: "environment" },
-                    focusMode: "continuous",
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                 },
@@ -37,10 +36,9 @@ function BarcodeScanner({ onDetected, onClose }) {
                     scannedRef.current = true;
 
                     const barcode = result.getText();
-                    onDetected(barcode);
+                    onDetected(barcode); // ✅ แค่แจ้ง parent
 
-                    reader.reset();
-                    onClose?.();
+                    reader.reset(); // หยุดกล้องพอ
                 }
             }
         );
@@ -52,12 +50,11 @@ function BarcodeScanner({ onDetected, onClose }) {
 
     const handleClose = () => {
         readerRef.current?.reset();
-        onClose?.();
+        onClose?.(); // ✅ ใช้เฉพาะตอนผู้ใช้กดปิด
     };
 
     return (
         <Box sx={{ position: "relative", width: "100%" }}>
-            {/* ปุ่มปิด */}
             <IconButton
                 onClick={handleClose}
                 sx={{
@@ -67,9 +64,6 @@ function BarcodeScanner({ onDetected, onClose }) {
                     zIndex: 10,
                     bgcolor: "rgba(0,0,0,0.5)",
                     color: "#fff",
-                    "&:hover": {
-                        bgcolor: "rgba(0,0,0,0.7)",
-                    },
                 }}
             >
                 <CloseIcon />
@@ -87,5 +81,6 @@ function BarcodeScanner({ onDetected, onClose }) {
         </Box>
     );
 }
+
 
 export default BarcodeScanner;
