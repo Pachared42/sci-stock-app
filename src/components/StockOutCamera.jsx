@@ -509,17 +509,14 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog
-        open={openCamera}
-        fullScreen
-        onClose={() => setOpenCamera(false)}
-      >
+      <Dialog open={openCamera} fullScreen onClose={() => setOpenCamera(false)}>
         <BarcodeScanner
+          continuous={true} // 🔥 เปิดโหมดสแกนต่อเนื่อง
+          delay={800}
           onDetected={async (code) => {
             playBeep();
             vibrate();
             await handleStockOut(code);
-            setOpenCamera(false);
           }}
           onClose={() => setOpenCamera(false)}
         />

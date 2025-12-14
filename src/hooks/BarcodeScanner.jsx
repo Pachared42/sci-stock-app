@@ -1,16 +1,19 @@
 import { useEffect, useRef } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import {
-    BarcodeFormat,
-    DecodeHintType,
-} from "@zxing/library";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-function BarcodeScanner({ onDetected, onClose }) {
+function BarcodeScanner({
+    onDetected,
+    onClose,
+    continuous = true, // 🔥 โหมดสแกนต่อเนื่อง
+    delay = 800,       // กันสแกนซ้ำตัวเดิม
+}) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
-    const scannedRef = useRef(false);
+    const lockRef = useRef(false);
+    const timeoutRef = useRef(null);
 
     useEffect(() => {
         const hints = new Map();
@@ -32,32 +35,48 @@ function BarcodeScanner({ onDetected, onClose }) {
             },
             videoRef.current,
             async (result) => {
-                if (result && !scannedRef.current) {
-                    scannedRef.current = true;
+                if (!result || lockRef.current) return;
 
-                    const barcode = result.getText();
+                lockRef.current = true;
 
-                    // 🔥 รอให้ parent ทำงานให้เสร็จ
-                    await Promise.resolve(onDetected(barcode));
+                const barcode = result.getText();
+                await Promise.resolve(onDetected(barcode));
 
-                    // ✅ ค่อยหยุดกล้องหลัง async เสร็จ
-                    reader.reset();
+                if (continuous) {
+                    timeoutRef.current = setTimeout(() => {
+                        lockRef.current = false; // 🔓 ปลดล็อก → สแกนต่อ
+                    }, delay);
+                } else {
+                    stopCamera();
                 }
             }
         );
 
         return () => {
-            reader.reset();
+            stopCamera();
         };
     }, []);
 
-    const handleClose = () => {
+    const stopCamera = () => {
         readerRef.current?.reset();
+
+        const video = videoRef.current;
+        if (video?.srcObject) {
+            video.srcObject.getTracks().forEach((track) => track.stop());
+            video.srcObject = null;
+        }
+
+        clearTimeout(timeoutRef.current);
+    };
+
+    const handleClose = () => {
+        stopCamera();
         onClose?.();
     };
 
     return (
-        <Box sx={{ position: "relative", width: "100%" }}>
+        <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+            {/* ปุ่มปิดกล้อง */}
             <IconButton
                 onClick={handleClose}
                 sx={{
