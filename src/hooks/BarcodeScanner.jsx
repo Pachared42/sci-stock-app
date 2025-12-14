@@ -5,15 +5,18 @@ import { Box } from "@mui/material";
 
 function BarcodeScanner({
     onDetected,
-    continuous = true, // 🔥 โหมดสแกนต่อเนื่อง
-    delay = 800,       // กันสแกนซ้ำตัวเดิม
+    continuous = true,
+    delay = 800,
 }) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
     const lockRef = useRef(false);
     const timeoutRef = useRef(null);
+    const activeRef = useRef(true); // 🔥 ตัวตัดวงจร
 
     useEffect(() => {
+        activeRef.current = true;
+
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
             BarcodeFormat.EAN_13,
@@ -33,16 +36,20 @@ function BarcodeScanner({
             },
             videoRef.current,
             async (result) => {
+                if (!activeRef.current) return;     // 🔥 สำคัญมาก
                 if (!result || lockRef.current) return;
 
                 lockRef.current = true;
 
-                const barcode = result.getText();
-                await Promise.resolve(onDetected(barcode));
+                await Promise.resolve(onDetected(result.getText()));
+
+                if (!activeRef.current) return;
 
                 if (continuous) {
                     timeoutRef.current = setTimeout(() => {
-                        lockRef.current = false; // 🔓 ปลดล็อก → สแกนต่อ
+                        if (activeRef.current) {
+                            lockRef.current = false;
+                        }
                     }, delay);
                 } else {
                     stopCamera();
@@ -51,6 +58,7 @@ function BarcodeScanner({
         );
 
         return () => {
+            activeRef.current = false; // 🔥 ตัด callback ทันที
             stopCamera();
         };
     }, []);
@@ -60,7 +68,7 @@ function BarcodeScanner({
 
         const video = videoRef.current;
         if (video?.srcObject) {
-            video.srcObject.getTracks().forEach((track) => track.stop());
+            video.srcObject.getTracks().forEach((t) => t.stop());
             video.srcObject = null;
         }
 
@@ -79,6 +87,7 @@ function BarcodeScanner({
                     objectFit: "cover",
                     clipPath: "inset(25% 10% 25% 10%)",
                     pointerEvents: "none",
+                    backgroundColor: "black",
                 }}
             />
         </Box>

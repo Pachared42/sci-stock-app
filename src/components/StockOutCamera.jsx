@@ -512,40 +512,39 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog
-        open={openCamera}
-        fullScreen
-        onClose={() => setOpenCamera(false)}
-        TransitionComponent={undefined}
-        PaperProps={{
-          sx: { bgcolor: "black" },
-        }}
-      >
-        {/* 🔥 Header Layer (รับ click 100%) */}
-        <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={() => setOpenCamera(false)}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+      {openCamera && (
+        <Dialog
+          key="barcode-dialog"   // 🔥 บังคับ lifecycle ใหม่
+          open
+          fullScreen
+          onClose={() => setOpenCamera(false)}
+          TransitionComponent={undefined}
+          PaperProps={{ sx: { bgcolor: "black" } }}
+        >
+          <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={() => setOpenCamera(false)}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
 
-        {/* 🔥 Body */}
-        <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
-          <BarcodeScanner
-            continuous
-            onDetected={async (code) => {
-              playBeep();
-              vibrate();
-              await handleStockOut(code);
-            }}
-          />
-        </Box>
-      </Dialog>
+          <Box sx={{ pt: 8, width: "100%", height: "100vh", bgcolor: "black" }}>
+            <BarcodeScanner
+              continuous
+              onDetected={async (code) => {
+                playBeep();
+                vibrate();
+                await handleStockOut(code);
+              }}
+            />
+          </Box>
+        </Dialog>
+      )}
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
