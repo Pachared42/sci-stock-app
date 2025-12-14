@@ -31,14 +31,17 @@ function BarcodeScanner({ onDetected, onClose }) {
                 },
             },
             videoRef.current,
-            (result) => {
+            async (result) => {
                 if (result && !scannedRef.current) {
                     scannedRef.current = true;
 
                     const barcode = result.getText();
-                    onDetected(barcode); // ✅ แค่แจ้ง parent
 
-                    reader.reset(); // หยุดกล้องพอ
+                    // 🔥 รอให้ parent ทำงานให้เสร็จ
+                    await Promise.resolve(onDetected(barcode));
+
+                    // ✅ ค่อยหยุดกล้องหลัง async เสร็จ
+                    reader.reset();
                 }
             }
         );
@@ -50,7 +53,7 @@ function BarcodeScanner({ onDetected, onClose }) {
 
     const handleClose = () => {
         readerRef.current?.reset();
-        onClose?.(); // ✅ ใช้เฉพาะตอนผู้ใช้กดปิด
+        onClose?.();
     };
 
     return (
@@ -71,6 +74,8 @@ function BarcodeScanner({ onDetected, onClose }) {
 
             <video
                 ref={videoRef}
+                playsInline
+                muted
                 style={{
                     width: "100%",
                     height: "100%",
@@ -81,6 +86,5 @@ function BarcodeScanner({ onDetected, onClose }) {
         </Box>
     );
 }
-
 
 export default BarcodeScanner;
