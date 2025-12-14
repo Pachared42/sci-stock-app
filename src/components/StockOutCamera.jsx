@@ -516,6 +516,10 @@ function StockOutPage() {
         open={openCamera}
         fullScreen
         onClose={() => setOpenCamera(false)}
+        TransitionComponent={undefined}
+        PaperProps={{
+          sx: { bgcolor: "black" },
+        }}
       >
         {/* 🔥 Header Layer (รับ click 100%) */}
         <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
