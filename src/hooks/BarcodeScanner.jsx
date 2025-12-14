@@ -83,7 +83,8 @@ function BarcodeScanner({
                     position: "absolute",
                     top: 8,
                     right: 8,
-                    zIndex: 10,
+                    zIndex: 20,
+                    pointerEvents: "auto",
                     bgcolor: "rgba(0,0,0,0.5)",
                     color: "#fff",
                 }}
@@ -100,6 +101,7 @@ function BarcodeScanner({
                     height: "100%",
                     objectFit: "cover",
                     clipPath: "inset(25% 10% 25% 10%)",
+                    pointerEvents: "none",
                 }}
             />
         </Box>
