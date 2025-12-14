@@ -17,8 +17,11 @@ import {
   Paper,
   Snackbar,
   Dialog,
+  AppBar,
+  IconButton,
 } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../context/AuthProvider";
 import {
@@ -509,17 +512,35 @@ function StockOutPage() {
         </Box>
       </Box>
 
-      <Dialog open={openCamera} fullScreen onClose={() => setOpenCamera(false)}>
-        <BarcodeScanner
-          continuous={true} // 🔥 เปิดโหมดสแกนต่อเนื่อง
-          delay={800}
-          onDetected={async (code) => {
-            playBeep();
-            vibrate();
-            await handleStockOut(code);
-          }}
-          onClose={() => setOpenCamera(false)}
-        />
+      <Dialog
+        open={openCamera}
+        fullScreen
+        onClose={() => setOpenCamera(false)}
+      >
+        {/* 🔥 Header Layer (รับ click 100%) */}
+        <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={() => setOpenCamera(false)}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+
+        {/* 🔥 Body */}
+        <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
+          <BarcodeScanner
+            continuous
+            onDetected={async (code) => {
+              playBeep();
+              vibrate();
+              await handleStockOut(code);
+            }}
+          />
+        </Box>
       </Dialog>
 
       {/* table */}
