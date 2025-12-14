@@ -475,7 +475,7 @@ function StockOutPage() {
         />
         <Box>
           <Button
-            variant="contained"
+            variant="outlined"
             onClick={() => setOpenCamera(true)}
             sx={{
               position: "absolute",
@@ -515,14 +515,13 @@ function StockOutPage() {
         onClose={() => setOpenCamera(false)}
       >
         <BarcodeScanner
-          onDetected={(code) => {
+          onDetected={async (code) => {
             playBeep();
             vibrate();
-            handleStockOut(code); // 🔥 ยิงซ้ำได้เรื่อย ๆ
-          }}
-          onClose={() => {
+            await handleStockOut(code);
             setOpenCamera(false);
           }}
+          onClose={() => setOpenCamera(false)}
         />
       </Dialog>
 
