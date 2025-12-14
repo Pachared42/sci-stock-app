@@ -115,7 +115,7 @@ function EnhancedTableToolbar({ title }) {
   );
 }
 
-function StockOutCamera({ openCamera }) {
+function StockOutPage() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
@@ -360,23 +360,17 @@ function StockOutCamera({ openCamera }) {
   useEffect(() => {
     if (openCamera) {
       document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
+      document.documentElement.style.height = "100%";
     } else {
       document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
+      document.documentElement.style.height = "";
     }
 
     return () => {
       document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
+      document.documentElement.style.height = "";
     };
   }, [openCamera]);
-
-  // 🔥 สำคัญมาก — ปิด = unmount ทันที
-  if (!openCamera) return null;
 
   const handleQuantityChange = (barcodeVal, value) => {
     setStockRows((prevRows) =>
@@ -536,15 +530,16 @@ function StockOutCamera({ openCamera }) {
       {openCamera && (
         <Box
           sx={{
-            position: "fixed",     // ✅ สำคัญมาก
-            inset: 0,
-            width: "100vw",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
             height: "100vh",
             bgcolor: "black",
-            zIndex: 9999,
+            zIndex: 1300,
           }}
         >
-          <AppBar position="fixed" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
+          <AppBar position="absolute" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
             <Toolbar>
               <IconButton
                 edge="start"
@@ -556,7 +551,7 @@ function StockOutCamera({ openCamera }) {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ pt: 8, width: "100%", height: "100%" }}>
+          <Box sx={{ pt: 8, height: "100%" }}>
             <BarcodeScanner
               continuous
               onDetected={async (code) => {
@@ -767,4 +762,4 @@ function StockOutCamera({ openCamera }) {
   );
 }
 
-export default StockOutCamera;
+export default StockOutPage;
