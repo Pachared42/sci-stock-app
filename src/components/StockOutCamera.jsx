@@ -359,6 +359,19 @@ function StockOutPage() {
 
   useEffect(() => {
     setOpenCamera(true);
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setOpenCamera(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      setOpenCamera(false); // ปิดกล้องเมื่อ component unmount
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -491,22 +504,32 @@ function StockOutPage() {
         <Box
           sx={{
             width: "100%",
-            height: 250, // ปรับความสูงตามต้องการ
+            height: 250,
             mb: 2,
             borderRadius: 2,
             overflow: "hidden",
             position: "relative",
             backgroundColor: "#000",
+            p: 1,
           }}
         >
-          <BarcodeScanner
-            continuous
-            onDetected={async (code) => {
-              playBeep();
-              vibrate();
-              await handleStockOut(code);
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              borderRadius: 1,
+              overflow: "hidden",
             }}
-          />
+          >
+            <BarcodeScanner
+              continuous
+              onDetected={async (code) => {
+                playBeep();
+                vibrate();
+                await handleStockOut(code);
+              }}
+            />
+          </Box>
         </Box>
       )}
       <Box sx={{ position: "relative", width: "100%" }}>
