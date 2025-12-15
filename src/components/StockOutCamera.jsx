@@ -358,13 +358,11 @@ function StockOutPage() {
   };
 
   useEffect(() => {
-    // เปิดกล้องอัตโนมัติ
     setOpenCamera(true);
 
-    // ฟังก์ชัน handle tab visibility
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setOpenCamera(false); // จะทำให้ BarcodeScanner unmount → stopCamera() ถูกเรียก
+        setOpenCamera(false);
       }
     };
 
@@ -749,7 +747,7 @@ function StockOutPage() {
           variant="filled"
           sx={{
             width: "100%",
-            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
+            maxWidth: { xs: "80%", sm: "100%", md: "100%" },
             mx: "auto",
             borderRadius: 3,
           }}
