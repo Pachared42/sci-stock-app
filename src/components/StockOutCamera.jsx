@@ -360,17 +360,8 @@ function StockOutPage() {
   useEffect(() => {
     setOpenCamera(true);
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setOpenCamera(false);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
-      setOpenCamera(false); // ปิดกล้องเมื่อ component unmount
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      setOpenCamera(false); // ปิดกล้องเมื่อออกจากหน้า
     };
   }, []);
 
@@ -508,9 +499,8 @@ function StockOutPage() {
             mb: 2,
             borderRadius: 2,
             overflow: "hidden",
-            position: "relative",
             backgroundColor: "#000",
-            p: 1,
+            p: 1, // padding รอบ ๆ
           }}
         >
           <Box
@@ -532,6 +522,7 @@ function StockOutPage() {
           </Box>
         </Box>
       )}
+
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"
