@@ -90,5 +90,4 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 1000, active = 
     );
 }
 
-
 export default BarcodeScanner;

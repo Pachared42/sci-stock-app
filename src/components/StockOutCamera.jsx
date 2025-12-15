@@ -360,28 +360,27 @@ function StockOutPage() {
   };
 
   useEffect(() => {
-    let isActive = true; // track ว่า component ยัง active
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        isActive = false;
-        setOpenCamera(false); // unmount BarcodeScanner
+        setOpenCamera(false);
       } else {
-        isActive = true;
-        setOpenCamera(true); // mount BarcodeScanner ใหม่
+        setOpenCamera(isCameraTab); // ถ้า tab ปัจจุบันคือ camera-stockout → เปิด
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // initial mount
+    setOpenCamera(!document.hidden && isCameraTab);
 
     return () => {
       document.removeEventListener(
         "visibilitychange",
         handleVisibilityChange
       );
-      isActive = false;
       setOpenCamera(false);
     };
-  }, []);
+  }, [isCameraTab]); // watch isCameraTab ด้วย
 
   useEffect(() => {
     if (openCamera) {
@@ -509,7 +508,7 @@ function StockOutPage() {
         px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
       }}
     >
-      {isCameraTab && (
+      {openCamera && (
         <BarcodeScanner
           continuous
           onDetected={async (code) => {
@@ -517,7 +516,7 @@ function StockOutPage() {
             vibrate();
             await handleStockOut(code);
           }}
-          active={isCameraTab}
+          active={openCamera}
         />
       )}
 
