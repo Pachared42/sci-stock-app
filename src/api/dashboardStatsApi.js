@@ -53,3 +53,40 @@ export const fetchMonthlySalesSummary = async (token) => {
     throw error;
   }
 };
+
+export const fetchWeeklySalesCurrentMonth = async (token) => {
+
+  try {
+    const res = await axios.get(
+      `${API_URL}/api/dashboard/sales-weekly`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error(
+      "ดึงข้อมูลยอดขายรายสัปดาห์ของเดือนปัจจุบันไม่สำเร็จ:",
+      error
+    );
+    throw error;
+  }
+};
+
+export const fetchTopSellingProductsCurrentMonth = async (token) => {
+  try {
+    const res = await axios.get(
+      `${API_URL}/api/dashboard/top-selling-products`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error(
+      "ดึงข้อมูลสินค้าขายดีของเดือนปัจจุบันไม่สำเร็จ:",
+      error
+    );
+    throw error;
+  }
+};

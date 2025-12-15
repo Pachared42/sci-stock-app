@@ -11,7 +11,6 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import shapeSquare from "../assets/shape-square.svg";
-import dayjs from "dayjs";
 import {
   LineChart,
   Line,
@@ -29,6 +28,8 @@ import {
   fetchLowStockProducts,
   fetchOutOfStockProducts,
   fetchMonthlySalesSummary,
+  fetchWeeklySalesCurrentMonth,
+  fetchTopSellingProductsCurrentMonth
 } from "../api/dashboardStatsApi";
 
 function Dashboard() {
@@ -42,9 +43,17 @@ function Dashboard() {
   const [lowStockCategoryData, setLowStockCategoryData] = useState([]);
   const [outOfStockCategoryData, setOutOfStockCategoryData] = useState([]);
   const [salesSummaryData, setSalesSummaryData] = useState([]);
+  const [weeklySalesData, setWeeklySalesData] = useState([]);
+  const [topSellingData, setTopSellingData] = useState([]);
   const [monthlySalesTotal, setMonthlySalesTotal] = useState(0);
 
   const dashboardRef = useRef(null);
+
+  const monthNames = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+  const currentMonthName = monthNames[new Date().getMonth()];
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -113,6 +122,19 @@ function Dashboard() {
 
         setSalesSummaryData(month1ySales);
         setMonthlySalesTotal(totalSales);
+
+        const weeklyRes = await fetchWeeklySalesCurrentMonth(token);
+        const weeklySales =
+          weeklyRes?.["ยอดขายรายสัปดาห์เดือนปัจจุบัน"] ?? [];
+
+        setWeeklySalesData(weeklySales);
+
+        const topSellingRes = await fetchTopSellingProductsCurrentMonth(token);
+        const topProducts =
+          topSellingRes?.["สินค้าขายดีเดือนปัจจุบัน"] ?? [];
+
+        setTopSellingData(topProducts);
+
       } catch (err) {
         console.error("โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
       }
@@ -154,7 +176,7 @@ function Dashboard() {
     ]
   );
 
-  const salesData = useMemo(() => {
+  const salesMonthlyData = useMemo(() => {
     if (!salesSummaryData || salesSummaryData.length === 0) return [];
 
     return salesSummaryData.map((item) => ({
@@ -162,6 +184,24 @@ function Dashboard() {
       sales: item.total_sales,
     }));
   }, [salesSummaryData]);
+
+  const salesWeekData = useMemo(() => {
+    if (!weeklySalesData || weeklySalesData.length === 0) return [];
+
+    return weeklySalesData.map((item) => ({
+      week: `สัปดาห์ที่ ${item.week}`,
+      sales: item.total_sales,
+    }))
+  }, [weeklySalesData]);
+
+  const topSellingDisplayData = useMemo(() => {
+    if (!topSellingData || topSellingData.length === 0) return [];
+
+    return topSellingData.map((item) => ({
+      name: item.product_name,
+      image: item.image_url,
+    }));
+  }, [topSellingData]);
 
   return (
     <Box
@@ -249,7 +289,7 @@ function Dashboard() {
                   >
                     {card.value}{" "}
                     {card.label === "สินค้ากำลังจะหมด" ||
-                    card.label === "สินค้าหมดสต็อก"
+                      card.label === "สินค้าหมดสต็อก"
                       ? "รายการ"
                       : "ชิ้น"}
                   </Typography>
@@ -259,6 +299,152 @@ function Dashboard() {
           </Box>
         ))}
       </Grid>
+
+      <Box mt={2}>
+        <Card
+          sx={{
+            borderRadius: 5,
+            p: 2,
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              fontWeight: 500,
+              mb: 3,
+              mt: 2,
+              textAlign: "center",
+            }}
+          >
+            สินค้าขายดี 3 อันดับแรกของเดือน {currentMonthName}
+          </Typography>
+
+          <Grid
+            container
+            spacing={2}
+            justifyContent="center"
+            columns={{ xs: 2, sm: 3, md: 12 }}
+          >
+            {topSellingDisplayData.map((item, index) => (
+              <Grid
+                key={index}
+                sx={{
+                  gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
+                  textAlign: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    borderRadius: 4,
+                    p: 1.5,
+                    backgroundColor: theme.palette.background.paper,
+                    height: "100%",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={item.image}
+                    alt={item.name}
+                    sx={{
+                      width: "100%",
+                      height: 200,
+                      objectFit: "contain",
+                      mb: 1,
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                    title={item.name}
+                  >
+                    {item.name}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+
+
+        </Card>
+      </Box>
+
+      <Box mt={2}>
+        <Card
+          sx={{
+            borderRadius: 5,
+            p: 1,
+            backgroundColor: theme.palette.background.chartBackground,
+          }}
+        >
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              fontWeight: 500,
+              mb: 4,
+              mt: 4,
+              textAlign: "center",
+            }}
+          >
+            ยอดขายรายสัปดาห์ของเดือน {currentMonthName}
+          </Typography>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={salesWeekData}
+              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="2.5"
+                vertical={false}
+                stroke={theme.palette.text.secondary}
+                strokeOpacity={0.2}
+              />
+              <XAxis
+                dataKey="week"
+                stroke={theme.palette.text.secondary}
+                tick={{ fontSize: 14 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 15,
+                  backgroundColor: theme.palette.background.paper,
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                }}
+                labelFormatter={(label) => `${label}`}
+                formatter={(value) => [
+                  `฿${Number(value).toLocaleString()}`,
+                  "ยอดขาย",
+                ]}
+              />
+              <Line
+                type="monomial"
+                dataKey="sales"
+                name="ยอดขาย"
+                stroke={theme.palette.background.orangeDark}
+                strokeWidth={5}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
+      </Box>
 
       {/* ยอดขายรายเดือน */}
       <Box mt={2}>
@@ -279,12 +465,12 @@ function Dashboard() {
               textAlign: "center",
             }}
           >
-            ยอดขายรายเดือน
+            ยอดขายรายเดือน {currentMonthName}
           </Typography>
 
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
-              data={salesData}
+              data={salesMonthlyData}
               margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
             >
               <CartesianGrid
