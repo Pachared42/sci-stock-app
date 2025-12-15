@@ -20,6 +20,8 @@ import {
   AppBar,
   IconButton,
 } from "@mui/material";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../context/AuthProvider";
 import {
@@ -28,7 +30,6 @@ import {
   createDailyPayment,
 } from "../api/sellStockOutApi";
 import BarcodeScanner from "../hooks/BarcodeScanner";
-import { useLocation } from "react-router-dom";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -118,8 +119,6 @@ function StockOutPage() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
-  const location = useLocation();
-  const currentTab = location.pathname.replace("/", "");
 
   const [barcode, setBarcode] = useState("");
   const [stockRows, setStockRows] = useState(() => {
@@ -138,7 +137,6 @@ function StockOutPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
   const audioCtxRef = useRef(null);
-  const isCameraTab = currentTab === "camera-stockout";
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -360,27 +358,23 @@ function StockOutPage() {
   };
 
   useEffect(() => {
+    // เปิดกล้องอัตโนมัติ
+    setOpenCamera(true);
+
+    // ฟังก์ชัน handle tab visibility
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setOpenCamera(false);
-      } else {
-        setOpenCamera(isCameraTab); // ถ้า tab ปัจจุบันคือ camera-stockout → เปิด
+        setOpenCamera(false); // จะทำให้ BarcodeScanner unmount → stopCamera() ถูกเรียก
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // initial mount
-    setOpenCamera(!document.hidden && isCameraTab);
-
     return () => {
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange
-      );
-      setOpenCamera(false);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      setOpenCamera(false); // ปิดกล้องเมื่อออกจากหน้า
     };
-  }, [isCameraTab]); // watch isCameraTab ด้วย
+  }, []);
 
   useEffect(() => {
     if (openCamera) {
@@ -509,17 +503,36 @@ function StockOutPage() {
       }}
     >
       {openCamera && (
-        <BarcodeScanner
-          continuous
-          onDetected={async (code) => {
-            playBeep();
-            vibrate();
-            await handleStockOut(code);
+        <Box
+          sx={{
+            width: "100%",
+            height: 250,
+            mb: 2,
+            borderRadius: 2,
+            overflow: "hidden",
+            backgroundColor: "#000",
+            p: 1,
           }}
-          active={openCamera}
-        />
+        >
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              borderRadius: 1,
+              overflow: "hidden",
+            }}
+          >
+            <BarcodeScanner
+              continuous
+              onDetected={async (code) => {
+                playBeep();
+                vibrate();
+                await handleStockOut(code);
+              }}
+            />
+          </Box>
+        </Box>
       )}
-
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"

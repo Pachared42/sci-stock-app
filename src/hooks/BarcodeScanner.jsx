@@ -3,14 +3,19 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box } from "@mui/material";
 
-function BarcodeScanner({ onDetected, continuous = true, delay = 1000, active = true }) {
+function BarcodeScanner({
+    onDetected,
+    continuous = true,
+    delay = 800,
+}) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
     const lockRef = useRef(false);
     const timeoutRef = useRef(null);
+    const activeRef = useRef(true);
 
-    const startCamera = () => {
-        if (readerRef.current) return; // ถ้าเปิดอยู่แล้ว
+    useEffect(() => {
+        activeRef.current = true;
 
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -31,25 +36,35 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 1000, active = 
             },
             videoRef.current,
             async (result) => {
+                if (!activeRef.current) return;
                 if (!result || lockRef.current) return;
 
                 lockRef.current = true;
-                await onDetected(result.getText());
+
+                await Promise.resolve(onDetected(result.getText()));
+
+                if (!activeRef.current) return;
 
                 if (continuous) {
                     timeoutRef.current = setTimeout(() => {
-                        lockRef.current = false;
+                        if (activeRef.current) {
+                            lockRef.current = false;
+                        }
                     }, delay);
                 } else {
                     stopCamera();
                 }
             }
         );
-    };
+
+        return () => {
+            activeRef.current = false;
+            stopCamera();
+        };
+    }, []);
 
     const stopCamera = () => {
         readerRef.current?.reset();
-        readerRef.current = null;
 
         const video = videoRef.current;
         if (video?.srcObject) {
@@ -59,17 +74,6 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 1000, active = 
 
         clearTimeout(timeoutRef.current);
     };
-
-    useEffect(() => {
-        if (active) {
-            startCamera();
-        } else {
-            stopCamera();
-        }
-
-        // cleanup on unmount
-        return () => stopCamera();
-    }, [active]); // watch prop active
 
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
