@@ -358,6 +358,10 @@ function StockOutPage() {
   };
 
   useEffect(() => {
+    setOpenCamera(true);
+  }, []);
+
+  useEffect(() => {
     if (openCamera) {
       document.body.style.overflow = "hidden";
       document.documentElement.style.height = "100%";
@@ -483,6 +487,28 @@ function StockOutPage() {
         px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
       }}
     >
+      {openCamera && (
+        <Box
+          sx={{
+            width: "100%",
+            height: 250, // ปรับความสูงตามต้องการ
+            mb: 2,
+            borderRadius: 2,
+            overflow: "hidden",
+            position: "relative",
+            backgroundColor: "#000",
+          }}
+        >
+          <BarcodeScanner
+            continuous
+            onDetected={async (code) => {
+              playBeep();
+              vibrate();
+              await handleStockOut(code);
+            }}
+          />
+        </Box>
+      )}
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"
@@ -492,20 +518,6 @@ function StockOutPage() {
           InputProps={{ sx: { borderRadius: 4 } }}
         />
         <Box>
-          <Button
-            variant="outlined"
-            onClick={() => setOpenCamera(true)}
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: 120,
-              transform: "translateY(-50%)",
-              zIndex: 10,
-              borderRadius: 2,
-            }}
-          >
-            <CameraAltIcon />
-          </Button>
           <Button
             variant="contained"
             onClick={() => handleStockOut(barcode)}
@@ -526,43 +538,6 @@ function StockOutPage() {
           </Button>
         </Box>
       </Box>
-
-      {openCamera && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            bgcolor: "black",
-            zIndex: 1300,
-          }}
-        >
-          <AppBar position="absolute" sx={{ bgcolor: "rgba(0,0,0,0.6)" }}>
-            <Toolbar>
-              <IconButton
-                edge="start"
-                color="inherit"
-                onClick={() => setOpenCamera(false)}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-
-          <Box sx={{ pt: 8, height: "100%" }}>
-            <BarcodeScanner
-              continuous
-              onDetected={async (code) => {
-                playBeep();
-                vibrate();
-                await handleStockOut(code);
-              }}
-            />
-          </Box>
-        </Box>
-      )}
 
       {/* table */}
       <Paper sx={{ width: "100%", mb: 2 }}>
