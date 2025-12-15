@@ -46,13 +46,12 @@ function stableSort(array, comparator) {
 }
 
 const headCellsStockOut = [
-  { id: "product_name", label: "ชื่อสินค้า", width: "20%" },
+  { id: "product_name", label: "ชื่อสินค้า", width: "25%" },
   { id: "image_url", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "cost", label: "ราคาทุน", width: "10%" },
-  { id: "price", label: "ราคาขาย", width: "10%" },
-  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "30%" },
+  { id: "price", label: "ราคาขาย", width: "15%" },
+  { id: "manage", label: "ตัดสต๊อกสินค้า", width: "45%" },
 ];
+
 
 function EnhancedTableHeadStockOut({ order, orderBy, onRequestSort }) {
   const theme = useTheme();
@@ -512,15 +511,15 @@ function StockOutPage() {
                       {row.image_url ? (
                         <img
                           src={row.image_url}
-                          style={{ width: 75, height: 75, objectFit: "cover" }}
+                          style={{ width: 75, height: "auto", objectFit: "cover" }}
                           alt={row.product_name}
                         />
                       ) : (
                         "-"
                       )}
                     </TableCell>
-                    <TableCell>{row.barcode}</TableCell>
-                    <TableCell>{row.cost} บาท</TableCell>
+                    {/* <TableCell>{row.barcode}</TableCell>
+                    <TableCell>{row.cost} บาท</TableCell> */}
                     <TableCell>{row.price} บาท</TableCell>
                     <TableCell>
                       <Box

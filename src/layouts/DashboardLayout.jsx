@@ -118,13 +118,13 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
-  {
-    segment: "stock-out",
-    title: "ตัดสต๊อกสินค้า",
-    icon: <InsertPageBreakIcon />,
-    roles: ["admin", "superadmin", "employee"],
-    group: "main",
-  },
+  // {
+  //   segment: "stock-out",
+  //   title: "ตัดสต๊อกสินค้า",
+  //   icon: <InsertPageBreakIcon />,
+  //   roles: ["admin", "superadmin", "employee"],
+  //   group: "main",
+  // },
   {
     segment: "camera-stockout",
     title: "ตัดสต๊อกสินค้า",
