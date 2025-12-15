@@ -358,21 +358,24 @@ function StockOutPage() {
   };
 
   useEffect(() => {
-    // เปิดกล้องอัตโนมัติ
-    setOpenCamera(true);
-
-    // ฟังก์ชัน handle tab visibility
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setOpenCamera(false); // จะทำให้ BarcodeScanner unmount → stopCamera() ถูกเรียก
+        // ซ่อน tab → ปิดกล้อง
+        setOpenCamera(false);
+      } else {
+        // กลับมาที่ tab → เปิดกล้อง
+        setOpenCamera(true);
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    // เริ่มต้นเปิดกล้อง
+    setOpenCamera(true);
+
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      setOpenCamera(false); // ปิดกล้องเมื่อออกจากหน้า
+      setOpenCamera(false); // ปิดกล้องเมื่อ unmount
     };
   }, []);
 
