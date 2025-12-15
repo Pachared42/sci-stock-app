@@ -1,12 +1,35 @@
-# React + Vite
+# ระบบบริหารร้านค้า SCi_NEXT คณะวิทยาศาสตร์ (Final Project)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+โปรเจกต์นี้เป็นระบบบริหารจัดการสต๊อกสินค้า พัฒนาโดยใช้ **React + Vite** สำหรับใช้งานภายในคณะวิทยาศาสตร์ มีเป้าหมายเพื่อช่วยให้การจัดการสินค้า การตรวจสอบคงคลัง และการบันทึกการขายเป็นไปอย่างรวดเร็ว ถูกต้อง และมีประสิทธิภาพ
 
-Currently, two official plugins are available:
+## เทคโนโลยีที่ใช้
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Frontend
 
-## Expanding the ESLint configuration
+* **React** – สร้างส่วนติดต่อผู้ใช้ (UI)
+* **Vite** – เครื่องมือสำหรับพัฒนาและ Build ที่รวดเร็ว
+* **Material UI (MUI)** – ออกแบบ Dashboard และ Component
+* **Axios / Fetch API** – เชื่อมต่อกับ Backend API
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Backend (เชื่อมต่อภายนอก)
+
+* **Go (Gin Framework)** – REST API
+* **JWT Authentication** – ระบบยืนยันตัวตนและกำหนดสิทธิ์
+* **MySQL** – จัดเก็บและดึงข้อมูลสินค้า
+
+## ความสามารถหลักของระบบ
+
+* ระบบ Login ด้วย Email / Password
+* แยกสิทธิ์การใช้งานตามบทบาทผู้ใช้
+* แสดง Dashboard ภาพรวมสต๊อกสินค้า
+* ค้นหาและตัดสต๊อกสินค้าผ่าน Barcode
+* แสดงรายการสินค้าที่ขาย
+* รองรับการใช้งานทั้ง Desktop และ Mobile
+
+## ขอบเขตของโปรเจกต์
+
+ระบบนี้จัดทำขึ้นเพื่อเป็น **Project Final** สำหรับการศึกษา มีจุดมุ่งหมายเพื่อประยุกต์ใช้ความรู้ด้าน Web Application, API, Database และการออกแบบระบบสารสนเทศในสถานการณ์จริง
+
+---
+
+คณะวิทยาศาสตร์
