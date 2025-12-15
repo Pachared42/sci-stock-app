@@ -137,6 +137,7 @@ function StockOutPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openCamera, setOpenCamera] = useState(false);
   const audioCtxRef = useRef(null);
+  const isCameraTab = currentTab === "camera-stockout";
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -507,37 +508,18 @@ function StockOutPage() {
         px: { xs: 0, sm: 2, md: 1.5, lg: 1.5, xl: 20 },
       }}
     >
-      {openCamera && (
-        <Box
-          sx={{
-            width: "100%",
-            height: 250,
-            mb: 2,
-            borderRadius: 2,
-            overflow: "hidden",
-            backgroundColor: "#000",
-            p: 1,
+      {isCameraTab && (
+        <BarcodeScanner
+          continuous
+          onDetected={async (code) => {
+            playBeep();
+            vibrate();
+            await handleStockOut(code);
           }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "100%",
-              borderRadius: 1,
-              overflow: "hidden",
-            }}
-          >
-            <BarcodeScanner
-              continuous
-              onDetected={async (code) => {
-                playBeep();
-                vibrate();
-                await handleStockOut(code);
-              }}
-            />
-          </Box>
-        </Box>
+          active={isCameraTab}
+        />
       )}
+      
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"

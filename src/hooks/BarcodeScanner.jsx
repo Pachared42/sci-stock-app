@@ -3,19 +3,14 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box } from "@mui/material";
 
-function BarcodeScanner({
-    onDetected,
-    continuous = true,
-    delay = 1000,
-}) {
+function BarcodeScanner({ onDetected, continuous = true, delay = 1000, active = true }) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
     const lockRef = useRef(false);
     const timeoutRef = useRef(null);
-    const activeRef = useRef(true);
 
-    useEffect(() => {
-        activeRef.current = true;
+    const startCamera = () => {
+        if (readerRef.current) return; // ถ้าเปิดอยู่แล้ว
 
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -36,35 +31,25 @@ function BarcodeScanner({
             },
             videoRef.current,
             async (result) => {
-                if (!activeRef.current) return;
                 if (!result || lockRef.current) return;
 
                 lockRef.current = true;
-
-                await Promise.resolve(onDetected(result.getText()));
-
-                if (!activeRef.current) return;
+                await onDetected(result.getText());
 
                 if (continuous) {
                     timeoutRef.current = setTimeout(() => {
-                        if (activeRef.current) {
-                            lockRef.current = false;
-                        }
+                        lockRef.current = false;
                     }, delay);
                 } else {
                     stopCamera();
                 }
             }
         );
-
-        return () => {
-            activeRef.current = false;
-            stopCamera();
-        };
-    }, []);
+    };
 
     const stopCamera = () => {
         readerRef.current?.reset();
+        readerRef.current = null;
 
         const video = videoRef.current;
         if (video?.srcObject) {
@@ -74,6 +59,17 @@ function BarcodeScanner({
 
         clearTimeout(timeoutRef.current);
     };
+
+    useEffect(() => {
+        if (active) {
+            startCamera();
+        } else {
+            stopCamera();
+        }
+
+        // cleanup on unmount
+        return () => stopCamera();
+    }, [active]); // watch prop active
 
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
@@ -93,5 +89,6 @@ function BarcodeScanner({
         </Box>
     );
 }
+
 
 export default BarcodeScanner;
