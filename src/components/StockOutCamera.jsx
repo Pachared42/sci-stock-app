@@ -358,24 +358,26 @@ function StockOutPage() {
   };
 
   useEffect(() => {
+    let isActive = true; // track ว่า component ยัง active
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // ซ่อน tab → ปิดกล้อง
-        setOpenCamera(false);
+        isActive = false;
+        setOpenCamera(false); // unmount BarcodeScanner
       } else {
-        // กลับมาที่ tab → เปิดกล้อง
-        setOpenCamera(true);
+        isActive = true;
+        setOpenCamera(true); // mount BarcodeScanner ใหม่
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // เริ่มต้นเปิดกล้อง
-    setOpenCamera(true);
-
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      setOpenCamera(false); // ปิดกล้องเมื่อ unmount
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+      isActive = false;
+      setOpenCamera(false);
     };
   }, []);
 
