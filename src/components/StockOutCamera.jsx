@@ -747,7 +747,7 @@ function StockOutPage() {
           variant="filled"
           sx={{
             width: "100%",
-            maxWidth: { xs: "80%", sm: "100%", md: "100%" },
+            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
             mx: "auto",
             borderRadius: 3,
           }}
