@@ -3,7 +3,11 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box } from "@mui/material";
 
-function BarcodeScanner({ onDetected, continuous = true, delay = 800 }) {
+function BarcodeScanner({
+    onDetected,
+    continuous = true,
+    delay = 1000,
+}) {
     const videoRef = useRef(null);
     const readerRef = useRef(null);
     const lockRef = useRef(false);
@@ -14,14 +18,21 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 800 }) {
         activeRef.current = true;
 
         const hints = new Map();
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13, BarcodeFormat.CODE_128]);
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.CODE_128,
+        ]);
 
         const reader = new BrowserMultiFormatReader(hints);
         readerRef.current = reader;
 
         reader.decodeFromConstraints(
             {
-                video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+                video: {
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
             },
             videoRef.current,
             async (result) => {
@@ -29,13 +40,16 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 800 }) {
                 if (!result || lockRef.current) return;
 
                 lockRef.current = true;
-                await onDetected(result.getText());
+
+                await Promise.resolve(onDetected(result.getText()));
 
                 if (!activeRef.current) return;
 
                 if (continuous) {
                     timeoutRef.current = setTimeout(() => {
-                        if (activeRef.current) lockRef.current = false;
+                        if (activeRef.current) {
+                            lockRef.current = false;
+                        }
                     }, delay);
                 } else {
                     stopCamera();
@@ -43,20 +57,23 @@ function BarcodeScanner({ onDetected, continuous = true, delay = 800 }) {
             }
         );
 
-        const stopCamera = () => {
-            readerRef.current?.reset();
-            if (videoRef.current?.srcObject) {
-                videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
-                videoRef.current.srcObject = null;
-            }
-            clearTimeout(timeoutRef.current);
-        };
-
         return () => {
             activeRef.current = false;
             stopCamera();
         };
-    }, [onDetected, continuous, delay]);
+    }, []);
+
+    const stopCamera = () => {
+        readerRef.current?.reset();
+
+        const video = videoRef.current;
+        if (video?.srcObject) {
+            video.srcObject.getTracks().forEach((t) => t.stop());
+            video.srcObject = null;
+        }
+
+        clearTimeout(timeoutRef.current);
+    };
 
     return (
         <Box sx={{ width: "100%", height: "100%" }}>

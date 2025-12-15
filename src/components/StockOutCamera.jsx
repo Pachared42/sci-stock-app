@@ -358,9 +358,20 @@ function StockOutPage() {
   };
 
   useEffect(() => {
+    // เปิดกล้องอัตโนมัติ
     setOpenCamera(true);
 
+    // ฟังก์ชัน handle tab visibility
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setOpenCamera(false); // จะทำให้ BarcodeScanner unmount → stopCamera() ถูกเรียก
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       setOpenCamera(false); // ปิดกล้องเมื่อออกจากหน้า
     };
   }, []);
@@ -500,7 +511,7 @@ function StockOutPage() {
             borderRadius: 2,
             overflow: "hidden",
             backgroundColor: "#000",
-            p: 1, // padding รอบ ๆ
+            p: 1,
           }}
         >
           <Box
@@ -522,7 +533,6 @@ function StockOutPage() {
           </Box>
         </Box>
       )}
-
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"
