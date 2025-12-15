@@ -20,8 +20,6 @@ import {
   AppBar,
   IconButton,
 } from "@mui/material";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../context/AuthProvider";
 import {
@@ -30,6 +28,7 @@ import {
   createDailyPayment,
 } from "../api/sellStockOutApi";
 import BarcodeScanner from "../hooks/BarcodeScanner";
+import { useLocation } from "react-router-dom";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
@@ -119,6 +118,8 @@ function StockOutPage() {
   const theme = useTheme();
   const { user } = useAuth();
   const token = user?.token;
+  const location = useLocation();
+  const currentTab = location.pathname.replace("/", "");
 
   const [barcode, setBarcode] = useState("");
   const [stockRows, setStockRows] = useState(() => {
@@ -519,7 +520,7 @@ function StockOutPage() {
           active={isCameraTab}
         />
       )}
-      
+
       <Box sx={{ position: "relative", width: "100%" }}>
         <TextField
           label="กรอกบาร์โค้ด"
