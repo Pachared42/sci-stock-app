@@ -16,18 +16,12 @@ import {
   TablePagination,
   Paper,
   Snackbar,
-  Dialog,
-  AppBar,
-  IconButton,
 } from "@mui/material";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../context/AuthProvider";
 import {
   sellStockOut,
   getProductByBarcode,
-  createDailyPayment,
 } from "../api/sellStockOutApi";
 import BarcodeScanner from "../hooks/BarcodeScanner";
 
@@ -124,11 +118,6 @@ function StockOutPage() {
     return stored ? JSON.parse(stored) : [];
   });
 
-  const [dailyRows, setDailyRows] = useState(() => {
-    const stored = localStorage.getItem("dailyPayments");
-    return stored ? JSON.parse(stored) : [];
-  });
-
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("product_name");
   const [page, setPage] = useState(0);
@@ -150,111 +139,7 @@ function StockOutPage() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const handleAddDailyRow = (name, price) => {
-    const numPrice = Number(price);
-    if (!name || isNaN(numPrice) || numPrice < 0) {
-      setSnackbar({
-        open: true,
-        message: "กรุณากรอกชื่อรายการและราคาที่ถูกต้อง",
-        severity: "error",
-      });
-      return;
-    }
-
-    const newRow = {
-      id: Date.now(),
-      item_name: name,
-      item_price: numPrice,
-    };
-
-    setDailyRows((prev) => {
-      const updated = [...prev, newRow];
-      localStorage.setItem("dailyPayments", JSON.stringify(updated));
-      return updated;
-    });
-
-    setSnackbar({
-      open: true,
-      message: `เพิ่มรายการ "${name}" ราคา ${numPrice} บาท สำเร็จ`,
-      severity: "success",
-    });
-  };
-
-  const handleConfirm = async (id) => {
-    if (!token) {
-      setSnackbar({
-        open: true,
-        message: "กรุณาเข้าสู่ระบบ",
-        severity: "warning",
-      });
-      return;
-    }
-
-    const row = dailyRows.find((r) => r.id === id);
-    if (!row) {
-      setSnackbar({
-        open: true,
-        message: "ไม่พบรายการที่เลือก",
-        severity: "error",
-      });
-      return;
-    }
-
-    const amount = Number(row.item_price);
-    if (isNaN(amount) || amount <= 0) {
-      setSnackbar({
-        open: true,
-        message: "ราคาของรายการไม่ถูกต้อง",
-        severity: "error",
-      });
-      return;
-    }
-
-    try {
-      const data = await createDailyPayment(token, {
-        item_name: row.item_name,
-        amount: amount,
-        payment_date: new Date().toISOString().split("T")[0],
-      });
-
-      console.log("ยืนยันสำเร็จ:", data);
-
-      setDailyRows((prev) => {
-        const updated = prev.filter((r) => r.id !== id);
-        localStorage.setItem("dailyPayments", JSON.stringify(updated));
-        return updated;
-      });
-
-      setSnackbar({
-        open: true,
-        message: `ยืนยันรายการ "${row.item_name}" ราคา ${amount} บาท สำเร็จ`,
-        severity: "success",
-      });
-    } catch (err) {
-      console.error(err);
-      setSnackbar({
-        open: true,
-        message: err.message || "เกิดข้อผิดพลาดในการยืนยัน",
-        severity: "error",
-      });
-    }
-  };
-
-  const handleDeleteDailyRow = (id) => {
-    setDailyRows((prev) => {
-      const updated = prev.filter((row) => row.id !== id);
-      localStorage.setItem("dailyPayments", JSON.stringify(updated));
-      return updated;
-    });
-
-    setSnackbar({
-      open: true,
-      message: "ลบรายการเรียบร้อยแล้ว",
-      severity: "success",
-    });
-  };
-
-  const handleStockOut = async (barcodeValue) => {
+  const handleScanBarcodeAndAddItem = async (barcodeValue) => {
     const finalBarcode = barcodeValue ?? barcode;
 
     if (!finalBarcode) {
@@ -286,14 +171,12 @@ function StockOutPage() {
         let updated;
 
         if (index !== -1) {
-          // ✅ มีอยู่แล้ว → เพิ่มจำนวน
           updated = prev.map((item, i) =>
             i === index
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
         } else {
-          // ✅ ยังไม่มี → เพิ่มแถวใหม่
           updated = [
             ...prev,
             {
@@ -323,7 +206,7 @@ function StockOutPage() {
       console.error(err);
       setSnackbar({
         open: true,
-        message: err.message || "เกิดข้อผิดพลาดในการค้นหาสินค้า",
+        message: err.message,
         severity: "error",
       });
     }
@@ -368,7 +251,7 @@ function StockOutPage() {
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      setOpenCamera(false); // ปิดกล้องเมื่อออกจากหน้า
+      setOpenCamera(false);
     };
   }, []);
 
@@ -523,7 +406,7 @@ function StockOutPage() {
               onDetected={async (code) => {
                 playBeep();
                 vibrate();
-                await handleStockOut(code);
+                await handleScanBarcodeAndAddItem(code);
               }}
             />
           </Box>
@@ -540,7 +423,7 @@ function StockOutPage() {
         <Box>
           <Button
             variant="contained"
-            onClick={() => handleStockOut(barcode)}
+            onClick={() => handleScanBarcodeAndAddItem(barcode)}
             disabled={!barcode}
             sx={{
               position: "absolute",

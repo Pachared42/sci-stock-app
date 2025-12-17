@@ -19,16 +19,25 @@ export async function sellStockOut(token, stockOutData) {
 }
 
 export async function getProductByBarcode(token, barcode) {
-
   try {
     const res = await axios.get(`${API_URL}/api/product/${barcode}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.data.product_name) throw new Error("ข้อมูลสินค้าไม่สมบูรณ์");
+
+    if (!res.data?.product_name) {
+      throw new Error("ไม่พบสินค้า");
+    }
+
     return res.data;
   } catch (error) {
-    console.error("ดึงสินค้าไม่สำเร็จ:", error);
-    throw error;
+    if (error.response?.status === 404) {
+      throw new Error("ไม่พบสินค้าตามบาร์โค้ดที่ระบุ");
+    }
+
+    throw new Error(
+      error.response?.data?.message ||
+      "เกิดข้อผิดพลาดในการดึงข้อมูลสินค้า"
+    );
   }
 }
 
