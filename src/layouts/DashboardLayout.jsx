@@ -18,7 +18,6 @@ import {
   Divider,
   useMediaQuery,
   Button,
-  Fade,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { keyframes } from "@mui/system";
@@ -34,13 +33,11 @@ import {
 } from "@mui/icons-material";
 import {
   AccountCircle as AccountCircleIcon,
-  ManageAccounts as ManageAccountsIcon,
   AssignmentInd as AssignmentIndIcon,
   Settings as SettingsIcon,
   RecentActors as RecentActorsIcon,
 } from "@mui/icons-material";
 import {
-  ShoppingBasket as ShoppingBasketIcon,
   InsertPageBreak as InsertPageBreakIcon,
   UploadFileRounded as UploadFileRoundedIcon,
   Warehouse as WarehouseIcon,
@@ -59,7 +56,6 @@ import {
 } from "@mui/icons-material";
 import {
   CalendarMonth as CalendarMonthIcon,
-  PersonAdd as PersonAddIcon,
   DesignServices as DesignServicesIcon,
 } from "@mui/icons-material";
 import "@fontsource/noto-sans-thai";
@@ -104,13 +100,6 @@ const NAVIGATION = [
     roles: ["employee"],
     group: "main",
   },
-  // {
-  //   segment: "google-sheets-stockout",
-  //   title: "ตัดสต๊อกสินค้า V.2",
-  //   icon: <InsertPageBreakIcon />,
-  //   roles: ["admin", "superadmin"],
-  //   group: "main",
-  // },
   {
     segment: "flex-cost",
     title: "ค่าใช้จ่ายรายวัน",
@@ -118,13 +107,6 @@ const NAVIGATION = [
     roles: ["admin", "superadmin"],
     group: "main",
   },
-  // {
-  //   segment: "stock-out",
-  //   title: "ตัดสต๊อกสินค้า",
-  //   icon: <InsertPageBreakIcon />,
-  //   roles: ["admin", "superadmin", "employee"],
-  //   group: "main",
-  // },
   {
     segment: "camera-stockout",
     title: "ตัดสต๊อกสินค้า",

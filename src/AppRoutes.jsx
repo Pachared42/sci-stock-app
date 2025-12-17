@@ -1,9 +1,8 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PrivateRoute from "./components/PrivateRoute";
 import OrderDay from "./components/OrderDay";
-import StockOutFromGoogleSheet from "./components/StockOutFromGoogleSheet";
 import useRouteProgress from "./hooks/useRouteProgress";
 import Dashboard from "./components/Dashboard";
 import CalendarPage from "./components/Calendar";
@@ -14,10 +13,8 @@ import Snack from "./components/ProductSnack";
 import Stationery from "./components/ProductStationery";
 import ApproveStaff from "./components/ApproveStaff";
 import UploadProductsXlsx from "./components/UploadProductsXlsx";
-import StockOutPage from "./components/StockOutPage";
 import ProductAll from "./components/ProductAll";
 import ProfileSettings from "./components/ProfileSettings";
-import EmpolyeeData from "./components/EmpolyeeData";
 import OwnerData from "./components/OwnerData";
 import CalendarPageEmployee from "./components/CalendarEmployee";
 import FlexCost from "./components/FlexCost";
@@ -41,7 +38,6 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="google-sheets-stockout" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />
@@ -51,11 +47,9 @@ function AppRoutes() {
         <Route path="snack-category" element={<Snack />} />
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
-        <Route path="stock-out" element={<StockOutPage />} />
         <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
-        <Route path="empolyee-data" element={<EmpolyeeData />} />
         <Route path="owner-data" element={<OwnerData />} />
       </Route>
 
@@ -70,7 +64,6 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="calendar" element={<CalendarPage />} />
-        <Route path="google-sheets-stockout" element={<StockOutFromGoogleSheet />} />
         <Route path="sales-day" element={<OrderDay />} />
         <Route path="staff-management" element={<ApproveStaff />} />
         <Route path="all-products" element={<ProductAll />} />
@@ -80,11 +73,9 @@ function AppRoutes() {
         <Route path="snack-category" element={<Snack />} />
         <Route path="stationery-category" element={<Stationery />} />
         <Route path="upload-products" element={<UploadProductsXlsx />} />
-        <Route path="stock-out" element={<StockOutPage />} />
         <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
-        <Route path="empolyee-data" element={<EmpolyeeData />} />
       </Route>
 
       {/* สำหรับ Employee */}
@@ -96,7 +87,6 @@ function AppRoutes() {
           </PrivateRoute>
         }
       >
-        <Route path="stock-out" element={<StockOutPage />} />
         <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="calendar-employee" element={<CalendarPageEmployee />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
