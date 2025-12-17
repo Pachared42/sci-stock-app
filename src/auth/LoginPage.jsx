@@ -67,7 +67,7 @@ function LoginPage() {
       if (data.role === "superadmin") navigate("/superadmin/dashboard");
       else if (data.role === "admin") navigate("/admin/dashboard");
       else if (data.role === "employee")
-        navigate("/employee/stock-out");
+        navigate("/employee/camera-stockout");
       else {
         setSnackbar({
           open: true,

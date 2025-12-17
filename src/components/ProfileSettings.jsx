@@ -17,18 +17,20 @@ import { fetchUserProfile, updateUserProfile } from "../api/profileApi";
 function UserProfileSettings() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
+  // ✅ state ต้องมี field ครบตั้งแต่แรก และใช้ชื่อเดียวกันทั้งไฟล์
   const [formData, setFormData] = useState({
     gmail: "",
     firstName: "",
     lastName: "",
-    new_password: "",
-    photo: null,
+    password: "",
+    photoFile: null,
   });
 
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -37,31 +39,38 @@ function UserProfileSettings() {
     async function loadProfile() {
       try {
         const profile = await fetchUserProfile();
+
         setFormData({
           gmail: profile.gmail || "",
           firstName: profile.firstName || "",
           lastName: profile.lastName || "",
           password: "",
-          photo: null,
+          photoFile: null,
         });
+
         if (profile.profileImage) {
-          const base64 = profile.profileImage;
-          setPhotoPreview(`data:image/jpeg;base64,${base64}`);
+          setPhotoPreview(
+            `data:image/jpeg;base64,${profile.profileImage}`
+          );
         }
       } catch (err) {
         console.error("โหลดข้อมูลโปรไฟล์ไม่สำเร็จ", err);
       }
     }
+
     loadProfile();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -72,6 +81,7 @@ function UserProfileSettings() {
       });
       return;
     }
+
     if (file.size > 3 * 1024 * 1024) {
       setSnackbar({
         open: true,
@@ -84,7 +94,10 @@ function UserProfileSettings() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPhotoPreview(reader.result);
-      setFormData((prev) => ({ ...prev, photoFile: file }));
+      setFormData((prev) => ({
+        ...prev,
+        photoFile: file,
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -95,8 +108,15 @@ function UserProfileSettings() {
         first_name: formData.firstName,
         last_name: formData.lastName,
       };
-      if (formData.password) payload.password = formData.password;
-      if (formData.photoFile) payload.profile_image = formData.photoFile;
+
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+
+      if (formData.photoFile) {
+        payload.profile_image = formData.photoFile;
+      }
+
       await updateUserProfile(payload);
 
       setSnackbar({
@@ -105,13 +125,17 @@ function UserProfileSettings() {
         severity: "success",
       });
 
-      setFormData((prev) => ({ ...prev, password: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        password: "",
+      }));
     } catch (err) {
       console.error(err);
       setSnackbar({
         open: true,
         message:
-          err.response?.data?.error || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
+          err.response?.data?.error ||
+          "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
         severity: "error",
       });
     }
@@ -121,9 +145,8 @@ function UserProfileSettings() {
     <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
       <Typography
         variant="h5"
-        fontWeight="500"
+        fontWeight={500}
         color="text.primary"
-        textAlign="left"
         mb={2}
         mx={2}
       >
@@ -140,7 +163,7 @@ function UserProfileSettings() {
         {/* Upload box */}
         <Box
           sx={{
-            flex: "1",
+            flex: 1,
             bgcolor: theme.palette.background.chartBackground,
             borderRadius: 4,
             pt: 5,
@@ -157,7 +180,7 @@ function UserProfileSettings() {
                 width: 200,
                 height: 200,
                 borderRadius: "50%",
-                border: "1.8px dashed #666666",
+                border: "1.8px dashed #666",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -180,13 +203,13 @@ function UserProfileSettings() {
                       width: 170,
                       height: 170,
                       borderRadius: "50%",
-                      backgroundColor: "rgba(240, 240, 240, 0.85)",
+                      backgroundColor: "rgba(240,240,240,0.85)",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
                       opacity: 0,
-                      transition: "opacity 0.3s ease",
+                      transition: "opacity 0.3s",
                     }}
                   >
                     <PhotoCameraIcon sx={{ fontSize: 28, color: "#666" }} />
@@ -197,7 +220,6 @@ function UserProfileSettings() {
                 </>
               ) : (
                 <Box
-                  className="overlay"
                   sx={{
                     width: 170,
                     height: 170,
@@ -207,8 +229,6 @@ function UserProfileSettings() {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    transition: "background-color 0.3s ease",
-                    "&:hover": { backgroundColor: "#e0e0e0" },
                   }}
                 >
                   <AddPhotoAlternateIcon sx={{ fontSize: 28, color: "#666" }} />
@@ -228,34 +248,25 @@ function UserProfileSettings() {
             onChange={handleFileChange}
           />
 
-          <Typography variant="caption" color="gray" textAlign="center" mt={4}>
-            อนุญาตเฉพาะไฟล์ .jpg, .png, <br /> ขนาดสูงสุด 3MB
+          <Typography variant="caption" color="gray" mt={4} textAlign="center">
+            อนุญาตเฉพาะไฟล์ .jpg, .png
+            <br />
+            ขนาดสูงสุด 3MB
           </Typography>
         </Box>
 
         {/* Form box */}
         <Box
           sx={{
-            flex: "2",
+            flex: 2,
             bgcolor: theme.palette.background.chartBackground,
             borderRadius: 4,
             p: 3,
             display: "flex",
             flexDirection: "column",
-            height: "100%",
-            width: "100%",
           }}
         >
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              width: "100%",
-              minWidth: 0,
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField
               fullWidth
               label="Gmail"
@@ -263,57 +274,52 @@ function UserProfileSettings() {
               value={formData.gmail}
               InputProps={{
                 readOnly: true,
-                sx: { borderRadius: 4, bgcolor: "action.disabledBackground" },
+                sx: {
+                  borderRadius: 4,
+                  bgcolor: "action.disabledBackground",
+                },
               }}
             />
+
             <TextField
               fullWidth
               label="ชื่อ"
               name="firstName"
-              onChange={handleChange}
               value={formData.firstName}
+              onChange={handleChange}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
             />
+
             <TextField
               fullWidth
               label="นามสกุล"
               name="lastName"
-              onChange={handleChange}
               value={formData.lastName}
+              onChange={handleChange}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
             />
+
             <TextField
               fullWidth
-              label="รหัสผ่านใหม่ *เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน*"
+              label="รหัสผ่านใหม่ (เว้นว่างหากไม่เปลี่ยน)"
               name="password"
               type="password"
-              onChange={handleChange}
               value={formData.password}
+              onChange={handleChange}
               autoComplete="new-password"
-              inputProps={{ autoComplete: "new-password" }}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 4 } }}
             />
           </Box>
 
-          <Box
-            sx={{
-              mt: 4,
-              textAlign: "right",
-              bgcolor: theme.palette.background.chartBackground,
-              borderRadius: 2,
-            }}
-          >
+          <Box sx={{ mt: 4, textAlign: "right" }}>
             <Button
               variant="contained"
-              onClick={handleSubmit}
               size="large"
+              onClick={handleSubmit}
               sx={{
-                p: 1.5,
-                fontSize: "1rem",
-                fontWeight: "500",
                 borderRadius: 3,
-                backgroundColor: theme.palette.background.ButtonDay,
-                color: theme.palette.text.hint,
+                px: 4,
+                py: 1.5,
               }}
             >
               บันทึกการตั้งค่า
@@ -321,22 +327,14 @@ function UserProfileSettings() {
           </Box>
         </Box>
       </Box>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{
-            width: "100%",
-            maxWidth: { xs: "50%", sm: "70%", md: "100%" },
-            mx: "auto",
-            borderRadius: 3,
-          }}
-        >
+        <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>

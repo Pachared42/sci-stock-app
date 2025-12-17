@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -15,7 +15,6 @@ import {
   Toolbar,
   Typography,
   Paper,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -72,11 +71,8 @@ const headCellsAdmin = [
 
 function EnhancedTableHead(props) {
   const {
-    onSelectAllClick,
     order,
     orderBy,
-    numSelected,
-    rowCount,
     onRequestSort,
   } = props;
   const createSortHandler = (property) => (event) => {
@@ -114,12 +110,9 @@ function EnhancedTableHead(props) {
 }
 
 EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
 function EnhancedTableToolbar(props) {
@@ -199,8 +192,12 @@ function AdminTable() {
   const token = user?.token;
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [otp, setOtp] = useState("");
-  const filteredRows = rows;
-
+  const filteredRows = rows.filter(
+    (row) =>
+      row.firstName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.lastName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.gmail?.toLowerCase().includes(searchText.toLowerCase())
+  );
   useEffect(() => {
     let isMounted = true;
 
@@ -239,15 +236,6 @@ function AdminTable() {
       isMounted = false;
     };
   }, [reload, token]);
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
-      setSelected(newSelected);
-      return;
-    }
-    setSelected([]);
-  };
 
   useEffect(() => {
     const saved = localStorage.getItem("adminPendingOtp");
@@ -592,7 +580,6 @@ function AdminTable() {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={filteredRows.length}
             />

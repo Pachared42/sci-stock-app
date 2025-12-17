@@ -229,12 +229,6 @@ function SalesTableByDate({ date, rows, dailyExpenses }) {
   );
   const totalProfit = totalSales - totalCost;
 
-  const filteredExpenses = dailyExpenses.filter((e) => e.date === date);
-  const totalDailyPayments = filteredExpenses.reduce(
-    (sum, e) => sum + (e.amount || 0),
-    0
-  );
-
   const formattedSelectedDate = new Date(date).toISOString().split("T")[0];
 
   return (
@@ -667,7 +661,6 @@ function SalesTablesGroupByDate() {
   const [selectedDate, setSelectedDate] = React.useState(dayjs());
   const [dailyExpenses, setDailyExpenses] = React.useState([]);
   const [topProducts, setTopProducts] = React.useState([]);
-  const theme = useTheme();
 
   React.useEffect(() => {
     const fetchData = async () => {

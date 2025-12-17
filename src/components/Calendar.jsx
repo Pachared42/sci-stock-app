@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -100,8 +100,14 @@ function CalendarPage() {
   };
 
   const handleAddOrUpdate = async () => {
-    if (!formState.title || !formState.date) return;
-
+    if (!formState.title || !formState.date) {
+      setAlert({
+        open: true,
+        message: "กรุณากรอกข้อมูลให้ครบ",
+        severity: "warning",
+      });
+      return;
+    }
     try {
       if (editingEvent) {
         await updateWorkSchedule(editingEvent.id, formState);
@@ -140,7 +146,7 @@ function CalendarPage() {
 
   const handleEventDrop = async (info) => {
     try {
-      const updatedDate = info.event.startStr;
+      const updatedDate = info.event.startStr.slice(0, 10);
       const id = parseInt(info.event.id, 10);
       const event = events.find((e) => e.id === id);
       if (!event) return;
@@ -151,6 +157,7 @@ function CalendarPage() {
       setReload((r) => !r);
       navigate(location.pathname, { replace: true });
     } catch (err) {
+      info.revert();
       setAlert({ open: true, message: err.message, severity: "error" });
     }
   };

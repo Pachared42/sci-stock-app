@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -683,15 +683,75 @@ function SnackTable() {
                   borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
-            >
-              {/* กรณีข้อมูลในระบบยังไม่มีเลย */}
-              {rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    ยังไม่มีรายการสินค้า
+            > {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell
+                    padding="checkbox"
+                    sx={{
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    <Skeleton
+                      animation="wave"
+                      variant="rounded"
+                      width={24}
+                      height={24}
+                      sx={{ mx: "auto" }}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton
+                      animation="wave"
+                      variant="rounded"
+                      width={100}
+                      height={50}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton animation="wave" variant="text" width="100%" />
+                  </TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
+                    <Skeleton
+                      animation="wave"
+                      variant="rounded"
+                      width={100}
+                      height={30}
+                    />
                   </TableCell>
                 </TableRow>
-              ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
+              ))
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center">
+                  ยังไม่มีรายการสินค้า
+                </TableCell>
+              </TableRow>
+            ) : /* กรณีข้อมูลมีแล้วแต่กรองแล้วไม่มีข้อมูลแสดง */
               filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -720,8 +780,8 @@ function SnackTable() {
                           bgcolor: isOutOfStock(row)
                             ? "rgba(255, 0, 0, 0.30)"
                             : isLowStock(row)
-                            ? "rgba(255, 165, 0, 0.30)"
-                            : "inherit",
+                              ? "rgba(255, 165, 0, 0.30)"
+                              : "inherit",
                         }}
                       >
                         <TableCell padding="checkbox" sx={{ width: 48 }}>
@@ -865,10 +925,10 @@ function SnackTable() {
               px: { xs: 1, sm: 2 },
               ".MuiTablePagination-spacer": { display: "none" },
               ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                {
-                  fontSize: { xs: "0.8rem", sm: "1rem" },
-                  whiteSpace: "nowrap",
-                },
+              {
+                fontSize: { xs: "0.8rem", sm: "1rem" },
+                whiteSpace: "nowrap",
+              },
               backgroundColor: "transparent",
               zIndex: 1100,
               minWidth: 300,

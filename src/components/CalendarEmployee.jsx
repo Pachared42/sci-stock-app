@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -15,17 +15,6 @@ import {
   useMediaQuery,
   Box,
   Button,
-  Stack,
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  Tooltip,
-  Fade,
 } from "@mui/material";
 
 import {
@@ -124,7 +113,6 @@ function CalendarEmployee() {
       setEditingEvent(null);
 
       setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -140,7 +128,7 @@ function CalendarEmployee() {
 
   const handleEventDrop = async (info) => {
     try {
-      const updatedDate = info.event.startStr;
+      const updatedDate = info.event.startStr.slice(0, 10);
       const id = parseInt(info.event.id, 10);
       const event = events.find((e) => e.id === id);
       if (!event) return;
@@ -149,7 +137,6 @@ function CalendarEmployee() {
       setAlert({ open: true, message: "เลื่อนการทำงานแล้ว", severity: "info" });
 
       setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -165,7 +152,6 @@ function CalendarEmployee() {
       setEditingEvent(null);
 
       setReload((r) => !r);
-      navigate(location.pathname, { replace: true });
     } catch (err) {
       setAlert({ open: true, message: err.message, severity: "error" });
     }
@@ -341,7 +327,6 @@ function CalendarEmployee() {
           <FullCalendar
             ref={calendarRef}
             {...calendarOptions}
-            initialView="listWeek"
             headerToolbar={false}
             dayMaxEvents={false}
             eventDisplay="block"

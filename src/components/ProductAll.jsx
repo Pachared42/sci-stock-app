@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, } from "react";
+import { useState, useEffect, useMemo, } from "react";
 import PropTypes from "prop-types";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -15,10 +15,6 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { visuallyHidden } from "@mui/utils";
 import Snackbar from "@mui/material/Snackbar";
@@ -215,7 +211,7 @@ function ProductAll() {
   });
 
   useEffect(() => {
-    const categories = ["dried_food", "soft_drink", "stationery"];
+    const categories = ["dried_food", "soft_drink", "stationery", "snack", "fresh_food"];
 
     const loadAllData = async () => {
       try {
