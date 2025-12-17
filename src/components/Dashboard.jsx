@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
   useTheme,
+  Skeleton
 } from "@mui/material";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -46,8 +47,7 @@ function Dashboard() {
   const [weeklySalesData, setWeeklySalesData] = useState([]);
   const [topSellingData, setTopSellingData] = useState([]);
   const [monthlySalesTotal, setMonthlySalesTotal] = useState(0);
-
-  const dashboardRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   const monthNames = [
     "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -58,6 +58,7 @@ function Dashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
+        setLoading(true);
         // สินค้าทั้งหมด
         const totalData = await fetchTotalProducts(token);
         setTotalProducts(totalData?.["จำนวนสินค้าทั้งหมด"] ?? 0);
@@ -137,6 +138,8 @@ function Dashboard() {
 
       } catch (err) {
         console.error("โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -203,9 +206,73 @@ function Dashboard() {
     }));
   }, [topSellingData]);
 
+  const LineChartSkeleton = ({ height = 320 }) => {
+    const points = "0,180 60,120 120,150 180,80 240,110 300,60";
+
+    return (
+      <Box sx={{ p: 2, width: "100%" }}>
+        <Box
+          sx={{
+            height: height - 60,
+            width: "100%",
+          }}
+        >
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 300 200"
+            preserveAspectRatio="none"
+          >
+            <polyline
+              points={points}
+              fill="none"
+              stroke="#444"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <animate
+                attributeName="stroke-dashoffset"
+                from="400"
+                to="0"
+                dur="1.4s"
+                repeatCount="indefinite"
+              />
+            </polyline>
+          </svg>
+        </Box>
+      </Box>
+    );
+  };
+
+  const BarChartSkeleton = ({ bars = 5, height = 320 }) => (
+    <Box
+      sx={{
+        height,
+        display: "flex",
+        alignItems: "flex-end",
+        width: "100%",
+        px: 2,
+        pb: 2,
+        gap: 1.5,
+      }}
+    >
+      {Array.from({ length: bars }).map((_, index) => (
+        <Skeleton
+          key={index}
+          variant="rounded"
+          sx={{
+            flex: 1,
+            height: Math.random() * 160 + 80,
+            borderRadius: 2,
+          }}
+        />
+      ))}
+    </Box>
+  );
+
   return (
     <Box
-      ref={dashboardRef}
       sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}
     >
       <Grid
@@ -219,8 +286,23 @@ function Dashboard() {
             md: "repeat(4, 1fr)",
           },
         }}
-      >
-        {statCards.map((card, index) => (
+      > {loading
+        ? Array.from({ length: 3 }).map((_, index) => (
+          <Card
+            key={index}
+            sx={{
+              borderRadius: 5,
+              height: 260,
+            }}
+          >
+            <Skeleton
+              variant="rectangular"
+              height="100%"
+              sx={{ borderRadius: 5 }}
+            />
+          </Card>
+        ))
+        : statCards.map((card, index) => (
           <Box key={index}>
             <Card
               sx={{
@@ -320,58 +402,83 @@ function Dashboard() {
           >
             สินค้าขายดี 3 อันดับแรกของเดือน {currentMonthName}
           </Typography>
-
           <Grid
             container
             spacing={2}
             justifyContent="center"
             columns={{ xs: 2, sm: 3, md: 12 }}
           >
-            {topSellingDisplayData.map((item, index) => (
-              <Grid
-                key={index}
-                sx={{
-                  gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
-                  textAlign: "center",
-                }}
-              >
-                <Box
+            {loading
+              ? Array.from({ length: 3 }).map((_, index) => (
+                <Grid
+                  key={index}
                   sx={{
-                    borderRadius: 4,
-                    p: 1.5,
-                    backgroundColor: theme.palette.background.paper,
-                    height: "100%",
+                    gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
                   }}
                 >
                   <Box
-                    component="img"
-                    src={item.image}
-                    alt={item.name}
                     sx={{
-                      width: "100%",
-                      height: 200,
-                      objectFit: "contain",
-                      mb: 1,
+                      borderRadius: 4,
+                      p: 1.5,
+                      height: "100%",
                     }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                    title={item.name}
                   >
-                    {item.name}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
+                    {/* รูป */}
+                    <Skeleton
+                      variant="rectangular"
+                      width={250}
+                      height={210}
+                      sx={{ borderRadius: 2, mb: 1 }}
+                    />
+
+                    {/* ชื่อสินค้า */}
+                    <Skeleton height={20} width="100%" />
+                  </Box>
+                </Grid>
+              ))
+              : topSellingDisplayData.map((item, index) => (
+                <Grid
+                  key={index}
+                  sx={{
+                    gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
+                    textAlign: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      borderRadius: 4,
+                      p: 1.5,
+                      backgroundColor: theme.palette.background.paper,
+                      height: "100%",
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={item.image}
+                      alt={item.name}
+                      sx={{
+                        width: "100%",
+                        height: 200,
+                        objectFit: "contain",
+                        mb: 1,
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      title={item.name}
+                    >
+                      {item.name}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
           </Grid>
-
-
         </Card>
       </Box>
 
@@ -396,53 +503,56 @@ function Dashboard() {
             ยอดขายรายสัปดาห์ของเดือน {currentMonthName}
           </Typography>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={salesWeekData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="2.5"
-                vertical={false}
-                stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="week"
-                stroke={theme.palette.text.secondary}
-                tick={{ fontSize: 14 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-                labelFormatter={(label) => `${label}`}
-                formatter={(value) => [
-                  `฿${Number(value).toLocaleString()}`,
-                  "ยอดขาย",
-                ]}
-              />
-              <Line
-                type="monomial"
-                dataKey="sales"
-                name="ยอดขาย"
-                stroke={theme.palette.background.orangeDark}
-                strokeWidth={5}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <LineChartSkeleton />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={salesWeekData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="2.5"
+                  vertical={false}
+                  stroke={theme.palette.text.secondary}
+                  strokeOpacity={0.2}
+                />
+                <XAxis
+                  dataKey="week"
+                  stroke={theme.palette.text.secondary}
+                  tick={{ fontSize: 14 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke={theme.palette.text.secondary}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: theme.palette.background.paper,
+                    border: "none",
+                    boxShadow: "none",
+                    textAlign: "center",
+                  }}
+                  labelFormatter={(label) => `${label}`}
+                  formatter={(value) => [
+                    `฿${Number(value).toLocaleString()}`,
+                    "ยอดขาย",
+                  ]}
+                />
+                <Line
+                  type="monomial"
+                  dataKey="sales"
+                  name="ยอดขาย"
+                  stroke={theme.palette.background.orangeDark}
+                  strokeWidth={5}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>)}
         </Card>
       </Box>
 
@@ -467,54 +577,56 @@ function Dashboard() {
           >
             ยอดขายรายเดือน {currentMonthName}
           </Typography>
-
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={salesMonthlyData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="2.5"
-                vertical={false}
-                stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="month"
-                stroke={theme.palette.text.secondary}
-                tick={{ fontSize: 14 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-                labelFormatter={(label) => `เดือน ${label}`}
-                formatter={(value) => [
-                  `฿${Number(value).toLocaleString()}`,
-                  "ยอดขาย",
-                ]}
-              />
-              <Line
-                type="monomial"
-                dataKey="sales"
-                name="ยอดขาย"
-                stroke={theme.palette.background.goldDark}
-                strokeWidth={5}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <LineChartSkeleton />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={salesMonthlyData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="2.5"
+                  vertical={false}
+                  stroke={theme.palette.text.secondary}
+                  strokeOpacity={0.2}
+                />
+                <XAxis
+                  dataKey="month"
+                  stroke={theme.palette.text.secondary}
+                  tick={{ fontSize: 14 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke={theme.palette.text.secondary}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: theme.palette.background.paper,
+                    border: "none",
+                    boxShadow: "none",
+                    textAlign: "center",
+                  }}
+                  labelFormatter={(label) => `เดือน ${label}`}
+                  formatter={(value) => [
+                    `฿${Number(value).toLocaleString()}`,
+                    "ยอดขาย",
+                  ]}
+                />
+                <Line
+                  type="monomial"
+                  dataKey="sales"
+                  name="ยอดขาย"
+                  stroke={theme.palette.background.goldDark}
+                  strokeWidth={5}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>)}
         </Card>
       </Box>
 
@@ -534,55 +646,58 @@ function Dashboard() {
           >
             สินค้าทั้งหมดในสต๊อกแต่ละประเภท
           </Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={categoryData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="2.5"
-                vertical={false}
-                stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="category"
-                stroke={theme.palette.text.secondary}
-                tick={{ fontSize: 14 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.08)" }}
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-                formatter={(value) => [`${value} ชิ้น`, "จำนวนสินค้า"]}
-              />
-              <Bar
-                dataKey="total"
-                name="จำนวนสินค้า"
-                fill={theme.palette.background.tealDark}
-                radius={[10, 10, 0, 0]}
-                barSize={50}
+          {loading ? (
+            <BarChartSkeleton />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={categoryData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
               >
-                <LabelList
-                  dataKey="total"
-                  position="top"
-                  fill={theme.palette.text.primary}
+                <CartesianGrid
+                  strokeDasharray="2.5"
+                  vertical={false}
+                  stroke={theme.palette.text.secondary}
+                  strokeOpacity={0.2}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <XAxis
+                  dataKey="category"
+                  stroke={theme.palette.text.secondary}
+                  tick={{ fontSize: 14 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke={theme.palette.text.secondary}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.08)" }}
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: theme.palette.background.paper,
+                    border: "none",
+                    boxShadow: "none",
+                    textAlign: "center",
+                  }}
+                  formatter={(value) => [`${value} ชิ้น`, "จำนวนสินค้า"]}
+                />
+                <Bar
+                  dataKey="total"
+                  name="จำนวนสินค้า"
+                  fill={theme.palette.background.tealDark}
+                  radius={[10, 10, 0, 0]}
+                  barSize={50}
+                >
+                  <LabelList
+                    dataKey="total"
+                    position="top"
+                    fill={theme.palette.text.primary}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>)}
         </Card>
       </Box>
 
@@ -602,55 +717,58 @@ function Dashboard() {
           >
             สินค้าใกล้หมดในสต๊อกแต่ละประเภท
           </Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={lowStockCategoryData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="2.5"
-                vertical={false}
-                stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="category"
-                stroke={theme.palette.text.secondary}
-                tick={{ fontSize: 14 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.08)" }}
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-                formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าใกล้หมด"]}
-              />
-              <Bar
-                dataKey="total"
-                name="ใกล้หมด"
-                fill={theme.palette.background.blueDark}
-                radius={[10, 10, 0, 0]}
-                barSize={50}
+          {loading ? (
+            <BarChartSkeleton />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={lowStockCategoryData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
               >
-                <LabelList
-                  dataKey="total"
-                  position="top"
-                  fill={theme.palette.text.primary}
+                <CartesianGrid
+                  strokeDasharray="2.5"
+                  vertical={false}
+                  stroke={theme.palette.text.secondary}
+                  strokeOpacity={0.2}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <XAxis
+                  dataKey="category"
+                  stroke={theme.palette.text.secondary}
+                  tick={{ fontSize: 14 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke={theme.palette.text.secondary}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.08)" }}
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: theme.palette.background.paper,
+                    border: "none",
+                    boxShadow: "none",
+                    textAlign: "center",
+                  }}
+                  formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าใกล้หมด"]}
+                />
+                <Bar
+                  dataKey="total"
+                  name="ใกล้หมด"
+                  fill={theme.palette.background.blueDark}
+                  radius={[10, 10, 0, 0]}
+                  barSize={50}
+                >
+                  <LabelList
+                    dataKey="total"
+                    position="top"
+                    fill={theme.palette.text.primary}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>)}
         </Card>
       </Box>
 
@@ -670,55 +788,58 @@ function Dashboard() {
           >
             สินค้าหมดในสต๊อกแต่ละประเภท
           </Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={outOfStockCategoryData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="2.5"
-                vertical={false}
-                stroke={theme.palette.text.secondary}
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="category"
-                stroke={theme.palette.text.secondary}
-                tick={{ fontSize: 14 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.08)" }}
-                contentStyle={{
-                  borderRadius: 15,
-                  backgroundColor: theme.palette.background.paper,
-                  border: "none",
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
-                formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าหมด"]}
-              />
-              <Bar
-                dataKey="total"
-                name="หมด"
-                fill={theme.palette.background.deepPinkDark}
-                radius={[10, 10, 0, 0]}
-                barSize={50}
+          {loading ? (
+            <BarChartSkeleton />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={outOfStockCategoryData}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
               >
-                <LabelList
-                  dataKey="total"
-                  position="top"
-                  fill={theme.palette.text.primary}
+                <CartesianGrid
+                  strokeDasharray="2.5"
+                  vertical={false}
+                  stroke={theme.palette.text.secondary}
+                  strokeOpacity={0.2}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <XAxis
+                  dataKey="category"
+                  stroke={theme.palette.text.secondary}
+                  tick={{ fontSize: 14 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke={theme.palette.text.secondary}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.08)" }}
+                  contentStyle={{
+                    borderRadius: 15,
+                    backgroundColor: theme.palette.background.paper,
+                    border: "none",
+                    boxShadow: "none",
+                    textAlign: "center",
+                  }}
+                  formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าหมด"]}
+                />
+                <Bar
+                  dataKey="total"
+                  name="หมด"
+                  fill={theme.palette.background.deepPinkDark}
+                  radius={[10, 10, 0, 0]}
+                  barSize={50}
+                >
+                  <LabelList
+                    dataKey="total"
+                    position="top"
+                    fill={theme.palette.text.primary}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>)}
         </Card>
       </Box>
     </Box>
