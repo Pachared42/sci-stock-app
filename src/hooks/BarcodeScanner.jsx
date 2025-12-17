@@ -3,95 +3,100 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { Box } from "@mui/material";
 
-function BarcodeScanner({
-    onDetected,
-    continuous = true,
-    delay = 800,
-}) {
-    const videoRef = useRef(null);
-    const readerRef = useRef(null);
-    const lockRef = useRef(false);
-    const timeoutRef = useRef(null);
-    const activeRef = useRef(true);
+function BarcodeScanner({ onDetected, continuous = true, delay = 800 }) {
+  const videoRef = useRef(null);
+  const readerRef = useRef(null);
+  const controlsRef = useRef(null);
 
-    useEffect(() => {
-        activeRef.current = true;
+  const lockRef = useRef(false);
+  const timeoutRef = useRef(null);
+  const activeRef = useRef(true);
 
-        const hints = new Map();
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-            BarcodeFormat.EAN_13,
-            BarcodeFormat.CODE_128,
-        ]);
+  useEffect(() => {
+    activeRef.current = true;
 
-        const reader = new BrowserMultiFormatReader(hints);
-        readerRef.current = reader;
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.CODE_128,
+    ]);
 
-        reader.decodeFromConstraints(
-            {
-                video: {
-                    facingMode: { ideal: "environment" },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                },
-            },
-            videoRef.current,
-            async (result) => {
-                if (!activeRef.current) return;
-                if (!result || lockRef.current) return;
+    const reader = new BrowserMultiFormatReader(hints);
+    readerRef.current = reader;
 
-                lockRef.current = true;
+    reader
+      .decodeFromConstraints(
+        {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        },
+        videoRef.current,
+        async (result) => {
+          if (!activeRef.current) return;
+          if (!result || lockRef.current) return;
 
-                await Promise.resolve(onDetected(result.getText()));
+          lockRef.current = true;
 
-                if (!activeRef.current) return;
+          await Promise.resolve(onDetected(result.getText()));
 
-                if (continuous) {
-                    timeoutRef.current = setTimeout(() => {
-                        if (activeRef.current) {
-                            lockRef.current = false;
-                        }
-                    }, delay);
-                } else {
-                    stopCamera();
-                }
-            }
-        );
+          if (!activeRef.current) return;
 
-        return () => {
-            activeRef.current = false;
+          if (continuous) {
+            timeoutRef.current = setTimeout(() => {
+              if (activeRef.current) {
+                lockRef.current = false;
+              }
+            }, delay);
+          } else {
             stopCamera();
-        };
-    }, []);
-
-    const stopCamera = () => {
-        readerRef.current?.reset();
-
-        const video = videoRef.current;
-        if (video?.srcObject) {
-            video.srcObject.getTracks().forEach((t) => t.stop());
-            video.srcObject = null;
+          }
         }
+      )
+      .then((controls) => {
+        controlsRef.current = controls;
+      })
+      .catch(console.error);
 
-        clearTimeout(timeoutRef.current);
+    return () => {
+      activeRef.current = false;
+      stopCamera();
     };
+  }, []);
 
-    return (
-        <Box sx={{ width: "100%", height: "100%" }}>
-            <video
-                ref={videoRef}
-                playsInline
-                muted
-                style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    backgroundColor: "black",
-                    pointerEvents: "none",
-                }}
-            />
-        </Box>
-    );
+  const stopCamera = () => {
+    // ✅ วิธีที่ถูกต้อง
+    controlsRef.current?.stop();
+    controlsRef.current = null;
+
+    const video = videoRef.current;
+    if (video?.srcObject) {
+      video.srcObject.getTracks().forEach((t) => t.stop());
+      video.srcObject = null;
+    }
+
+    clearTimeout(timeoutRef.current);
+  };
+
+  return (
+    <Box sx={{ width: "100%", height: "100%" }}>
+      <video
+        ref={videoRef}
+        playsInline
+        muted
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          borderRadius: "8px",
+          backgroundColor: "black",
+          pointerEvents: "none",
+        }}
+      />
+    </Box>
+  );
 }
 
 export default BarcodeScanner;
