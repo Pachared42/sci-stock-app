@@ -24,7 +24,6 @@ function UserProfileSettings() {
     severity: "success",
   });
 
-  // ✅ state ต้องมี field ครบตั้งแต่แรก และใช้ชื่อเดียวกันทั้งไฟล์
   const [formData, setFormData] = useState({
     gmail: "",
     firstName: "",
@@ -49,9 +48,7 @@ function UserProfileSettings() {
         });
 
         if (profile.profileImage) {
-          setPhotoPreview(
-            `data:image/jpeg;base64,${profile.profileImage}`
-          );
+          setPhotoPreview(`data:image/jpeg;base64,${profile.profileImage}`);
         }
       } catch (err) {
         console.error("โหลดข้อมูลโปรไฟล์ไม่สำเร็จ", err);
@@ -134,8 +131,7 @@ function UserProfileSettings() {
       setSnackbar({
         open: true,
         message:
-          err.response?.data?.error ||
-          "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
+          err.response?.data?.error || "เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์",
         severity: "error",
       });
     }
@@ -320,6 +316,10 @@ function UserProfileSettings() {
                 borderRadius: 3,
                 px: 4,
                 py: 1.5,
+                backgroundColor: theme.palette.background.ButtonDay,
+                color: theme.palette.text.hint,
+                fontSize: "0.9rem",
+                fontWeight: "500",
               }}
             >
               บันทึกการตั้งค่า
