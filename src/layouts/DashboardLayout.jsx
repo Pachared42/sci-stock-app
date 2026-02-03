@@ -65,6 +65,7 @@ import { groups } from "../context/groups";
 import { getAppTheme } from "../theme/theme";
 import LogoBox from "../hooks/LogoBox";
 import ProfilePanel from "../components/ProfilePanel";
+import { ICON_COLORS } from "../context/IconColors";
 
 const spinningIcon = (
   <SettingsIcon
@@ -82,115 +83,120 @@ const NAVIGATION = [
   {
     segment: "dashboard",
     title: "แดชบอร์ดสถิติ",
-    icon: <AreaChartIcon />,
+    icon: <AreaChartIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "calendar",
     title: "ตารางงาน",
-    icon: <CalendarMonthIcon />,
+    icon: <CalendarMonthIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "calendar-employee",
     title: "ตารางงาน",
-    icon: <CalendarMonthIcon />,
+    icon: <CalendarMonthIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["employee"],
     group: "main",
   },
   {
     segment: "flex-cost",
     title: "ค่าใช้จ่ายรายวัน",
-    icon: <ReceiptLongIcon />,
+    icon: <ReceiptLongIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "camera-stockout",
     title: "ตัดสต๊อกสินค้า",
-    icon: <InsertPageBreakIcon />,
+    icon: <InsertPageBreakIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["admin", "superadmin", "employee"],
     group: "main",
   },
   {
     segment: "sales-day",
     title: "รายงานรายวัน",
-    icon: <AssignmentIcon />,
+    icon: <AssignmentIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["admin", "superadmin"],
     group: "main",
   },
   {
     segment: "staff-management",
     title: "อนุมัติพนักงาน",
-    icon: <RecentActorsIcon />,
+    icon: <RecentActorsIcon sx={{ color: ICON_COLORS.management }} />,
     roles: ["admin", "superadmin"],
     group: "management",
   },
   {
     segment: "owner-data",
     title: "ข้อมูลเจ้าของร้าน",
-    icon: <AssignmentIndIcon />,
+    icon: <AssignmentIndIcon sx={{ color: ICON_COLORS.management }} />,
     roles: ["superadmin"],
     group: "management",
   },
   {
     segment: "upload-products",
     title: "อัพโหลดสินค้าด้วยไฟล์",
-    icon: <UploadFileRoundedIcon />,
+    icon: <UploadFileRoundedIcon sx={{ color: ICON_COLORS.upload }} />,
     roles: ["admin", "superadmin"],
     group: "upload",
   },
   {
     segment: "all-products",
     title: "สินค้าทั้งหมด",
-    icon: <WarehouseIcon />,
+    icon: <WarehouseIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "dried-category",
     title: "ประเภทแห้ง",
-    icon: <RamenDiningIcon />,
+    icon: <RamenDiningIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "drink-category",
     title: "ประเภทเครื่องดื่ม",
-    icon: <LocalDrinkIcon />,
+    icon: <LocalDrinkIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "fresh-category",
     title: "ประเภทแช่แข็ง",
-    icon: <AcUnitIcon />,
+    icon: <AcUnitIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "snack-category",
     title: "ประเภทขนม",
-    icon: <CookieRoundedIcon />,
+    icon: <CookieRoundedIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "stationery-category",
     title: "ประเภทเครื่องเขียน",
-    icon: <DesignServicesIcon />,
+    icon: <DesignServicesIcon sx={{ color: ICON_COLORS.product }} />,
     roles: ["admin", "superadmin"],
     group: "product",
   },
   {
     segment: "profile-settings",
     title: "ตั้งค่าโปรไฟล์",
-    icon: spinningIcon,
+    icon: React.cloneElement(spinningIcon, {
+      sx: {
+        ...spinningIcon.props.sx,
+        color: ICON_COLORS.profile,
+      },
+    }),
     roles: ["admin", "superadmin", "employee"],
     group: "profile",
-  },
+  },  
 ];
 
 const drawerWidth = 300;
