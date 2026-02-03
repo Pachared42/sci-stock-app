@@ -259,6 +259,22 @@ function UploadProductsXlsx() {
   const [rowsPerPage3, setRowsPerPage3] = useState(5);
   const [uploading3, setUploading3] = useState(false);
 
+  const [data4, setData4] = useState([]);
+  const [errors4, setErrors4] = useState([]);
+  const [order4, setOrder4] = useState("asc");
+  const [orderBy4, setOrderBy4] = useState("product_name");
+  const [page4, setPage4] = useState(0);
+  const [rowsPerPage4, setRowsPerPage4] = useState(5);
+  const [uploading4, setUploading4] = useState(false);
+
+  const [data5, setData5] = useState([]);
+  const [errors5, setErrors5] = useState([]);
+  const [order5, setOrder5] = useState("asc");
+  const [orderBy5, setOrderBy5] = useState("product_name");
+  const [page5, setPage5] = useState(0);
+  const [rowsPerPage5, setRowsPerPage5] = useState(5);
+  const [uploading5, setUploading5] = useState(false);
+
   function handleUpload(setData, setErrors, setPage, setUploading, category) {
     return (e) => {
       const file = e.target.files?.[0];
@@ -283,7 +299,11 @@ function UploadProductsXlsx() {
             (category === "soft_drink" &&
               !sheetName.toLowerCase().includes("เครื่องดื่ม")) ||
             (category === "stationery" &&
-              !sheetName.toLowerCase().includes("เครื่องเขียน"))
+              !sheetName.toLowerCase().includes("เครื่องเขียน")) ||
+            (category === "fresh_food" &&
+              !sheetName.toLowerCase().includes("แช่แข็ง")) ||
+            (category === "snack" &&
+              !sheetName.toLowerCase().includes("ขนม"))
           ) {
             setErrors([`ไฟล์นี้ไม่ตรงกับประเภทสินค้า (${sheetName})`]);
             setUploading(false);
@@ -659,6 +679,88 @@ function UploadProductsXlsx() {
             setOrderBy={setOrderBy3}
             setPage={setPage3}
             setRowsPerPage={setRowsPerPage3}
+          />
+        </Box>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <UploadBox
+            label="สินค้าประเภทแช่แข็ง"
+            onFileChange={handleUpload(
+              setData4,
+              setErrors4,
+              setPage4,
+              setUploading4,
+              "fresh_food"
+            )}
+            disabled={uploading4}
+            uploading={uploading4}
+          />
+          <TableComponent
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">ข้อมูลประเภทแช่แข็ง</Typography>
+                <Typography variant="caption">
+                  แสดง {data1.length} รายการ
+                </Typography>
+              </Box>
+            }
+            rows={data4}
+            errors={errors4}
+            order={order4}
+            orderBy={orderBy4}
+            page={page4}
+            rowsPerPage={rowsPerPage4}
+            setOrder={setOrder4}
+            setOrderBy={setOrderBy4}
+            setPage={setPage4}
+            setRowsPerPage={setRowsPerPage4}
+          />
+        </Box>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <UploadBox
+            label="สินค้าประเภทขนม"
+            onFileChange={handleUpload(
+              setData5,
+              setErrors5,
+              setPage5,
+              setUploading5,
+              "snack"
+            )}
+            disabled={uploading5}
+            uploading={uploading5}
+          />
+          <TableComponent
+            title={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="h6">ข้อมูลประเภทขนม</Typography>
+                <Typography variant="caption">
+                  แสดง {data1.length} รายการ
+                </Typography>
+              </Box>
+            }
+            rows={data5}
+            errors={errors5}
+            order={order5}
+            orderBy={orderBy5}
+            page={page5}
+            rowsPerPage={rowsPerPage5}
+            setOrder={setOrder5}
+            setOrderBy={setOrderBy5}
+            setPage={setPage5}
+            setRowsPerPage={setRowsPerPage5}
           />
         </Box>
       </Stack>
