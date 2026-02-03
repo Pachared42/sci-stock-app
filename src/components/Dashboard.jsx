@@ -6,7 +6,7 @@ import {
   Typography,
   Box,
   useTheme,
-  Skeleton
+  Skeleton,
 } from "@mui/material";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -30,7 +30,7 @@ import {
   fetchOutOfStockProducts,
   fetchMonthlySalesSummary,
   fetchWeeklySalesCurrentMonth,
-  fetchTopSellingProductsCurrentMonth
+  fetchTopSellingProductsCurrentMonth,
 } from "../api/dashboardStatsApi";
 
 function Dashboard() {
@@ -50,8 +50,18 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
 
   const monthNames = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    "มกราคม",
+    "กุมภาพันธ์",
+    "มีนาคม",
+    "เมษายน",
+    "พฤษภาคม",
+    "มิถุนายน",
+    "กรกฎาคม",
+    "สิงหาคม",
+    "กันยายน",
+    "ตุลาคม",
+    "พฤศจิกายน",
+    "ธันวาคม",
   ];
   const currentMonthName = monthNames[new Date().getMonth()];
 
@@ -125,17 +135,14 @@ function Dashboard() {
         setMonthlySalesTotal(totalSales);
 
         const weeklyRes = await fetchWeeklySalesCurrentMonth(token);
-        const weeklySales =
-          weeklyRes?.["ยอดขายรายสัปดาห์เดือนปัจจุบัน"] ?? [];
+        const weeklySales = weeklyRes?.["ยอดขายรายสัปดาห์เดือนปัจจุบัน"] ?? [];
 
         setWeeklySalesData(weeklySales);
 
         const topSellingRes = await fetchTopSellingProductsCurrentMonth(token);
-        const topProducts =
-          topSellingRes?.["สินค้าขายดีเดือนปัจจุบัน"] ?? [];
+        const topProducts = topSellingRes?.["สินค้าขายดีเดือนปัจจุบัน"] ?? [];
 
         setTopSellingData(topProducts);
-
       } catch (err) {
         console.error("โหลดข้อมูลแดชบอร์ดไม่สำเร็จ:", err);
       } finally {
@@ -194,7 +201,7 @@ function Dashboard() {
     return weeklySalesData.map((item) => ({
       week: `สัปดาห์ที่ ${item.week}`,
       sales: item.total_sales,
-    }))
+    }));
   }, [weeklySalesData]);
 
   const topSellingDisplayData = useMemo(() => {
@@ -205,45 +212,6 @@ function Dashboard() {
       image: item.image_url,
     }));
   }, [topSellingData]);
-
-  const LineChartSkeleton = ({ height = 320 }) => {
-    const points = "0,180 60,120 120,150 180,80 240,110 300,60";
-
-    return (
-      <Box sx={{ p: 2, width: "100%" }}>
-        <Box
-          sx={{
-            height: height - 60,
-            width: "100%",
-          }}
-        >
-          <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 300 200"
-            preserveAspectRatio="none"
-          >
-            <polyline
-              points={points}
-              fill="none"
-              stroke="#444"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <animate
-                attributeName="stroke-dashoffset"
-                from="400"
-                to="0"
-                dur="1.4s"
-                repeatCount="indefinite"
-              />
-            </polyline>
-          </svg>
-        </Box>
-      </Box>
-    );
-  };
 
   const BarChartSkeleton = ({ bars = 5, height = 320 }) => (
     <Box
@@ -272,9 +240,7 @@ function Dashboard() {
   );
 
   return (
-    <Box
-      sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}
-    >
+    <Box sx={{ px: { xs: 1.5, sm: 2, md: 1.5, lg: 1.5, xl: 20 }, py: 1 }}>
       <Grid
         container
         spacing={2}
@@ -286,100 +252,102 @@ function Dashboard() {
             md: "repeat(4, 1fr)",
           },
         }}
-      > {loading
-        ? Array.from({ length: 3 }).map((_, index) => (
-          <Card
-            key={index}
-            sx={{
-              borderRadius: 5,
-              height: 260,
-            }}
-          >
-            <Skeleton
-              variant="rectangular"
-              height="100%"
-              sx={{ borderRadius: 5 }}
-            />
-          </Card>
-        ))
-        : statCards.map((card, index) => (
-          <Box key={index}>
-            <Card
-              sx={{
-                borderRadius: 5,
-                aspectRatio: { xs: "2", sm: "1.5", md: "1" },
-                backgroundColor: card.background,
-                position: "relative",
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-              }}
-            >
-              <Box
+      >
+        {" "}
+        {loading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <Card
+                key={index}
                 sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: -20,
-                  width: 380,
-                  height: 380,
-                  zIndex: 0,
-                  opacity: 0.5,
-                  backgroundColor: card.color,
-                  filter: "brightness(1)",
-                  mask: `url(${shapeSquare}) center center / cover no-repeat`,
-                  WebkitMask: `url(${shapeSquare}) center center / cover no-repeat`,
+                  borderRadius: 5,
+                  height: 260,
                 }}
-              />
-              <CardContent sx={{ zIndex: 1 }}>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  textAlign="center"
+              >
+                <Skeleton
+                  variant="rectangular"
+                  height="100%"
+                  sx={{ borderRadius: 5 }}
+                />
+              </Card>
+            ))
+          : statCards.map((card, index) => (
+              <Box key={index}>
+                <Card
+                  sx={{
+                    borderRadius: 5,
+                    aspectRatio: { xs: "2", sm: "1.5", md: "1" },
+                    backgroundColor: card.background,
+                    position: "relative",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                  }}
                 >
                   <Box
                     sx={{
-                      bgcolor: card.color,
-                      color: "#fff",
-                      p: 2,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      mb: 2,
+                      position: "absolute",
+                      top: 0,
+                      left: -20,
+                      width: 380,
+                      height: 380,
+                      zIndex: 0,
+                      opacity: 0.5,
+                      backgroundColor: card.color,
+                      filter: "brightness(1)",
+                      mask: `url(${shapeSquare}) center center / cover no-repeat`,
+                      WebkitMask: `url(${shapeSquare}) center center / cover no-repeat`,
                     }}
-                  >
-                    {card.icon}
-                  </Box>
-                  <Typography
-                    variant="subtitle1"
-                    color="text.disabled"
-                    sx={{ fontWeight: 500, mb: 0.5 }}
-                  >
-                    {card.label}
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 600,
-                      mt: 0.5,
-                      letterSpacing: 0.5,
-                      color: "#fff",
-                    }}
-                  >
-                    {card.value}{" "}
-                    {card.label === "สินค้ากำลังจะหมด" ||
-                      card.label === "สินค้าหมดสต็อก"
-                      ? "รายการ"
-                      : "ชิ้น"}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
+                  />
+                  <CardContent sx={{ zIndex: 1 }}>
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      textAlign="center"
+                    >
+                      <Box
+                        sx={{
+                          bgcolor: card.color,
+                          color: "#fff",
+                          p: 2,
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          mb: 2,
+                        }}
+                      >
+                        {card.icon}
+                      </Box>
+                      <Typography
+                        variant="subtitle1"
+                        color="text.disabled"
+                        sx={{ fontWeight: 500, mb: 0.5 }}
+                      >
+                        {card.label}
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 600,
+                          mt: 0.5,
+                          letterSpacing: 0.5,
+                          color: "#fff",
+                        }}
+                      >
+                        {card.value}{" "}
+                        {card.label === "สินค้ากำลังจะหมด" ||
+                        card.label === "สินค้าหมดสต็อก"
+                          ? "รายการ"
+                          : "ชิ้น"}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+            ))}
       </Grid>
 
       <Box mt={2}>
@@ -410,78 +378,79 @@ function Dashboard() {
           >
             {loading
               ? Array.from({ length: 3 }).map((_, index) => (
-                <Grid
-                  key={index}
-                  sx={{
-                    gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
-                  }}
-                >
-                  <Box
+                  <Grid
+                    key={index}
                     sx={{
-                      borderRadius: 4,
-                      p: 1.5,
-                      height: "100%",
-                    }}
-                  >
-                    {/* รูป */}
-                    <Skeleton
-                      variant="rectangular"
-                      width={250}
-                      height={210}
-                      sx={{ borderRadius: 2, mb: 1 }}
-                    />
-
-                    {/* ชื่อสินค้า */}
-                    <Skeleton height={20} width="100%" />
-                  </Box>
-                </Grid>
-              ))
-              : topSellingDisplayData.map((item, index) => (
-                <Grid
-                  key={index}
-                  sx={{
-                    gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
-                    textAlign: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      borderRadius: 4,
-                      p: 1.5,
-                      backgroundColor: theme.palette.background.paper,
-                      height: "100%",
+                      gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
                     }}
                   >
                     <Box
-                      component="img"
-                      src={item.image}
-                      alt={item.name}
                       sx={{
-                        width: "100%",
-                        height: 200,
-                        objectFit: "contain",
-                        mb: 1,
+                        borderRadius: 4,
+                        p: 1.5,
+                        height: "100%",
                       }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                      title={item.name}
                     >
-                      {item.name}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
+                      {/* รูป */}
+                      <Skeleton
+                        variant="rectangular"
+                        width={250}
+                        height={210}
+                        sx={{ borderRadius: 2, mb: 1 }}
+                      />
+
+                      {/* ชื่อสินค้า */}
+                      <Skeleton height={20} width="100%" />
+                    </Box>
+                  </Grid>
+                ))
+              : topSellingDisplayData.map((item, index) => (
+                  <Grid
+                    key={index}
+                    sx={{
+                      gridColumn: { xs: "span 1", sm: "span 1", md: "span 4" },
+                      textAlign: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        borderRadius: 4,
+                        p: 1.5,
+                        backgroundColor: theme.palette.background.paper,
+                        height: "100%",
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt={item.name}
+                        sx={{
+                          width: "100%",
+                          height: 200,
+                          objectFit: "contain",
+                          mb: 1,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        title={item.name}
+                      >
+                        {item.name}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
           </Grid>
         </Card>
       </Box>
 
+      {/* ยอดขายรายสัปดาห์ */}
       <Box mt={2}>
         <Card
           sx={{
@@ -503,56 +472,78 @@ function Dashboard() {
             ยอดขายรายสัปดาห์ของเดือน {currentMonthName}
           </Typography>
 
-          {loading ? (
-            <LineChartSkeleton />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart
-                data={salesWeekData}
-                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="2.5"
-                  vertical={false}
-                  stroke={theme.palette.text.secondary}
-                  strokeOpacity={0.2}
+          {/* Chart Area (lock height) */}
+          <Box sx={{ height: 300, px: 2 }}>
+            {loading ? (
+              <>
+                {/* X Axis */}
+                <Skeleton
+                  variant="rectangular"
+                  height={14}
+                  width="35%"
+                  sx={{ mb: 2, borderRadius: 2 }}
                 />
-                <XAxis
-                  dataKey="week"
-                  stroke={theme.palette.text.secondary}
-                  tick={{ fontSize: 14 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke={theme.palette.text.secondary}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 15,
-                    backgroundColor: theme.palette.background.paper,
-                    border: "none",
-                    boxShadow: "none",
-                    textAlign: "center",
+
+                {/* Line Chart Skeleton */}
+                <Skeleton
+                  variant="rectangular"
+                  height={240}
+                  sx={{
+                    borderRadius: 4,
+                    bgcolor: theme.palette.action.hover,
                   }}
-                  labelFormatter={(label) => `${label}`}
-                  formatter={(value) => [
-                    `฿${Number(value).toLocaleString()}`,
-                    "ยอดขาย",
-                  ]}
                 />
-                <Line
-                  type="monomial"
-                  dataKey="sales"
-                  name="ยอดขาย"
-                  stroke={theme.palette.background.orangeDark}
-                  strokeWidth={5}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>)}
+              </>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={salesWeekData}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="2.5"
+                    vertical={false}
+                    stroke={theme.palette.text.secondary}
+                    strokeOpacity={0.2}
+                  />
+                  <XAxis
+                    dataKey="week"
+                    stroke={theme.palette.text.secondary}
+                    tick={{ fontSize: 14 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke={theme.palette.text.secondary}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 15,
+                      backgroundColor: theme.palette.background.paper,
+                      border: "none",
+                      boxShadow: "none",
+                      textAlign: "center",
+                    }}
+                    labelFormatter={(label) => `${label}`}
+                    formatter={(value) => [
+                      `฿${Number(value).toLocaleString()}`,
+                      "ยอดขาย",
+                    ]}
+                  />
+                  <Line
+                    type="monomial"
+                    dataKey="sales"
+                    name="ยอดขาย"
+                    stroke={theme.palette.background.orangeDark}
+                    strokeWidth={5}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </Box>
         </Card>
       </Box>
 
@@ -577,56 +568,90 @@ function Dashboard() {
           >
             ยอดขายรายเดือน {currentMonthName}
           </Typography>
-          {loading ? (
-            <LineChartSkeleton />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart
-                data={salesMonthlyData}
-                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="2.5"
-                  vertical={false}
-                  stroke={theme.palette.text.secondary}
-                  strokeOpacity={0.2}
+
+          {/* Chart Area (lock height) */}
+          <Box sx={{ height: 300, px: 2 }}>
+            {loading ? (
+              <Box sx={{ height: "100%" }}>
+                {/* X axis placeholder */}
+                <Skeleton
+                  variant="rectangular"
+                  height={14}
+                  width="35%"
+                  sx={{ mb: 2, borderRadius: 2 }}
                 />
-                <XAxis
-                  dataKey="month"
-                  stroke={theme.palette.text.secondary}
-                  tick={{ fontSize: 14 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke={theme.palette.text.secondary}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 15,
-                    backgroundColor: theme.palette.background.paper,
-                    border: "none",
-                    boxShadow: "none",
-                    textAlign: "center",
+
+                {/* Line chart skeleton */}
+                <Box
+                  sx={{
+                    height: 240,
+                    borderRadius: 4,
+                    bgcolor: theme.palette.action.hover,
+                    position: "relative",
+                    overflow: "hidden",
                   }}
-                  labelFormatter={(label) => `เดือน ${label}`}
-                  formatter={(value) => [
-                    `฿${Number(value).toLocaleString()}`,
-                    "ยอดขาย",
-                  ]}
-                />
-                <Line
-                  type="monomial"
-                  dataKey="sales"
-                  name="ยอดขาย"
-                  stroke={theme.palette.background.goldDark}
-                  strokeWidth={5}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>)}
+                >
+                  {/* shimmer overlay */}
+                  <Skeleton
+                    variant="rectangular"
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      bgcolor: "transparent",
+                    }}
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={salesMonthlyData}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="2.5"
+                    vertical={false}
+                    stroke={theme.palette.text.secondary}
+                    strokeOpacity={0.2}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    stroke={theme.palette.text.secondary}
+                    tick={{ fontSize: 14 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke={theme.palette.text.secondary}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 15,
+                      backgroundColor: theme.palette.background.paper,
+                      border: "none",
+                      boxShadow: "none",
+                      textAlign: "center",
+                    }}
+                    labelFormatter={(label) => `เดือน ${label}`}
+                    formatter={(value) => [
+                      `฿${Number(value).toLocaleString()}`,
+                      "ยอดขาย",
+                    ]}
+                  />
+                  <Line
+                    type="monomial"
+                    dataKey="sales"
+                    name="ยอดขาย"
+                    stroke={theme.palette.background.goldDark}
+                    strokeWidth={5}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </Box>
         </Card>
       </Box>
 
@@ -697,7 +722,8 @@ function Dashboard() {
                   />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>)}
+            </ResponsiveContainer>
+          )}
         </Card>
       </Box>
 
@@ -752,7 +778,10 @@ function Dashboard() {
                     boxShadow: "none",
                     textAlign: "center",
                   }}
-                  formatter={(value) => [`${value} รายการ`, "จำนวนสินค้าใกล้หมด"]}
+                  formatter={(value) => [
+                    `${value} รายการ`,
+                    "จำนวนสินค้าใกล้หมด",
+                  ]}
                 />
                 <Bar
                   dataKey="total"
@@ -768,7 +797,8 @@ function Dashboard() {
                   />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>)}
+            </ResponsiveContainer>
+          )}
         </Card>
       </Box>
 
@@ -839,7 +869,8 @@ function Dashboard() {
                   />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>)}
+            </ResponsiveContainer>
+          )}
         </Card>
       </Box>
     </Box>
