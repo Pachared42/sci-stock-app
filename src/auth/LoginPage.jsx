@@ -66,8 +66,7 @@ function LoginPage() {
 
       if (data.role === "superadmin") navigate("/superadmin/dashboard");
       else if (data.role === "admin") navigate("/admin/dashboard");
-      else if (data.role === "employee")
-        navigate("/employee/camera-stockout");
+      else if (data.role === "employee") navigate("/employee/camera-stockout");
       else {
         setSnackbar({
           open: true,
@@ -95,8 +94,9 @@ function LoginPage() {
       } else {
         setSnackbar({
           open: true,
-          message: `อีเมลหรือรหัสผ่านไม่ถูกต้อง (เหลืออีก ${5 - newAttempts
-            } ครั้ง)`,
+          message: `อีเมลหรือรหัสผ่านไม่ถูกต้อง (เหลืออีก ${
+            5 - newAttempts
+          } ครั้ง)`,
           severity: "error",
         });
       }
@@ -199,16 +199,60 @@ function LoginPage() {
     return <LoadingScreen />;
   }
 
+  const textFieldStyle = {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 4,
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "1px solid rgba(255, 255, 255, 0.1)",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "rgba(255, 255, 255, 0.2)",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        border: "1px solid #fff",
+      },
+      color: "#fff",
+    },
+    "& .MuiInputLabel-root": { color: "#ccc" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#fff" },
+    "& input": { caretColor: "#fff", color: "#fff" },
+  };
+  
+  const buttonStyle = {
+    py: 2,
+    fontSize: "1.1rem",
+    fontWeight: "bold",
+    borderRadius: 4,
+    backgroundColor: "#fff",
+    color: "#000 !important",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    "&:hover": { backgroundColor: "#bbb" },
+    "&.Mui-disabled": {
+      backgroundColor: "#999",
+    },
+  };
+
   return (
     <div
       className="min-h-screen relative overflow-hidden"
       style={{ backgroundColor: "#060010" }}
     >
-      <div className="absolute inset-0 z-0">
+      <div
+        className="
+    absolute inset-0 z-0
+    h-full w-full
+    overflow-hidden
+    pointer-events-none
+    scale-100 opacity-60
+    md:scale-110 md:opacity-70
+    lg:scale-125 lg:opacity-80
+  "
+      >
         <Aurora
-          colorStops={["#1E3A8A", "#3B82F6", "#F97316"]}
-          blend={0.5}
-          amplitude={1.0}
+          colorStops={["#1E3A8A", "#F97316","#3B82F6"]}
+          blend={1.5}
+          amplitude={0.5}
           speed={1.0}
         />
       </div>
@@ -277,7 +321,15 @@ function LoginPage() {
                 variant="h4"
                 fontWeight={600}
                 className="text-[#fff] text-center"
-                sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "2rem", xl: "2.5rem" } }}
+                sx={{
+                  fontSize: {
+                    xs: "1rem",
+                    sm: "1.25rem",
+                    md: "1.5rem",
+                    lg: "2rem",
+                    xl: "2.5rem",
+                  },
+                }}
               >
                 {isRegister ? "ลงทะเบียนพนักงาน" : "ระบบบริหารร้านค้า"}
               </Typography>
@@ -540,40 +592,6 @@ function LoginPage() {
       </div>
     </div>
   );
-}
-
-const textFieldStyle = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 4,
-    "& .MuiOutlinedInput-notchedOutline": {
-      border: "1px solid rgba(255, 255, 255, 0.1)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "rgba(255, 255, 255, 0.2)",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      border: "1px solid #fff",
-    },
-    color: "#fff",
-  },
-  "& .MuiInputLabel-root": { color: "#ccc" },
-  "& .MuiInputLabel-root.Mui-focused": { color: "#fff" },
-  "& input": { caretColor: "#fff", color: "#fff" },
-};
-
-const buttonStyle = {
-  py: 2,
-  fontSize: "1.1rem",
-  fontWeight: "bold",
-  borderRadius: 4,
-  backgroundColor: "#fff",
-  color: "#000 !important",
-  letterSpacing: 1,
-  textTransform: "uppercase",
-  "&:hover": { backgroundColor: "#bbb" },
-  "&.Mui-disabled": {
-    backgroundColor: "#999",
-  },
 };
 
 export default LoginPage;
