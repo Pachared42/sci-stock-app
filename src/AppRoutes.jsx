@@ -19,6 +19,9 @@ import OwnerData from "./components/OwnerData";
 import CalendarPageEmployee from "./components/CalendarEmployee";
 import FlexCost from "./components/FlexCost";
 import StockOutCamera from "./components/StockOutCamera";
+import BackUp from "./components/BackUp";
+import CheckInEmployee from "./components/CheckInEmployee";
+import EmployeeCheckInList from "./components/EmployeeCheckInList";
 
 function AppRoutes() {
   useRouteProgress();
@@ -51,6 +54,8 @@ function AppRoutes() {
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
         <Route path="owner-data" element={<OwnerData />} />
+        <Route path="backup-data" element={<BackUp />} />
+        <Route path="employee-check-in-list" element={<EmployeeCheckInList />} />
       </Route>
 
       {/* สำหรับ Admin */}
@@ -76,6 +81,7 @@ function AppRoutes() {
         <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="flex-cost" element={<FlexCost />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
+        <Route path="employee-check-in-list" element={<EmployeeCheckInList />} />
       </Route>
 
       {/* สำหรับ Employee */}
@@ -90,6 +96,7 @@ function AppRoutes() {
         <Route path="camera-stockout" element={<StockOutCamera />} />
         <Route path="calendar-employee" element={<CalendarPageEmployee />} />
         <Route path="profile-settings" element={<ProfileSettings />} />
+        <Route path="check-in-employee" element={<CheckInEmployee />} />
       </Route>
     </Routes>
   );
