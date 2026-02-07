@@ -36,12 +36,14 @@ import {
   AssignmentInd as AssignmentIndIcon,
   Settings as SettingsIcon,
   RecentActors as RecentActorsIcon,
+  GroupAdd as GroupAddIcon,
 } from "@mui/icons-material";
 import {
   InsertPageBreak as InsertPageBreakIcon,
   UploadFileRounded as UploadFileRoundedIcon,
   Warehouse as WarehouseIcon,
-  ReceiptLong as ReceiptLongIcon
+  ReceiptLong as ReceiptLongIcon,
+  Backup as BackupIcon,
 } from "@mui/icons-material";
 import {
   LocalDrink as LocalDrinkIcon,
@@ -95,9 +97,23 @@ const NAVIGATION = [
     group: "main",
   },
   {
+    segment: "employee-check-in-list",
+    title: "รายการเช็คอินพนักงาน",
+    icon: <RecentActorsIcon sx={{ color: ICON_COLORS.main }} />,
+    roles: ["admin", "superadmin"],
+    group: "main",
+  },
+  {
     segment: "calendar-employee",
     title: "ตารางงาน",
     icon: <CalendarMonthIcon sx={{ color: ICON_COLORS.main }} />,
+    roles: ["employee"],
+    group: "main",
+  },
+  {
+    segment: "check-in-employee",
+    title: "เช็คอินพนักงาน",
+    icon: <AccountCircleIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["employee"],
     group: "main",
   },
@@ -125,7 +141,7 @@ const NAVIGATION = [
   {
     segment: "staff-management",
     title: "อนุมัติพนักงาน",
-    icon: <RecentActorsIcon sx={{ color: ICON_COLORS.management }} />,
+    icon: <GroupAddIcon sx={{ color: ICON_COLORS.management }} />,
     roles: ["admin", "superadmin"],
     group: "management",
   },
@@ -195,6 +211,13 @@ const NAVIGATION = [
       },
     }),
     roles: ["admin", "superadmin", "employee"],
+    group: "profile",
+  },
+  {
+    segment: "backup-data",
+    title: "สำรองข้อมูล",
+    icon: <BackupIcon sx={{ color: ICON_COLORS.profile }} />,
+    roles: ["superadmin"],
     group: "profile",
   },  
 ];
