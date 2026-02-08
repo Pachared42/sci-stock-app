@@ -37,6 +37,7 @@ import {
   Settings as SettingsIcon,
   RecentActors as RecentActorsIcon,
   GroupAdd as GroupAddIcon,
+  HowToReg as HowToRegIcon
 } from "@mui/icons-material";
 import {
   InsertPageBreak as InsertPageBreakIcon,
@@ -113,7 +114,7 @@ const NAVIGATION = [
   {
     segment: "check-in-employee",
     title: "เช็คอินพนักงาน",
-    icon: <AccountCircleIcon sx={{ color: ICON_COLORS.main }} />,
+    icon: <HowToRegIcon sx={{ color: ICON_COLORS.main }} />,
     roles: ["employee"],
     group: "main",
   },
@@ -449,8 +450,6 @@ function DashboardLayout() {
     </>
   );
 
-  const breadcrumbPaths = location.pathname.split("/").filter(Boolean);
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -510,7 +509,7 @@ function DashboardLayout() {
                     height: 30,
                     bgcolor: "background.paper",
                     transition: "background-color 0.2s ease, all 0.3s ease",
-                    border: "0.5px solid",
+                    border: "1px solid",
                     borderColor: "divider",
                     borderRadius: "50%",
                     boxShadow: "none",
