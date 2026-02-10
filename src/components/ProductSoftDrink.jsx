@@ -3,36 +3,16 @@ import PropTypes from "prop-types";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableSortLabel,
-  Toolbar,
-  Typography,
-  Paper,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Button,
-  Menu,
-  MenuItem,
-  Snackbar,
-  Alert,
-  InputAdornment,
-  Fade,
-  Skeleton,
+  Box, Table, TableBody, TableCell, TableContainer, TableHead,
+  TablePagination, TableRow, TableSortLabel, Toolbar, Typography,
+  Paper, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
+  TextField, Button, Menu, MenuItem, Snackbar, Alert,
+  InputAdornment, Fade, Skeleton
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
 import { visuallyHidden } from "@mui/utils";
+
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
@@ -44,29 +24,8 @@ import {
   updateProduct,
   deleteProduct,
 } from "../api/productApi";
-import { set } from "nprogress";
 
-function createData(
-  id,
-  name,
-  imgUrl,
-  barcode,
-  priceSell,
-  priceCost,
-  stockQty,
-  stockMin
-) {
-  return {
-    id,
-    name,
-    imgUrl,
-    barcode,
-    priceSell,
-    priceCost,
-    stockQty,
-    stockMin,
-  };
-}
+function createData(id, name, imgUrl, barcode, priceSell, priceCost, stockQty, stockMin, category) { return { id, name, imgUrl, barcode, priceSell, priceCost, stockQty, stockMin, category }; }
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -207,7 +166,7 @@ function SoftDrinkTable() {
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [editRow, setEditRow] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [deleteRow, setDeleteRow] = useState(null);
@@ -504,7 +463,7 @@ function SoftDrinkTable() {
         <EnhancedTableToolbar numSelected={selected.length} />
         <Box
           sx={{
-            p: "24px 24px 4px 24px",
+            p: "18px",
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             alignItems: { xs: "stretch", sm: "center" },
@@ -629,6 +588,7 @@ function SoftDrinkTable() {
           sx={{
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
+            borderTop: "2px dashed rgba(153, 153, 153, 0.3)",
             overflowX: "auto",
             width: "100%",
             WebkitOverflowScrolling: "touch",
@@ -658,7 +618,7 @@ function SoftDrinkTable() {
             <TableBody
               sx={{
                 "& .MuiTableCell-root": {
-                  borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+                  borderBottom: "2px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
             > {loading ? (
@@ -880,7 +840,7 @@ function SoftDrinkTable() {
           }}
         >
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[25, 50, 100]}
             component="div"
             count={filteredRows.length}
             rowsPerPage={rowsPerPage}
