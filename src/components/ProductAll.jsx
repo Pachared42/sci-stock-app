@@ -1,59 +1,25 @@
-import { useState, useEffect, useMemo, } from "react";
+import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import PropTypes from "prop-types";
+
 import { useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import { visuallyHidden } from "@mui/utils";
-import Snackbar from "@mui/material/Snackbar";
+import {
+  Box, Table, TableBody, TableCell, TableContainer, TableHead,
+  TablePagination, TableRow, TableSortLabel, Toolbar, Typography,
+  Paper, Checkbox, Button, TextField, Snackbar,
+  Menu, MenuItem, InputAdornment, Skeleton
+} from "@mui/material";
+
 import MuiAlert from "@mui/material/Alert";
-import { forwardRef } from "react";
+import { visuallyHidden } from "@mui/utils";
+
 import FilterListIcon from "@mui/icons-material/FilterList";
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
-import Skeleton from '@mui/material/Skeleton';
+import SearchIcon from "@mui/icons-material/Search";
 
 import {
   fetchProductsByCategory,
 } from "../api/productApi";
 
-function createData(
-  id,
-  name,
-  imgUrl,
-  barcode,
-  priceSell,
-  priceCost,
-  stockQty,
-  stockMin,
-  category
-) {
-  return {
-    id,
-    name,
-    imgUrl,
-    barcode,
-    priceSell,
-    priceCost,
-    stockQty,
-    stockMin,
-    category,
-  };
-}
+function createData(id, name, imgUrl, barcode, priceSell, priceCost, stockQty, stockMin, category) { return { id, name, imgUrl, barcode, priceSell, priceCost, stockQty, stockMin, category }; }
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -193,7 +159,7 @@ function ProductAll() {
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const theme = useTheme();
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -351,7 +317,7 @@ function ProductAll() {
         <EnhancedTableToolbar numSelected={selected.length} />
         <Box
           sx={{
-            p: "24px 24px 4px 24px",
+            p: "18px",
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             alignItems: { xs: "stretch", sm: "center" },
@@ -457,6 +423,7 @@ function ProductAll() {
           sx={{
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
+            borderTop: "2px dashed rgba(153, 153, 153, 0.3)",
             overflowX: "auto",
             width: "100%",
             WebkitOverflowScrolling: "touch",
@@ -486,7 +453,7 @@ function ProductAll() {
             <TableBody
               sx={{
                 "& .MuiTableCell-root": {
-                  borderBottom: "0.3px dashed rgba(153, 153, 153, 0.3)",
+                  borderBottom: "2px dashed rgba(153, 153, 153, 0.3)",
                 },
               }}
             > {loading ? (
@@ -522,7 +489,7 @@ function ProductAll() {
                   <TableCell sx={{ textAlign: "left" }}>
                     <Skeleton animation="wave" variant="text" width="100%" />
                   </TableCell>
-                  
+
                   <TableCell sx={{ textAlign: "left" }}>
                     <Skeleton animation="wave" variant="text" width="100%" />
                   </TableCell>
@@ -664,7 +631,7 @@ function ProductAll() {
           }}
         >
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[25, 50, 100]}
             component="div"
             count={filteredRows.length}
             rowsPerPage={rowsPerPage}
