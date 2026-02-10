@@ -2,23 +2,7 @@ import { useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
-import {
-  Box,
-  Typography,
-  Stack,
-  Alert,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableSortLabel,
-  Toolbar,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Stack, Alert, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, Toolbar, CircularProgress, } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
@@ -118,6 +102,7 @@ function EnhancedTableToolbar(props) {
     </Toolbar>
   );
 }
+
 EnhancedTableToolbar.propTypes = {
   title: PropTypes.string.isRequired,
 };
@@ -240,7 +225,7 @@ function UploadProductsXlsx() {
   const [order1, setOrder1] = useState("asc");
   const [orderBy1, setOrderBy1] = useState("product_name");
   const [page1, setPage1] = useState(0);
-  const [rowsPerPage1, setRowsPerPage1] = useState(5);
+  const [rowsPerPage1, setRowsPerPage1] = useState(25);
   const [uploading1, setUploading1] = useState(false);
 
   const [data2, setData2] = useState([]);
@@ -248,7 +233,7 @@ function UploadProductsXlsx() {
   const [order2, setOrder2] = useState("asc");
   const [orderBy2, setOrderBy2] = useState("product_name");
   const [page2, setPage2] = useState(0);
-  const [rowsPerPage2, setRowsPerPage2] = useState(5);
+  const [rowsPerPage2, setRowsPerPage2] = useState(25);
   const [uploading2, setUploading2] = useState(false);
 
   const [data3, setData3] = useState([]);
@@ -256,7 +241,7 @@ function UploadProductsXlsx() {
   const [order3, setOrder3] = useState("asc");
   const [orderBy3, setOrderBy3] = useState("product_name");
   const [page3, setPage3] = useState(0);
-  const [rowsPerPage3, setRowsPerPage3] = useState(5);
+  const [rowsPerPage3, setRowsPerPage3] = useState(25);
   const [uploading3, setUploading3] = useState(false);
 
   const [data4, setData4] = useState([]);
@@ -264,7 +249,7 @@ function UploadProductsXlsx() {
   const [order4, setOrder4] = useState("asc");
   const [orderBy4, setOrderBy4] = useState("product_name");
   const [page4, setPage4] = useState(0);
-  const [rowsPerPage4, setRowsPerPage4] = useState(5);
+  const [rowsPerPage4, setRowsPerPage4] = useState(25);
   const [uploading4, setUploading4] = useState(false);
 
   const [data5, setData5] = useState([]);
@@ -519,7 +504,7 @@ function UploadProductsXlsx() {
             }}
           >
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[25, 50, 100]}
               component="div"
               count={rows.length}
               rowsPerPage={rowsPerPage}
@@ -531,10 +516,10 @@ function UploadProductsXlsx() {
                 px: { xs: 1, sm: 2 },
                 ".MuiTablePagination-spacer": { display: "none" },
                 ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                  {
-                    fontSize: { xs: "0.8rem", sm: "1rem" },
-                    whiteSpace: "nowrap",
-                  },
+                {
+                  fontSize: { xs: "0.8rem", sm: "1rem" },
+                  whiteSpace: "nowrap",
+                },
                 backgroundColor: "transparent",
                 zIndex: 1100,
                 minWidth: 300,
