@@ -77,7 +77,7 @@ function BackUp() {
                 <Card variant="outlined">
                     <CardContent>
                         <Typography variant="h6" mb={1}>
-                            สำรองข้อมูล (Backup)
+                            สำรองข้อมูล
                         </Typography>
                         <Typography variant="body2" color="text.secondary" mb={2}>
                             ใช้สำหรับสำรองข้อมูลทั้งหมดของระบบ เพื่อป้องกันข้อมูลสูญหาย
@@ -97,7 +97,7 @@ function BackUp() {
                 <Card variant="outlined">
                     <CardContent>
                         <Typography variant="h6" mb={1}>
-                            กู้คืนข้อมูล (Restore)
+                            กู้คืนข้อมูล
                         </Typography>
                         <Typography variant="body2" color="text.secondary" mb={2}>
                             ใช้สำหรับกู้คืนข้อมูลจากไฟล์สำรอง (ควรใช้งานด้วยความระมัดระวัง)
