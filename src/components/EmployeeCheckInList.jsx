@@ -367,15 +367,6 @@ function EmployeeCheckInList() {
                               : "inherit",
                         }}
                       >
-                        <TableCell padding="checkbox" sx={{ width: 48 }}>
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            inputProps={{ "aria-labelledby": labelId }}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(event) => handleClick(event, row.id)}
-                          />
-                        </TableCell>
                         <TableCell
                           component="th"
                           id={labelId}
