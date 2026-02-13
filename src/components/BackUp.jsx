@@ -12,7 +12,6 @@ import {
     FormControlLabel,
     Checkbox,
     Divider,
-    Grid,
     Chip,
     useTheme,
 } from "@mui/material";
@@ -284,29 +283,38 @@ function BackUp() {
                                                 </Stack>
                                             </Stack>
 
-                                            <Grid container spacing={0.5}>
+                                            <Box
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: {
+                                                        xs: "1fr",
+                                                        sm: "1fr 1fr",
+                                                        md: "1fr 1fr 1fr",
+                                                    },
+                                                    gap: 0.5,
+                                                }}
+                                            >
                                                 {g.tables.map((t) => (
-                                                    <Grid item xs={12} sm={6} md={4} key={t}>
-                                                        <FormControlLabel
-                                                            sx={{ m: 0, width: "100%" }}
-                                                            control={
-                                                                <Checkbox
-                                                                    checked={!!selected[t]}
-                                                                    onChange={(e) =>
-                                                                        setSelected((prev) => ({ ...prev, [t]: e.target.checked }))
-                                                                    }
-                                                                    disabled={loading}
-                                                                />
-                                                            }
-                                                            label={
-                                                                <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
-                                                                    {t}
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                    </Grid>
+                                                    <FormControlLabel
+                                                        key={t}
+                                                        sx={{ m: 0, width: "100%" }}
+                                                        control={
+                                                            <Checkbox
+                                                                checked={!!selected[t]}
+                                                                onChange={(e) =>
+                                                                    setSelected((prev) => ({ ...prev, [t]: e.target.checked }))
+                                                                }
+                                                                disabled={loading}
+                                                            />
+                                                        }
+                                                        label={
+                                                            <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
+                                                                {t}
+                                                            </Typography>
+                                                        }
+                                                    />
                                                 ))}
-                                            </Grid>
+                                            </Box>
                                         </CardContent>
                                     </Card>
                                 );
