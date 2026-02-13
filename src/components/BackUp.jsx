@@ -19,8 +19,8 @@ import BackupIcon from "@mui/icons-material/Backup";
 import RestoreIcon from "@mui/icons-material/Restore";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { useDropzone } from "react-dropzone";
+import { exportBackupSelected, restoreBackup } from "../api/BackUpApi";
 
-// ✅ ตารางทั้งหมด (ใช้เป็นฐานสำหรับ selected)
 const TABLES = [
     "users",
     "roles",
@@ -36,7 +36,6 @@ const TABLES = [
     "daily_payments",
 ];
 
-// ✅ จัดหมวดให้เป็นระเบียบ
 const TABLE_GROUPS = [
     { title: "ผู้ใช้ / สิทธิ์", tables: ["users", "roles"] },
     { title: "นักศึกษา / เช็คอิน", tables: ["student_applications", "checkins"] },
@@ -91,48 +90,6 @@ function BackUp() {
         });
     };
 
-    // ✅ Backup: ส่ง tables ไปให้ backend แล้วโหลดไฟล์กลับมา
-    const handleBackup = async () => {
-        if (selectedTables.length === 0) {
-            showSnack("โปรดเลือกอย่างน้อย 1 ตารางก่อนสำรองข้อมูล", "warning");
-            return;
-        }
-
-        try {
-            setLoading(true);
-
-            const res = await fetch("/backup/export", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    // Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ tables: selectedTables }),
-            });
-
-            if (!res.ok) {
-                const text = await res.text().catch(() => "");
-                throw new Error(text || "backup failed");
-            }
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-
-            showSnack("สำรองข้อมูลเรียบร้อยแล้ว", "success");
-        } catch (err) {
-            showSnack("เกิดข้อผิดพลาดในการสำรองข้อมูล", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // ✅ Dropzone Restore
     const onDrop = useCallback(
         (acceptedFiles) => {
@@ -156,6 +113,33 @@ function BackUp() {
         maxFiles: 1,
     });
 
+    const handleBackup = async () => {
+        if (selectedTables.length === 0) {
+            showSnack("โปรดเลือกอย่างน้อย 1 ตารางก่อนสำรองข้อมูล", "warning");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // ✅ ได้ blob กลับมา
+            const blob = await exportBackupSelected(token, selectedTables);
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `backup_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showSnack("สำรองข้อมูลเรียบร้อยแล้ว", "success");
+        } catch (err) {
+            showSnack("เกิดข้อผิดพลาดในการสำรองข้อมูล", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleRestore = async () => {
         if (!restoreFile) {
             showSnack("โปรดเลือกไฟล์สำรองก่อน", "warning");
@@ -165,22 +149,7 @@ function BackUp() {
         try {
             setLoading(true);
 
-            const formData = new FormData();
-            formData.append("file", restoreFile);
-
-            const res = await fetch("/backup/restore", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    // ❗ ห้ามใส่ Content-Type เองตอนส่ง FormData
-                    // Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) {
-                const text = await res.text().catch(() => "");
-                throw new Error(text || "restore failed");
-            }
+            await restoreBackup(token, restoreFile);
 
             showSnack("กู้คืนข้อมูลเรียบร้อยแล้ว", "success");
             setRestoreFile(null);
