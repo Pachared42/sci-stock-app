@@ -17,7 +17,8 @@ import {
 } from "@mui/material";
 import BackupIcon from "@mui/icons-material/Backup";
 import RestoreIcon from "@mui/icons-material/Restore";
-import FileUploadIcon from '@mui/icons-material/FileUpload';
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useDropzone } from "react-dropzone";
 import { exportBackupSelected, restoreBackup } from "../api/BackUpApi";
 
@@ -51,14 +52,16 @@ const TABLE_GROUPS = [
 
 function BackUp() {
     const theme = useTheme();
+
+    // ✅ ดึง token (ปรับให้ตรงกับของคุณได้)
+    const token = localStorage.getItem("token"); // หรือ useAuth().token
+
     const [loading, setLoading] = useState(false);
 
-    // ✅ เลือกตารางสำหรับ Backup (default: เลือกทั้งหมด)
     const [selected, setSelected] = useState(() =>
         Object.fromEntries(TABLES.map((t) => [t, true]))
     );
 
-    // ✅ สำหรับ Restore
     const [restoreFile, setRestoreFile] = useState(null);
 
     const [snackbar, setSnackbar] = useState({
@@ -70,17 +73,13 @@ function BackUp() {
     const showSnack = (message, severity = "success") =>
         setSnackbar({ open: true, message, severity });
 
-    const selectedTables = useMemo(
-        () => TABLES.filter((t) => selected[t]),
-        [selected]
-    );
+    const selectedTables = useMemo(() => TABLES.filter((t) => selected[t]), [selected]);
 
     const toggleAll = (value) => {
         setSelected(Object.fromEntries(TABLES.map((t) => [t, value])));
     };
 
-    const countSelectedInGroup = (tables) =>
-        tables.filter((t) => selected[t]).length;
+    const countSelectedInGroup = (tables) => tables.filter((t) => selected[t]).length;
 
     const setGroup = (tables, value) => {
         setSelected((prev) => {
@@ -90,7 +89,6 @@ function BackUp() {
         });
     };
 
-    // ✅ Dropzone Restore
     const onDrop = useCallback(
         (acceptedFiles) => {
             const file = acceptedFiles?.[0];
@@ -104,7 +102,7 @@ function BackUp() {
             setRestoreFile(file);
             showSnack(`เลือกไฟล์แล้ว: ${file.name}`, "success");
         },
-        [] // showSnack ไม่ต้องใส่ deps เพราะมันใช้ setState โดยตรง (ไม่พึ่งค่าเปลี่ยนแปลง)
+        [] // showSnack ใช้ setState โดยตรง
     );
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -114,6 +112,10 @@ function BackUp() {
     });
 
     const handleBackup = async () => {
+        if (!token) {
+            showSnack("ไม่พบ token กรุณา login ใหม่", "error");
+            return;
+        }
         if (selectedTables.length === 0) {
             showSnack("โปรดเลือกอย่างน้อย 1 ตารางก่อนสำรองข้อมูล", "warning");
             return;
@@ -122,7 +124,7 @@ function BackUp() {
         try {
             setLoading(true);
 
-            // ✅ ได้ blob กลับมา
+            // ✅ BackUpApi.js จะรวมข้อมูลจาก GET /api/superadmin/backup/:table แล้วคืน Blob
             const blob = await exportBackupSelected(token, selectedTables);
 
             const url = window.URL.createObjectURL(blob);
@@ -134,13 +136,21 @@ function BackUp() {
 
             showSnack("สำรองข้อมูลเรียบร้อยแล้ว", "success");
         } catch (err) {
-            showSnack("เกิดข้อผิดพลาดในการสำรองข้อมูล", "error");
+            const msg =
+                err?.response?.data?.error ||
+                err?.message ||
+                "เกิดข้อผิดพลาดในการสำรองข้อมูล";
+            showSnack(msg, "error");
         } finally {
             setLoading(false);
         }
     };
 
     const handleRestore = async () => {
+        if (!token) {
+            showSnack("ไม่พบ token กรุณา login ใหม่", "error");
+            return;
+        }
         if (!restoreFile) {
             showSnack("โปรดเลือกไฟล์สำรองก่อน", "warning");
             return;
@@ -149,12 +159,17 @@ function BackUp() {
         try {
             setLoading(true);
 
-            await restoreBackup(token, restoreFile);
+            // ✅ BackUpApi.js จะอ่านไฟล์ แล้ว POST /api/superadmin/import-data ทีละตารางให้เอง
+            const res = await restoreBackup(token, restoreFile);
 
-            showSnack("กู้คืนข้อมูลเรียบร้อยแล้ว", "success");
+            showSnack(res?.message || "กู้คืนข้อมูลเรียบร้อยแล้ว", "success");
             setRestoreFile(null);
         } catch (err) {
-            showSnack("เกิดข้อผิดพลาดในการกู้คืนข้อมูล", "error");
+            const msg =
+                err?.response?.data?.error ||
+                err?.message ||
+                "เกิดข้อผิดพลาดในการกู้คืนข้อมูล";
+            showSnack(msg, "error");
         } finally {
             setLoading(false);
         }
@@ -168,7 +183,7 @@ function BackUp() {
 
             <Stack spacing={3}>
                 {/* Backup Card */}
-                <Card sx={{ borderRadius: 4, bgcolor: theme.palette.background.chartBackground, }}>
+                <Card sx={{ borderRadius: 4, bgcolor: theme.palette.background.chartBackground }}>
                     <CardContent>
                         <Typography variant="h6" mb={1}>
                             สำรองข้อมูล (เลือกตารางได้)
@@ -178,20 +193,10 @@ function BackUp() {
                         </Typography>
 
                         <Stack direction="row" spacing={1} flexWrap="wrap" mb={2} alignItems="center">
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={() => toggleAll(true)}
-                                disabled={loading}
-                            >
+                            <Button variant="outlined" size="small" onClick={() => toggleAll(true)} disabled={loading}>
                                 เลือกทั้งหมด
                             </Button>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                onClick={() => toggleAll(false)}
-                                disabled={loading}
-                            >
+                            <Button variant="outlined" size="small" onClick={() => toggleAll(false)} disabled={loading}>
                                 ไม่เลือกทั้งหมด
                             </Button>
 
@@ -204,14 +209,19 @@ function BackUp() {
 
                         <Divider sx={{ mb: 2 }} />
 
-                        {/* ✅ แสดงแบบจัดหมวด + Grid */}
                         <Stack spacing={2.25}>
                             {TABLE_GROUPS.map((g) => {
                                 const picked = countSelectedInGroup(g.tables);
                                 const allPicked = picked === g.tables.length;
 
                                 return (
-                                    <Card key={g.title} sx={{ borderRadius: 3, border: "1.5px dashed rgba(153, 153, 153, 0.2)", }}>
+                                    <Card
+                                        key={g.title}
+                                        sx={{
+                                            borderRadius: 3,
+                                            border: "1.5px dashed rgba(153, 153, 153, 0.2)",
+                                        }}
+                                    >
                                         <CardContent sx={{ py: 2 }}>
                                             <Stack
                                                 direction="row"
@@ -290,33 +300,37 @@ function BackUp() {
                             })}
                         </Stack>
 
-                        {loading && <LinearProgress sx={{ my: 2 }} />}
-
                         <Stack direction="row" justifyContent="flex-end" mt={2}>
                             <Button
                                 variant="contained"
-                                startIcon={<BackupIcon />}
                                 onClick={handleBackup}
                                 disabled={loading}
+                                startIcon={
+                                    loading ? (
+                                        <CircularProgress  size={18} sx={{ color: "inherit" }} />
+                                    ) : (
+                                        <BackupIcon />
+                                    )
+                                }
                                 sx={{
-                                    marginTop: "10px",
+                                    mt: 1,
                                     borderRadius: 3,
                                     px: 4,
                                     py: 1.5,
                                     backgroundColor: theme.palette.background.ButtonDay,
                                     color: theme.palette.text.hint,
                                     fontSize: "0.9rem",
-                                    fontWeight: "500",
+                                    fontWeight: 500,
                                 }}
                             >
-                                สำรองข้อมูล (ดาวน์โหลดไฟล์)
+                                {loading ? "กำลังสำรองข้อมูล..." : "สำรองข้อมูล"}
                             </Button>
                         </Stack>
                     </CardContent>
                 </Card>
 
                 {/* Restore Card */}
-                <Card sx={{ borderRadius: 4, bgcolor: theme.palette.background.chartBackground, }}>
+                <Card sx={{ borderRadius: 4, bgcolor: theme.palette.background.chartBackground }}>
                     <CardContent>
                         <Typography variant="h6" mb={1}>
                             กู้คืนข้อมูล (อัปโหลดไฟล์)
@@ -326,8 +340,8 @@ function BackUp() {
                             (คำเตือน: อาจทับข้อมูลปัจจุบัน)
                         </Typography>
 
-                        {/* Dropzone */}
-                        <Box {...getRootProps()}
+                        <Box
+                            {...getRootProps()}
                             sx={{
                                 border: "1.5px dashed rgba(153, 153, 153, 0.2)",
                                 borderRadius: 3,
@@ -337,14 +351,14 @@ function BackUp() {
                                 cursor: "pointer",
                                 transition: "all .2s ease",
                                 bgcolor: isDragActive ? "action.hover" : "background.paper",
-
                                 "&:hover": {
                                     border: "1.5px dashed rgba(153, 153, 153, 0.2)",
                                     backgroundColor: "action.hover",
-                                }
-                            }}>
+                                },
+                            }}
+                        >
                             <input {...getInputProps()} />
-                            <FileUploadIcon sx={{ fontSize: 80, marginBottom: 1, color: "#10B981" }} />
+                            <FileUploadIcon sx={{ fontSize: 80, mb: 1, color: "#10B981" }} />
                             <Typography variant="body1" fontWeight={500}>
                                 {isDragActive ? "ปล่อยไฟล์เพื่ออัปโหลด..." : "ลากไฟล์มาวางหรือคลิกเพื่อเลือกไฟล์"}
                             </Typography>
@@ -369,12 +383,12 @@ function BackUp() {
                                 onClick={handleRestore}
                                 disabled={loading || !restoreFile}
                                 sx={{
-                                    marginTop: "10px",
+                                    mt: 1,
                                     borderRadius: 3,
                                     px: 4,
                                     py: 1.5,
                                     fontSize: "0.9rem",
-                                    fontWeight: "500",
+                                    fontWeight: 500,
                                 }}
                             >
                                 กู้คืนข้อมูล
@@ -385,12 +399,12 @@ function BackUp() {
                                 onClick={() => setRestoreFile(null)}
                                 disabled={loading || !restoreFile}
                                 sx={{
-                                    marginTop: "10px",
+                                    mt: 1,
                                     borderRadius: 3,
                                     px: 4,
                                     py: 1.5,
                                     fontSize: "0.9rem",
-                                    fontWeight: "500",
+                                    fontWeight: 500,
                                 }}
                             >
                                 ล้างไฟล์
