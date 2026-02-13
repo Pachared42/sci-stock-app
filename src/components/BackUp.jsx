@@ -307,7 +307,7 @@ function BackUp() {
                                 disabled={loading}
                                 startIcon={
                                     loading ? (
-                                        <CircularProgress  size={18} sx={{ color: "inherit" }} />
+                                        <CircularProgress size={18} sx={{ color: "inherit" }} />
                                     ) : (
                                         <BackupIcon />
                                     )
@@ -373,15 +373,19 @@ function BackUp() {
                             )}
                         </Box>
 
-                        {loading && <LinearProgress sx={{ my: 2 }} />}
-
                         <Stack direction="row" spacing={1.5} mt={2} justifyContent="flex-end">
                             <Button
                                 variant="contained"
                                 color="success"
-                                startIcon={<RestoreIcon />}
                                 onClick={handleRestore}
                                 disabled={loading || !restoreFile}
+                                startIcon={
+                                    loading ? (
+                                        <CircularProgress size={18} sx={{ color: "inherit" }} />
+                                    ) : (
+                                        <RestoreIcon />
+                                    )
+                                }
                                 sx={{
                                     mt: 1,
                                     borderRadius: 3,
@@ -391,7 +395,7 @@ function BackUp() {
                                     fontWeight: 500,
                                 }}
                             >
-                                กู้คืนข้อมูล
+                                {loading ? "กำลังกู้คืนข้อมูล..." : "กู้คืนข้อมูล"}
                             </Button>
 
                             <Button
