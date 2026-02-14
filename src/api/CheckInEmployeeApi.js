@@ -60,3 +60,20 @@ export async function getCheckinStatus(token) {
         throw error;
     }
 }
+
+export async function getAttendanceCheckins(token, params = {}) {
+    try {
+        const res = await axios.get(`${API_URL}/api/attendance/checkins`, {
+            headers: { Authorization: `Bearer ${token}` },
+            params,
+        });
+        return res.data;
+    } catch (error) {
+        console.error("attendance error:", {
+            message: error?.message,
+            status: error?.response?.status,
+            data: error?.response?.data,
+        });
+        throw error;
+    }
+}
