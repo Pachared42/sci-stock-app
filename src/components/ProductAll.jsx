@@ -38,13 +38,13 @@ function getComparator(order, orderBy) {
 }
 
 const headCells = [
-  { id: "name", label: "ชื่อสินค้า", width: "15%" },
-  { id: "img", label: "รูปภาพ", width: "15%" },
-  { id: "barcode", label: "BARCODE", width: "15%" },
-  { id: "priceSell", label: "ราคาขาย", width: "10%" },
-  { id: "priceCost", label: "ราคาต้นทุน", width: "10%" },
-  { id: "stockQty", label: "จำนวนสต็อก", width: "10%" },
-  { id: "stockMin", label: "สต็อกต่ำสุด", width: "10%" },
+  { id: "name", label: "ชื่อสินค้า", width: "28%" },
+  { id: "img", label: "รูปภาพ", width: "12%" },
+  { id: "barcode", label: "BARCODE", width: "18%" },
+  { id: "priceSell", label: "ราคาขาย", width: "10%"  },
+  { id: "priceCost", label: "ราคาต้นทุน", width: "10%"  },
+  { id: "stockQty", label: "จำนวนสต็อก", width: "11%"  },
+  { id: "stockMin", label: "สต็อกต่ำสุด", width: "11%"  },
 ];
 
 function EnhancedTableHead(props) {
