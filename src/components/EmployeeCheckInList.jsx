@@ -20,16 +20,17 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import { visuallyHidden } from "@mui/utils";
 
-// ✅ หัวตารางตามที่ต้องการ
+import { getAttendanceCheckins } from "../api/CheckInEmployeeApi";
+import { useAuth } from "../context/AuthProvider";
+
 const headCells = [
-  { id: "name", label: "ชื่อพนักงาน", width: "20%" },
-  { id: "checkIn", label: "เช็คอินเข้า", width: "15%" },
-  { id: "checkOut", label: "เช็คเอ้าท์ออก", width: "15%" },
-  { id: "checkInImage", label: "รูปเช็คอินเข้า", width: "25%" },
-  { id: "checkOutImage", label: "รูปเช็คเอ้าท์ออก", width: "25%" },
+  { id: "name", label: "ชื่อพนักงาน", width: "22%" },
+  { id: "checkIn", label: "เช็คอินเข้า", width: "18%" },
+  { id: "checkOut", label: "เช็คเอ้าท์ออก", width: "18%" },
+  { id: "checkInImage", label: "รูปเช็คอินเข้า", width: "21%" },
+  { id: "checkOutImage", label: "รูปเช็คเอ้าท์ออก", width: "21%" },
 ];
 
-// ✅ sort helpers
 function descendingComparator(a, b, orderBy) {
   if (b?.[orderBy] < a?.[orderBy]) return -1;
   if (b?.[orderBy] > a?.[orderBy]) return 1;
@@ -71,7 +72,6 @@ function EnhancedTableHead({ order, orderBy, onRequestSort }) {
     </TableHead>
   );
 }
-
 EnhancedTableHead.propTypes = {
   onRequestSort: PropTypes.func.isRequired,
   order: PropTypes.oneOf(["asc", "desc"]).isRequired,
@@ -99,16 +99,37 @@ function EnhancedTableToolbar() {
   );
 }
 
+const toDataUrl = (base64, mime = "image/jpeg") => {
+  if (!base64) return "";
+  if (typeof base64 === "string" && base64.startsWith("data:")) return base64;
+  return `data:${mime};base64,${base64}`;
+};
+
+const formatDateTime = (value) => {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString("th-TH", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 function EmployeeCheckInList() {
   const theme = useTheme();
 
-  // ✅ rows โครงสร้างที่ใช้จริงในตารางนี้
-  // { id, name, checkIn, checkOut, checkInImage, checkOutImage }
-  const [rows, setRows] = useState([]);
+  // ✅ AuthProvider เดิมมีแค่ { user, login, logout, loading }
+  const { user, loading: authLoading } = useAuth();
 
+  // ✅ token อยู่ใน user.token (ไม่ใช่ ctx.token)
+  const token = user?.token || "";
+
+  const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("name");
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
@@ -120,23 +141,58 @@ function EmployeeCheckInList() {
   });
 
   useEffect(() => {
+    // ✅ รอ provider โหลดก่อน (ตอนแรก user ยัง null)
+    if (authLoading) return;
+
+    // ✅ ถ้าไม่ login → ไม่เรียก API
+    if (!token) {
+      setRows([]);
+      setSnackbar({
+        open: true,
+        message: "กรุณาเข้าสู่ระบบก่อนเพื่อดูรายการเช็คอิน",
+        severity: "warning",
+      });
+      return;
+    }
+
     const loadData = async () => {
       try {
         setLoading(true);
-        // setRows([
-        //  { id: 1, name: "พชร", checkIn: "08:30", checkOut: "17:10", checkInImage: "url", checkOutImage: "url" }
-        // ]);
+
+        const res = await getAttendanceCheckins(token);
+        const list = Array.isArray(res?.data) ? res.data : [];
+
+        const mapped = list.map((item, idx) => ({
+          id: `${item.user_id}-${item.checkin_at}-${idx}`,
+          name: item.first_name || "-",
+          checkIn: formatDateTime(item.checkin_at),
+          checkOut: item.checkout_at ? formatDateTime(item.checkout_at) : "-",
+          checkInImage: item.checkin_photo ? toDataUrl(item.checkin_photo, "image/jpeg") : "",
+          checkOutImage: item.checkout_photo ? toDataUrl(item.checkout_photo, "image/jpeg") : "",
+        }));
+
+        setRows(mapped);
+      } catch (err) {
+        const status = err?.response?.status;
+
+        if (status === 401) {
+          setSnackbar({
+            open: true,
+            message: "ไม่สามารถเข้าถึงได้ (401) กรุณาเข้าสู่ระบบใหม่",
+            severity: "error",
+          });
+        } else {
+          setSnackbar({ open: true, message: "ไม่สามารถโหลดข้อมูลเช็คอินได้", severity: "error" });
+        }
 
         setRows([]);
-      } catch (err) {
-        setSnackbar({ open: true, message: "ไม่สามารถโหลดข้อมูลเช็คอินได้", severity: "error" });
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [authLoading, token]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -215,20 +271,16 @@ function EmployeeCheckInList() {
                       {row.name}
                     </TableCell>
 
-                    <TableCell sx={{ px: 1, whiteSpace: "nowrap" }}>
-                      {row.checkIn || "-"}
-                    </TableCell>
+                    <TableCell sx={{ px: 1, whiteSpace: "nowrap" }}>{row.checkIn || "-"}</TableCell>
 
-                    <TableCell sx={{ px: 1, whiteSpace: "nowrap" }}>
-                      {row.checkOut || "-"}
-                    </TableCell>
+                    <TableCell sx={{ px: 1, whiteSpace: "nowrap" }}>{row.checkOut || "-"}</TableCell>
 
                     <TableCell sx={{ px: 1 }}>
                       {row.checkInImage ? (
                         <img
                           src={row.checkInImage}
                           alt="check-in"
-                          style={{ width: 120, height: 70, objectFit: "cover", borderRadius: 10 }}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }}
                         />
                       ) : (
                         "-"
@@ -240,7 +292,7 @@ function EmployeeCheckInList() {
                         <img
                           src={row.checkOutImage}
                           alt="check-out"
-                          style={{ width: 120, height: 70, objectFit: "cover", borderRadius: 10 }}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }}
                         />
                       ) : (
                         "-"
