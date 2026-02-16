@@ -257,7 +257,7 @@ function UploadProductsXlsx() {
   const [order5, setOrder5] = useState("asc");
   const [orderBy5, setOrderBy5] = useState("product_name");
   const [page5, setPage5] = useState(0);
-  const [rowsPerPage5, setRowsPerPage5] = useState(5);
+  const [rowsPerPage5, setRowsPerPage5] = useState(25);
   const [uploading5, setUploading5] = useState(false);
 
   function handleUpload(setData, setErrors, setPage, setUploading, category) {
