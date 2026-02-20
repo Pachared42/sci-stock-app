@@ -25,10 +25,10 @@ import { useAuth } from "../context/AuthProvider";
 
 const headCells = [
   { id: "name", label: "ชื่อพนักงาน", width: "22%" },
-  { id: "checkIn", label: "เช็คอินเข้า", width: "18%" },
-  { id: "checkOut", label: "เช็คเอ้าท์ออก", width: "18%" },
-  { id: "checkInImage", label: "รูปเช็คอินเข้า", width: "21%" },
-  { id: "checkOutImage", label: "รูปเช็คเอ้าท์ออก", width: "21%" },
+  { id: "checkIn", label: "เช็คอินเข้าทำงาน", width: "18%" },
+  { id: "checkOut", label: "เช็คเอ้าท์ออกทำงาน", width: "18%" },
+  { id: "checkInImage", label: "รูปเช็คอินเข้าทำงาน", width: "21%" },
+  { id: "checkOutImage", label: "รูปเช็คเอ้าท์ออกทำงาน", width: "21%" },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -280,7 +280,7 @@ function EmployeeCheckInList() {
                         <img
                           src={row.checkInImage}
                           alt="check-in"
-                          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }}
+                          style={{ width: "35%", height: "100%", objectFit: "cover", borderRadius: 10 }}
                         />
                       ) : (
                         "-"
@@ -292,7 +292,7 @@ function EmployeeCheckInList() {
                         <img
                           src={row.checkOutImage}
                           alt="check-out"
-                          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10 }}
+                          style={{ width: "35%", height: "100%", objectFit: "cover", borderRadius: 10 }}
                         />
                       ) : (
                         "-"
