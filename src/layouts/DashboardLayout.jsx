@@ -45,6 +45,7 @@ import {
   Warehouse as WarehouseIcon,
   ReceiptLong as ReceiptLongIcon,
   Backup as BackupIcon,
+  Storage as StorageIcon,
 } from "@mui/icons-material";
 import {
   LocalDrink as LocalDrinkIcon,
@@ -217,7 +218,7 @@ const NAVIGATION = [
   {
     segment: "backup-data",
     title: "สำรองข้อมูล",
-    icon: <BackupIcon sx={{ color: ICON_COLORS.profile }} />,
+    icon: <StorageIcon sx={{ color: ICON_COLORS.profile }} />,
     roles: ["superadmin"],
     group: "profile",
   },  
